@@ -2,14 +2,15 @@
 
 module Cacco.LexerSpec where
 
+import qualified Data.Scientific  as Scientific
 import           Test.Tasty.Hspec (Spec, describe, it, shouldBe)
 import           Text.Megaparsec  (parse)
 
-import qualified Cacco.Lexer      as L
+import qualified Cacco.Lexer      as Lexer
 
 spec_integerLiteral :: Spec
 spec_integerLiteral = describe "Cacco.Lexer.integer" $ do
-  let parseTest = parse L.integer "test"
+  let parseTest = parse Lexer.integer "test"
 
   describe "parsing decimal integer literal" $ do
     it "can parse 0 as integer" $
@@ -56,3 +57,12 @@ spec_integerLiteral = describe "Cacco.Lexer.integer" $ do
 
     it "can parse 0b00000101 as 5" $
       parseTest "0b00000101" `shouldBe` Right 5
+
+spec_decimalLiteral :: Spec
+spec_decimalLiteral = describe "Cacco.Lexer.decimal" $ do
+  let parseTest = parse Lexer.decimal "test"
+  it "can parse 0.0 as 0" $
+    parseTest "0.0" `shouldBe` Right (Scientific.fromFloatDigits 0)
+
+  it "can parse 0.01 as 0.01" $
+    parseTest "0.01" `shouldBe` Right (Scientific.fromFloatDigits 0.01)

@@ -7,11 +7,13 @@ module Cacco.Lexer
   , angles
   , brackets
   , integer
+  , decimal
   ) where
 
 import           Data.Char                  (digitToInt)
 import           Data.Functor               (void)
 import           Data.List                  (foldl')
+import           Data.Scientific            (Scientific)
 import           Text.Megaparsec            (between, char, some, (<|>))
 import           Text.Megaparsec.ByteString (Parser)
 import           Text.Megaparsec.Char       (spaceChar)
@@ -30,9 +32,11 @@ spaceConsumer = L.space skipSpace skipLineComment skipBlockComment
     skipBlockComment :: Parser ()
     skipBlockComment = L.skipBlockCommentNested ";/" "/;"
 
+-- |make parser to ignore any space and comment expressions
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme spaceConsumer
 
+-- |make specified string to token parser
 symbol :: String -> Parser String
 symbol = L.symbol spaceConsumer
 
@@ -68,3 +72,7 @@ integer = positionalNotation <|> L.integer
 
     readBin :: String -> Integer
     readBin = fromIntegral . foldl' (\acc x -> acc * 2 + digitToInt x) 0
+
+-- |parsing decimal number (floating point number)
+decimal :: Parser Scientific
+decimal = L.scientific

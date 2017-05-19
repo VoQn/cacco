@@ -23,6 +23,7 @@ library
     , Cacco.Lexer
   build-depends:
       base >= 4.7 && < 5
+    , scientific >= 0.3 && < 0.4
     , megaparsec
 
 executable cacco
@@ -50,6 +51,7 @@ test-suite test
     , tasty-quickcheck
     , tasty-smallcheck
     , megaparsec
+    , scientific
     , cacco
   other-modules:
       Cacco.LexerSpec
