@@ -14,27 +14,51 @@ extra-source-files:  README.md
 cabal-version:       >=1.10
 
 library
-  hs-source-dirs:      src
-  exposed-modules:     Lib
-  build-depends:       base >= 4.7 && < 5
-  default-language:    Haskell2010
+  default-language:  Haskell2010
+  hs-source-dirs:    src
+  ghc-options:
+    -Wall
+  exposed-modules:
+      Lib
+    , Cacco.Lexer
+  build-depends:
+      base >= 4.7 && < 5
+    , scientific >= 0.3 && < 0.4
+    , megaparsec
 
-executable repl
-  hs-source-dirs:      app
-  main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , cacco
-  default-language:    Haskell2010
+executable cacco
+  default-language:  Haskell2010
+  hs-source-dirs:    app
+  main-is:           Main.hs
+  ghc-options:
+    -threaded
+    -rtsopts
+    -with-rtsopts=-N
+  build-depends:
+      base
+    , cacco
 
 test-suite test
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Spec.hs
-  build-depends:       base
-                     , cacco
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  default-language:    Haskell2010
+  default-language:  Haskell2010
+  type:              exitcode-stdio-1.0
+  hs-source-dirs:    test
+  main-is:           Tasty.hs
+  build-depends:
+      base
+    , tasty
+    , tasty-discover >= 2.0 && < 3
+    , tasty-hspec >= 1.1 && < 1.2
+    , tasty-quickcheck
+    , tasty-smallcheck
+    , megaparsec
+    , scientific
+    , cacco
+  other-modules:
+      Cacco.LexerSpec
+  ghc-options:
+    -threaded
+    -rtsopts
+    -with-rtsopts=-N
 
 source-repository head
   type:     git
