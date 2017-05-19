@@ -5,6 +5,8 @@ Thumbs.db
 # build
 dist/*
 .stack-work/*
+.hpc/*
+*.tix
 
 # Misc
 .direnv
