@@ -14,12 +14,13 @@ import           Data.Char                  (digitToInt)
 import           Data.Functor               (void)
 import           Data.List                  (foldl')
 import           Data.Scientific            (Scientific)
-import           Text.Megaparsec            (between, char, some, (<|>))
+import           Text.Megaparsec            (SourcePos, between, char, choice,
+                                             getPosition, some, try, (<|>))
 import           Text.Megaparsec.ByteString (Parser)
-import           Text.Megaparsec.Char       (spaceChar)
+import           Text.Megaparsec.Char       (oneOf, spaceChar)
 import qualified Text.Megaparsec.Lexer      as L
 
--- |skipping space characters and comments
+-- |Skipping space characters and comments
 spaceConsumer :: Parser ()
 spaceConsumer = L.space skipSpace skipLineComment skipBlockComment
   where
@@ -32,11 +33,11 @@ spaceConsumer = L.space skipSpace skipLineComment skipBlockComment
     skipBlockComment :: Parser ()
     skipBlockComment = L.skipBlockCommentNested ";/" "/;"
 
--- |make parser to ignore any space and comment expressions
+-- |Make parser to ignore any space and comment expressions
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme spaceConsumer
 
--- |make specified string to token parser
+-- |Make specified string to token parser
 symbol :: String -> Parser String
 symbol = L.symbol spaceConsumer
 
@@ -52,27 +53,32 @@ angles = between (symbol "<") (symbol ">")
 brackets :: Parser a -> Parser a
 brackets = between (symbol "[") (symbol "]")
 
--- |parsing integer literal
-integer :: Parser Integer
-integer = positionalNotation <|> L.integer
+withPositionRange :: Parser a -> Parser (a, (SourcePos, SourcePos))
+withPositionRange parser = do
+  begin <- getPosition
+  value <- parser
+  end   <- getPosition
+  return (value, (begin, end))
+
+hexadecimal :: Parser Integer
+hexadecimal = char 'x' >> L.hexadecimal
+
+octal :: Parser Integer
+octal = char 'o' >> L.octal
+
+binary :: Parser Integer
+binary = char 'b' >> readBin <$> some (oneOf "01")
   where
-    positionalNotation :: Parser Integer
-    positionalNotation = char '0' >> (hexadecimal <|> octal <|> binary <|> return 0)
-
-    hexadecimal :: Parser Integer
-    hexadecimal = char 'x' >> L.hexadecimal
-
-    octal :: Parser Integer
-    octal = char 'o' >> L.octal
-
-    binary :: Parser Integer
-    binary = char 'b' >> do
-      bs <- some (char '1' <|> char '0')
-      return $  readBin bs
-
     readBin :: String -> Integer
     readBin = fromIntegral . foldl' (\acc x -> acc * 2 + digitToInt x) 0
 
--- |parsing decimal number (floating point number)
-decimal :: Parser Scientific
-decimal = L.scientific
+-- |Parse a integer number.
+integer :: Parser (Integer, (SourcePos, SourcePos))
+integer = withPositionRange $ try positionalNotation <|> L.integer
+  where
+    positionalNotation :: Parser Integer
+    positionalNotation = char '0' >> choice [hexadecimal, octal, binary]
+
+-- |Parse a floating point number.
+decimal :: Parser (Scientific, (SourcePos, SourcePos))
+decimal = withPositionRange L.scientific

@@ -2,15 +2,17 @@
 
 module Cacco.LexerSpec where
 
-import qualified Data.Scientific  as Scientific
+import           Data.Scientific  (fromFloatDigits)
 import           Test.Tasty.Hspec (Spec, describe, it, shouldBe)
 import           Text.Megaparsec  (parse)
 
 import qualified Cacco.Lexer      as Lexer
 
+{-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
+
 spec_integerLiteral :: Spec
 spec_integerLiteral = describe "Cacco.Lexer.integer" $ do
-  let parseTest = parse Lexer.integer "test"
+  let parseTest = parse (fst <$> Lexer.integer) "test"
 
   describe "parsing decimal integer literal" $ do
     it "can parse 0 as integer" $
@@ -22,6 +24,9 @@ spec_integerLiteral = describe "Cacco.Lexer.integer" $ do
     it "can parse 10 as integer" $
       parseTest "10" `shouldBe` Right 10
 
+    it "can parse 010 as integer" $
+      parseTest "010" `shouldBe` Right 10
+
   describe "parsing hexadecimal integer literal" $ do
     it "can parse 0x10 as 16" $
       parseTest "0x10" `shouldBe` Right 16
@@ -29,8 +34,11 @@ spec_integerLiteral = describe "Cacco.Lexer.integer" $ do
     it "can parse 0x100 as 256" $
       parseTest "0x100" `shouldBe` Right 256
 
-    it "can parse 0xFF as integer" $
-      parseTest "0xFF" `shouldBe` Right 0xFF
+    it "can parse 0xa as 10" $
+      parseTest "0xa" `shouldBe` Right 10
+
+    it "can parse 0xFF as 255" $
+      parseTest "0xFF" `shouldBe` Right 255
 
   describe "parsing octal integer literal" $ do
     it "can parse 0o10 as 8" $
@@ -60,9 +68,10 @@ spec_integerLiteral = describe "Cacco.Lexer.integer" $ do
 
 spec_decimalLiteral :: Spec
 spec_decimalLiteral = describe "Cacco.Lexer.decimal" $ do
-  let parseTest = parse Lexer.decimal "test"
+  let parseTest = parse (fst <$> Lexer.decimal) "test"
+
   it "can parse 0.0 as 0" $
-    parseTest "0.0" `shouldBe` Right (Scientific.fromFloatDigits 0)
+    parseTest "0.0" `shouldBe` Right (fromFloatDigits (0.0 :: Double))
 
   it "can parse 0.01 as 0.01" $
-    parseTest "0.01" `shouldBe` Right (Scientific.fromFloatDigits 0.01)
+    parseTest "0.01" `shouldBe` Right (fromFloatDigits (0.01 :: Double))
