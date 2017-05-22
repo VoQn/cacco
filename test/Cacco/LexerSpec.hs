@@ -2,17 +2,19 @@
 
 module Cacco.LexerSpec where
 
-import qualified Data.Scientific  as Scientific
-import           Test.Tasty.Hspec (Spec, describe, it, shouldBe)
+import           Data.Scientific  (fromFloatDigits)
+import           Test.Tasty.Hspec (Spec, context, describe, it, shouldBe)
 import           Text.Megaparsec  (parse)
 
 import qualified Cacco.Lexer      as Lexer
 
-spec_integerLiteral :: Spec
-spec_integerLiteral = describe "Cacco.Lexer.integer" $ do
-  let parseTest = parse Lexer.integer "test"
+{-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
-  describe "parsing decimal integer literal" $ do
+spec_integerLiteralParser :: Spec
+spec_integerLiteralParser = describe "Cacco.Lexer.integer" $ do
+  let parseTest = parse (fst <$> Lexer.integer) "test"
+
+  context "when parsing decimal integer literal" $ do
     it "can parse 0 as integer" $
       parseTest "0" `shouldBe` Right 0
 
@@ -22,24 +24,30 @@ spec_integerLiteral = describe "Cacco.Lexer.integer" $ do
     it "can parse 10 as integer" $
       parseTest "10" `shouldBe` Right 10
 
-  describe "parsing hexadecimal integer literal" $ do
+    it "can parse 010 as integer" $
+      parseTest "010" `shouldBe` Right 10
+
+  context "when parsing hexadecimal integer literal" $ do
     it "can parse 0x10 as 16" $
       parseTest "0x10" `shouldBe` Right 16
 
     it "can parse 0x100 as 256" $
       parseTest "0x100" `shouldBe` Right 256
 
-    it "can parse 0xFF as integer" $
-      parseTest "0xFF" `shouldBe` Right 0xFF
+    it "can parse 0xa as 10" $
+      parseTest "0xa" `shouldBe` Right 10
 
-  describe "parsing octal integer literal" $ do
+    it "can parse 0xFF as 255" $
+      parseTest "0xFF" `shouldBe` Right 255
+
+  context "when parsing octal integer literal" $ do
     it "can parse 0o10 as 8" $
       parseTest "0o10" `shouldBe` Right 8
 
     it "can parse 0o77 as integer" $
       parseTest "0o77" `shouldBe` Right 0o77
 
-  describe "parsing binary integer literal" $ do
+  context "when parsing binary integer literal" $ do
     it "can parse 0b00000000 as 0" $
       parseTest "0b00000000" `shouldBe` Right 0
 
@@ -58,11 +66,15 @@ spec_integerLiteral = describe "Cacco.Lexer.integer" $ do
     it "can parse 0b00000101 as 5" $
       parseTest "0b00000101" `shouldBe` Right 5
 
-spec_decimalLiteral :: Spec
-spec_decimalLiteral = describe "Cacco.Lexer.decimal" $ do
-  let parseTest = parse Lexer.decimal "test"
+spec_decimalLiteralParser :: Spec
+spec_decimalLiteralParser = describe "Cacco.Lexer.decimal" $ do
+  let parseTest = parse (fst <$> Lexer.decimal) "test"
+
   it "can parse 0.0 as 0" $
-    parseTest "0.0" `shouldBe` Right (Scientific.fromFloatDigits 0)
+    parseTest "0.0" `shouldBe` Right (fromFloatDigits (0.0 :: Double))
 
   it "can parse 0.01 as 0.01" $
-    parseTest "0.01" `shouldBe` Right (Scientific.fromFloatDigits 0.01)
+    parseTest "0.01" `shouldBe` Right (fromFloatDigits (0.01 :: Double))
+
+  it "can parse 1.0 as 1.0" $
+    parseTest "1.0" `shouldBe` Right (fromFloatDigits (1.0 :: Double))
