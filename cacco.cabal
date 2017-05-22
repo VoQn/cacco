@@ -20,6 +20,8 @@ library
     -Wall
   exposed-modules:
       Lib
+    , Cacco.Location
+    , Cacco.Literal
     , Cacco.Lexer
   build-depends:
       base >= 4.7 && < 5

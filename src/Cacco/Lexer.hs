@@ -14,11 +14,13 @@ import           Data.Char                  (digitToInt)
 import           Data.Functor               (void)
 import           Data.List                  (foldl')
 import           Data.Scientific            (Scientific)
-import           Text.Megaparsec            (SourcePos, between, char, choice,
-                                             getPosition, some, try, (<|>))
+import           Text.Megaparsec            (between, char, choice, getPosition,
+                                             some, try, (<|>))
 import           Text.Megaparsec.ByteString (Parser)
 import           Text.Megaparsec.Char       (oneOf, spaceChar)
 import qualified Text.Megaparsec.Lexer      as L
+
+import           Cacco.Location             (Location (..), fromSourcePos)
 
 -- |Skipping space characters and comments.
 spaceConsumer :: Parser ()
@@ -56,16 +58,17 @@ angles = between (symbol "<") (symbol ">")
 brackets :: Parser a -> Parser a
 brackets = between (symbol "[") (symbol "]")
 
-withPositionRange :: Parser a -> Parser (a, (SourcePos, SourcePos))
-withPositionRange parser = do
+-- |Capture token's position range.
+withLocation :: Parser a -> Parser (a, Location)
+withLocation parser = do
   begin <- getPosition
   value <- parser
   end   <- getPosition
-  return (value, (begin, end))
+  return (value, fromSourcePos begin end)
 
 -- |Parse a integer number.
-integer :: Parser (Integer, (SourcePos, SourcePos))
-integer = withPositionRange $ try positionalNotation <|> L.integer
+integer :: Parser (Integer, Location)
+integer = withLocation $ try positionalNotation <|> L.integer
   where
     -- |Parse a integer with prefix for positional notation.
     positionalNotation :: Parser Integer
@@ -87,5 +90,5 @@ integer = withPositionRange $ try positionalNotation <|> L.integer
     readBin = fromIntegral . foldl' (\acc x -> acc * 2 + digitToInt x) 0
 
 -- |Parse a floating point number.
-decimal :: Parser (Scientific, (SourcePos, SourcePos))
-decimal = withPositionRange L.scientific
+decimal :: Parser (Scientific, Location)
+decimal = withLocation L.scientific
