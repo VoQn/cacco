@@ -22,7 +22,7 @@ import qualified Text.Megaparsec.Lexer      as L
 
 import           Cacco.Location             (Location (..), fromSourcePos)
 
--- |Skipping space characters and comments.
+-- | Skipping space characters and comments.
 spaceConsumer :: Parser ()
 spaceConsumer = L.space skipSpace skipLineComment skipBlockComment
     where
@@ -38,11 +38,11 @@ spaceConsumer = L.space skipSpace skipLineComment skipBlockComment
       skipBlockComment :: Parser ()
       skipBlockComment = L.skipBlockCommentNested ";/" "/;"
 
--- |Make parser to ignore any space and comment expressions
+-- | Make parser to ignore any space and comment expressions
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme spaceConsumer
 
--- |Make specified string to token parser
+-- | Make specified string to token parser
 symbol :: String -> Parser String
 symbol = L.symbol spaceConsumer
 
@@ -58,7 +58,7 @@ angles = between (symbol "<") (symbol ">")
 brackets :: Parser a -> Parser a
 brackets = between (symbol "[") (symbol "]")
 
--- |Capture token's position range.
+-- | Capture token's position range.
 withLocation :: Parser a -> Parser (a, Location)
 withLocation parser = do
   begin <- getPosition
@@ -66,29 +66,26 @@ withLocation parser = do
   end   <- getPosition
   return (value, fromSourcePos begin end)
 
--- |Parse a integer number.
+-- | Parse a integer number.
 integer :: Parser (Integer, Location)
 integer = withLocation $ try positionalNotation <|> L.integer
   where
-    -- |Parse a integer with prefix for positional notation.
+    -- | Parse a integer with prefix for positional notation.
     positionalNotation :: Parser Integer
     positionalNotation = char '0' >> choice [hexadecimal, octal, binary]
-
-    -- |Parse a hexadecimal integer with prefix 'x' (e.g. xFA901)
+    -- | Parse a hexadecimal integer with prefix 'x' (e.g. xFA901)
     hexadecimal :: Parser Integer
     hexadecimal = char 'x' >> L.hexadecimal
-
-    -- |Parse a octal integer with prefix 'o' (e.g. o080)
+    -- | Parse a octal integer with prefix 'o' (e.g. o080)
     octal :: Parser Integer
     octal = char 'o' >> L.octal
-
-    -- |Parse a binary integer with prefix 'b' (e.g. b101010)
+    -- | Parse a binary integer with prefix 'b' (e.g. b101010)
     binary :: Parser Integer
     binary = char 'b' >> readBin <$> some (oneOf "01")
-
+    -- | Convert from string binary expression to integer number.
     readBin :: String -> Integer
     readBin = fromIntegral . foldl' (\acc x -> acc * 2 + digitToInt x) 0
 
--- |Parse a floating point number.
+-- | Parse a floating point number.
 decimal :: Parser (Scientific, Location)
 decimal = withLocation L.scientific

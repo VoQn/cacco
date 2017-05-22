@@ -2,8 +2,7 @@
 {-# LANGUAGE LambdaCase         #-}
 
 module Cacco.Literal
-  ( Location(..)
-  , Literal(..)
+  ( Literal(..)
   , getLocation
   ) where
 
@@ -13,7 +12,7 @@ import           Data.Typeable   (Typeable)
 
 import           Cacco.Location  (Location)
 
--- |Literal Data for cacco
+-- | Literal Data for cacco
 data Literal
   = IntegerLiteral Integer    Location
   | DecimalLiteral Scientific Location
@@ -26,6 +25,7 @@ instance Show Literal where
     DecimalLiteral x l -> "Decimal " <> show x <> " (" <> show l <> ")"
     StringLiteral  x l -> "String "  <> show x <> " (" <> show l <> ")"
 
+-- | Get the location of the literal.
 getLocation :: Literal -> Location
 getLocation = \case
   IntegerLiteral _ l -> l

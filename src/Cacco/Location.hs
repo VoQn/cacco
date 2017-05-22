@@ -7,7 +7,8 @@ module Cacco.Location
   , beginColumn
   , endLine
   , endColumn
-  , Pos -- re-export
+  　-- re-export
+  , Pos
   ) where
 
 import           Control.Arrow       ((&&&))
@@ -16,12 +17,17 @@ import           Data.Typeable       (Typeable)
 import           Text.Megaparsec.Pos (Pos, SourcePos)
 import qualified Text.Megaparsec.Pos as Pos
 
-data Location = Location {
+-- | The abstract data type @Location@ hints source positions.
+data Location = Location
+  { -- | the name of the source-file or input.
     sourceName    :: FilePath,
+    -- | the line number in the source-file or input.
     beginPosition :: !(Pos, Pos),
+    -- | the column number in the source-file or input.
     endPosition   :: !(Pos, Pos)
   } deriving (Eq, Typeable)
 
+-- | Convert from two @SourcePos@ to @Location@.
 fromSourcePos :: SourcePos -> SourcePos -> Location
 fromSourcePos b e =
   let
@@ -30,15 +36,19 @@ fromSourcePos b e =
   in
     Location n b' e'
 
+-- | Get the beginning of line number of the location.
 beginLine :: Location -> Pos
 beginLine = fst . beginPosition
 
+-- | Get the beginning of column number of the location.
 beginColumn :: Location -> Pos
 beginColumn = snd . beginPosition
 
+-- | Get the end of the line number of the location.
 endLine :: Location -> Pos
 endLine = fst . endPosition
 
+-- | Get the end of the column number of the location.
 endColumn :: Location -> Pos
 endColumn = snd . endPosition
 
