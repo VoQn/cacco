@@ -78,3 +78,19 @@ spec_decimalLiteralParser = describe "Cacco.Lexer.decimal" $ do
 
   it "can parse 1.0 as 1.0" $
     parseTest "1.0" `shouldBe` Right (fromFloatDigits (1.0 :: Double))
+
+spec_stringLiteralParser :: Spec
+spec_stringLiteralParser = describe "Cacco.Lexer.stringLiteral" $ do
+  let parseTest = parse (fst <$> Lexer.stringLiteral) "test"
+
+  it "can parse \"\" as empty string" $
+    parseTest "\"\"" `shouldBe` Right ""
+
+  it "can parse \"\\\"\" as valid string" $
+    parseTest "\"\\\"\"" `shouldBe` Right "\""
+
+  it "can parse \"hello\" as string using ASCII characters" $
+    parseTest "\"hello\"" `shouldBe` Right "hello"
+
+  it "can parse \"こんにちは\" as string using multi-byte characters" $
+    parseTest "\"こんにちは\"" `shouldBe` Right "こんにちは"

@@ -8,19 +8,22 @@ module Cacco.Lexer
   , brackets
   , integer
   , decimal
+  , stringLiteral
   ) where
 
-import           Data.Char                  (digitToInt)
-import           Data.Functor               (void)
-import           Data.List                  (foldl')
-import           Data.Scientific            (Scientific)
-import           Text.Megaparsec            (between, char, choice, getPosition,
-                                             some, try, (<|>))
-import           Text.Megaparsec.ByteString (Parser)
-import           Text.Megaparsec.Char       (oneOf, spaceChar)
-import qualified Text.Megaparsec.Lexer      as L
+import           Data.Char             (digitToInt)
+import           Data.Functor          (void)
+import           Data.List             (foldl')
+import           Data.Scientific       (Scientific)
+import           Data.Text             (Text)
+import qualified Data.Text             as T
+import           Text.Megaparsec       (between, char, choice, getPosition,
+                                        manyTill, some, try, (<|>))
+import           Text.Megaparsec.Char  (oneOf, spaceChar)
+import qualified Text.Megaparsec.Lexer as L
+import           Text.Megaparsec.Text  (Parser)
 
-import           Cacco.Location             (Location (..), fromSourcePos)
+import           Cacco.Location        (Location (..), fromSourcePos)
 
 -- | Skipping space characters and comments.
 spaceConsumer :: Parser ()
@@ -89,3 +92,7 @@ integer = withLocation $ try positionalNotation <|> L.integer
 -- | Parse a floating point number.
 decimal :: Parser (Scientific, Location)
 decimal = withLocation L.scientific
+
+-- | Parse a Unicode text.
+stringLiteral :: Parser (Text, Location)
+stringLiteral = withLocation $ char '"' >> T.pack <$> manyTill L.charLiteral (char '"')

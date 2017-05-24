@@ -25,6 +25,7 @@ library
     , Cacco.Lexer
   build-depends:
       base >= 4.7 && < 5
+    , text >= 1.2 && < 2
     , scientific >= 0.3 && < 0.4
     , megaparsec
 

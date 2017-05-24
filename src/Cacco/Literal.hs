@@ -8,6 +8,7 @@ module Cacco.Literal
 
 import           Data.Monoid     ((<>))
 import           Data.Scientific (Scientific)
+import           Data.Text       (Text)
 import           Data.Typeable   (Typeable)
 
 import           Cacco.Location  (Location)
@@ -16,7 +17,7 @@ import           Cacco.Location  (Location)
 data Literal
   = IntegerLiteral Integer    Location
   | DecimalLiteral Scientific Location
-  | StringLiteral  String     Location
+  | StringLiteral  Text       Location
   deriving (Eq, Ord, Typeable)
 
 instance Show Literal where
