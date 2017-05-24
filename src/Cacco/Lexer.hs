@@ -11,15 +11,14 @@ module Cacco.Lexer
   , stringLiteral
   ) where
 
-import           Data.Char             (digitToInt)
-import           Data.Functor          (void)
+import           Data.Bits             (shiftL)
+import           Data.Functor          (void, ($>))
 import           Data.List             (foldl')
 import           Data.Scientific       (Scientific)
 import           Data.Text             (Text)
 import qualified Data.Text             as T
 import           Text.Megaparsec       (between, char, choice, getPosition,
-                                        manyTill, some, try, (<|>))
-import           Text.Megaparsec.Char  (oneOf, spaceChar)
+                                        manyTill, some, spaceChar, try, (<|>))
 import qualified Text.Megaparsec.Lexer as L
 import           Text.Megaparsec.Text  (Parser)
 
@@ -29,15 +28,13 @@ import           Cacco.Location        (Location (..), fromSourcePos)
 spaceConsumer :: Parser ()
 spaceConsumer = L.space skipSpace skipLineComment skipBlockComment
     where
-      -- |Ignore a space-characters.
+      -- | Ignore a space-characters.
       skipSpace :: Parser ()
       skipSpace = void spaceChar
-
-      -- |Ignore single line comment.
+      -- | Ignore single line comment.
       skipLineComment :: Parser ()
       skipLineComment = L.skipLineComment ";;"
-
-      -- |Ignore nested block comment.
+      -- | Ignore nested block comment.
       skipBlockComment :: Parser ()
       skipBlockComment = L.skipBlockCommentNested ";/" "/;"
 
@@ -84,10 +81,18 @@ integer = withLocation $ try positionalNotation <|> L.integer
     octal = char 'o' >> L.octal
     -- | Parse a binary integer with prefix 'b' (e.g. b101010)
     binary :: Parser Integer
-    binary = char 'b' >> readBin <$> some (oneOf "01")
-    -- | Convert from string binary expression to integer number.
-    readBin :: String -> Integer
-    readBin = fromIntegral . foldl' (\acc x -> acc * 2 + digitToInt x) 0
+    binary = do
+      _    <- char 'b'
+      bits <- some $  char '0' $> False
+                  <|> char '1' $> True
+      return $ foldl' bitOp 0 bits
+      where
+        -- | Accumulate boolean as bit-shift
+        bitOp :: Integer -> Bool -> Integer
+        bitOp 0 False = 0
+        bitOp 0 True  = 1
+        bitOp v False = v `shiftL` 1
+        bitOp v True  = v `shiftL` 1 + 1
 
 -- | Parse a floating point number.
 decimal :: Parser (Scientific, Location)
@@ -95,4 +100,7 @@ decimal = withLocation L.scientific
 
 -- | Parse a Unicode text.
 stringLiteral :: Parser (Text, Location)
-stringLiteral = withLocation $ char '"' >> T.pack <$> manyTill L.charLiteral (char '"')
+stringLiteral = withLocation $ do
+  _   <- char '"'
+  str <- manyTill L.charLiteral $ char '"'
+  return $ T.pack str
