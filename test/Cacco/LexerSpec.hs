@@ -15,17 +15,20 @@ spec_integerLiteralParser = describe "Cacco.Lexer.integer" $ do
   let parseTest = parse (fst <$> Lexer.integer) "test"
 
   context "when parsing decimal integer literal" $ do
-    it "can parse 0 as integer" $
+    it "can parse 0" $
       parseTest "0" `shouldBe` Right 0
 
-    it "can parse 1 as integer" $
+    it "can parse 1" $
       parseTest "1" `shouldBe` Right 1
 
-    it "can parse 10 as integer" $
+    it "can parse 10" $
       parseTest "10" `shouldBe` Right 10
 
-    it "can parse 010 as integer" $
+    it "can parse 010" $
       parseTest "010" `shouldBe` Right 10
+
+    it "can parse -1" $
+      parseTest "-1" `shouldBe` Right (-1)
 
   context "when parsing hexadecimal integer literal" $ do
     it "can parse 0x10 as 16" $
@@ -70,14 +73,17 @@ spec_decimalLiteralParser :: Spec
 spec_decimalLiteralParser = describe "Cacco.Lexer.decimal" $ do
   let parseTest = parse (fst <$> Lexer.decimal) "test"
 
-  it "can parse 0.0 as 0" $
+  it "can parse 0.0" $
     parseTest "0.0" `shouldBe` Right (fromFloatDigits (0.0 :: Double))
 
-  it "can parse 0.01 as 0.01" $
+  it "can parse 0.01" $
     parseTest "0.01" `shouldBe` Right (fromFloatDigits (0.01 :: Double))
 
-  it "can parse 1.0 as 1.0" $
+  it "can parse 1.0" $
     parseTest "1.0" `shouldBe` Right (fromFloatDigits (1.0 :: Double))
+
+  it "can parse -10.5" $
+    parseTest "-10.5" `shouldBe` Right (fromFloatDigits ((-10.5) :: Double))
 
 spec_stringLiteralParser :: Spec
 spec_stringLiteralParser = describe "Cacco.Lexer.stringLiteral" $ do

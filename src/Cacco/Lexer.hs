@@ -22,7 +22,8 @@ import           Text.Megaparsec       (between, char, choice, getPosition,
 import qualified Text.Megaparsec.Lexer as L
 import           Text.Megaparsec.Text  (Parser)
 
-import           Cacco.Location        (Location (..), fromSourcePos)
+import           Cacco.Location        (Location (..))
+import qualified Cacco.Location        as Location
 
 -- | Skipping space characters and comments.
 spaceConsumer :: Parser ()
@@ -64,11 +65,24 @@ withLocation parser = do
   begin <- getPosition
   value <- parser
   end   <- getPosition
-  return (value, fromSourcePos begin end)
+  let location = Location.fromSourcePos begin end
+  return (value, location)
+
+-- | Parse a number with sign
+withSign :: Num a => Parser a -> Parser a
+withSign parser = do
+    f <- minus <|> plus <|> return id
+    x <- parser
+    return $ f x
+  where
+    minus :: Num a => Parser (a -> a)
+    minus = char '-' $> negate
+    plus :: Num a => Parser (a -> a)
+    plus = char '+' $> id
 
 -- | Parse a integer number.
 integer :: Parser (Integer, Location)
-integer = withLocation $ try positionalNotation <|> L.integer
+integer = withLocation $ try positionalNotation <|> withSign L.integer
   where
     -- | Parse a integer with prefix for positional notation.
     positionalNotation :: Parser Integer
@@ -96,7 +110,7 @@ integer = withLocation $ try positionalNotation <|> L.integer
 
 -- | Parse a floating point number.
 decimal :: Parser (Scientific, Location)
-decimal = withLocation L.scientific
+decimal = withLocation $ withSign L.scientific
 
 -- | Parse a Unicode text.
 stringLiteral :: Parser (Text, Location)
