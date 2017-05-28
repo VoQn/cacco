@@ -59,7 +59,8 @@ test-suite test
     , lens
     , cacco
   other-modules:
-      Cacco.LexerSpec
+      Cacco.LocationSpec
+    , Cacco.LexerSpec
   ghc-options:
     -threaded
     -rtsopts

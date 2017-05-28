@@ -3,6 +3,7 @@
 
 module Cacco.Location
   ( Location(..)
+  , HasLocation(..)
   , sourceName
   , line
   , column
@@ -27,6 +28,12 @@ data Location = Location
   } deriving (Eq, Typeable)
 
 makeLenses ''Location
+
+class HasLocation a where
+  getLocation :: a -> Location
+
+instance HasLocation Location where
+  getLocation = id
 
 initLocation :: Location
 initLocation = Location{ _sourceName = "", _line = 1, _column = 1}
