@@ -22,7 +22,9 @@ library
       Lib
     , Cacco.Location
     , Cacco.Literal
+    , Cacco.Expr
     , Cacco.Lexer
+    , Cacco.Parser
   build-depends:
       base >= 4.7 && < 5
     , text >= 1.2 && < 2
@@ -61,6 +63,7 @@ test-suite test
   other-modules:
       Cacco.LocationSpec
     , Cacco.LexerSpec
+    , Cacco.ParserSpec
   ghc-options:
     -threaded
     -rtsopts

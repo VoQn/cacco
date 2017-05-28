@@ -16,10 +16,10 @@ specAsInstanceOfShow :: Spec
 specAsInstanceOfShow = describe "a location `x` as instance of Show" $ do
     context "when x = Location{_sourceName = \"\", _line = 1, _column = 2}" $ do
         let x = initLocation & column .~ 2
-        it "show x returns \"(unknown): 1,2\"" $ show x `shouldBe` "(unknown): 1,2"
+        it "show x returns \"(unknown):1,2\"" $ show x `shouldBe` "(unknown):1,2"
     context "when x = Location{_sourceName = \"test\", _line = 1, _column = 1}" $ do
         let x = initLocation & sourceName .~ "test" & column .~ 2
-        it "show x returns \"test: 1,2\"" $ show x `shouldBe` "test: 1,2"
+        it "show x returns \"test:1,2\"" $ show x `shouldBe` "test:1,2"
 
 specAsInstanceOfOrd :: Spec
 specAsInstanceOfOrd = describe "two locations `a` and `b` as instance of Ord" $ do

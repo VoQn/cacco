@@ -62,4 +62,4 @@ instance Show Location where
       l = show $ location ^. line
       c = show $ location ^. column
     in
-      (if n == "" then "(unknown)" else n) <> ": " <> l <> "," <> c
+      (if n == "" then "(unknown)" else n) <> ":" <> l <> "," <> c

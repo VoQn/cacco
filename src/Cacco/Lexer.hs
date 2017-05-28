@@ -1,6 +1,7 @@
 module Cacco.Lexer
   ( spaceConsumer
   , lexeme
+  , withLocation
   , symbol
   , parens
   , braces
