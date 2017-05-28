@@ -64,8 +64,7 @@ withLocation :: Parser a -> Parser (a, Location)
 withLocation parser = do
   begin <- getPosition
   value <- parser
-  end   <- getPosition
-  let location = Location.fromSourcePos begin end
+  let location = Location.fromSourcePos begin
   return (value, location)
 
 -- | Parse a number with sign
