@@ -45,7 +45,7 @@ Cacco is a programming language.
 (var y 0)
 
 ;; Strictly typing with literal.
-(val z (as 0 Word8))
+(let z (as 0 Word8))
 (var w (as "something" ByteString))
 
 ;; Reassign
