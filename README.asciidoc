@@ -1,17 +1,15 @@
 
 = cacco
 Cacco is a programming language.
-:source-highlighter: highlightjs
-:icons: font
 :toc:
 
 IMPORTANT: Cacco is still in the design stage. It's not working yet.
 
 [[introduction]]
-== icon:book[] Introduction
+== Introduction
 
 [[comment]]
-=== icon:comments-o[] Comment
+=== Comment
 ----
 ;; This is inline comment (to the end of the line).
 
@@ -27,7 +25,7 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 <3> Block comments can be nested
 
 [[literals]]
-=== icon:cube[] Literals
+=== Literals
 ----
 0     ;; Fuzzy Numeric.  (default: Natural)
 -1 +1 ;; Fuzzy Integer.  (default: Integer)
@@ -51,7 +49,7 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 |===
 
 [[declaration-and-reassign]]
-=== icon:shield[] Declaration and Reassign
+=== Declaration and Reassign
 ----
 ;; Declare procedure or value or variable.
 (dec x Integer)
@@ -73,7 +71,7 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 ----
 
 [[calling-procedure]]
-=== icon:volume-control-phone[] Calling procedure
+=== Calling procedure
 ----
 ;; Simply calling a procedure.
 (foo a b c)
@@ -83,7 +81,7 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 ----
 
 [[define-procedure]]
-=== icon:puzzle-piece[] Define procedure
+=== Define procedure
 ----
 ;; Declare a procedure
 (dec make_linear
@@ -98,17 +96,17 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 <2> `(fun: T1 T2 ... Tn)` is Function type recieve `T1`, `T2` ... then return value as `Tn` type.
 
 [[development]]
-== icon:code[] Development
+== Development
 [[prequisites]]
-=== icon:shopping-cart[] Prerequisites
+=== Prerequisites
 
 * Haskell Stack
 
 [[build-and-testing]]
-=== icon:terminal[] Build and Testing
+=== Build and Testing
 
 [[simply-building-libraries-and-application]]
-==== icon:rocket[] Simply building libraries and application
+==== Simply building libraries and application
 [source,bash]
 ----
 stack build
