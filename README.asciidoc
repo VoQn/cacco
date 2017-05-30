@@ -1,0 +1,135 @@
+
+= cacco
+Cacco is a programming language.
+:source-highlighter: highlightjs
+:icons: font
+:toc:
+
+IMPORTANT: Cacco is still in the design stage. It's not working yet.
+
+[[introduction]]
+== icon:book[] Introduction
+
+[[comment]]
+=== icon:comments-o[] Comment
+----
+;; This is inline comment (to the end of the line).
+
+;/ This is block comment. ;;<1>
+   block comment is keeping until the terminator -> /; ;; <2>
+
+;/
+  ;/ These block comments can be nested. /; ;;<3>
+/;
+----
+<1> `;/` is the start of block comment
+<2> `/;` is the end of block comment
+<3> Block comments can be nested
+
+[[literals]]
+=== icon:cube[] Literals
+----
+0     ;; Fuzzy Numeric.  (default: Natural)
+-1 +1 ;; Fuzzy Integer.  (default: Integer)
+0.0   ;; Fuzyy Decimal.  (default: Decimal)
+1/2   ;; Rational.
+'a'   ;; Charactor.      (same as Word32)
+""    ;; Fuzzy Text.     (default: String_UTF8)
+:key  ;; Keyword.
+[]    ;; Fuzzy Sequence. (default: List)
+{}    ;; Key-Value Map.
+----
+
+|===
+|Fuzzy Types    | Include Types
+
+|Fuzzy_Numeric  | Word8, Word16, Word32, Word64, Nat, and Fuzzy_Integer
+|Fuzzy_Integer  | Int8, Int16, Int32, Int64, Integer, and Fuzzy_Flonum
+|Fuzzy_Decimal  | Float16, Float32, Float64, Flonum
+|Fuzzy_Text     | Bytes, String_UTF8, String_UTF16, String_UTF32
+|Fuzzy_Sequence | List, Vector, Array, Sequence
+|===
+
+[[declaration-and-reassign]]
+=== icon:shield[] Declaration and Reassign
+----
+;; Declare procedure or value or variable.
+(dec x Integer)
+
+;; Define a constant value once.
+(let x 1000)
+
+;; Declare a mutable variable.
+(var y 0)
+
+;; Strictly typing with literal.
+(let z (as 0 Word8))
+(var w (as "something" Bytes))
+
+;; Reassign
+(set! y 1000)    ;; OK
+(set! y "hello") ;; Can't. `y` has been declered as Number type.
+(set! x 10)      ;; Can't. `x` has been declered as immutable.
+----
+
+[[calling-procedure]]
+=== icon:volume-control-phone[] Calling procedure
+----
+;; Simply calling a procedure.
+(foo a b c)
+
+;; Calling closure.
+((fun [a] (* a a)) 10) ;; returns 100
+----
+
+[[define-procedure]]
+=== icon:puzzle-piece[] Define procedure
+----
+;; Declare a procedure
+(dec make_linear
+     (let: (n Number) ;;<1>
+           (fun: n n (fun: n n)))) ;;<2>
+;; Define the procedure
+(let make_linear
+     (fun [a b]
+          (fun [x] (+ (* a x) b))))
+----
+<1> `(let: (t Type) ...)` is Generic typing form.
+<2> `(fun: T1 T2 ... Tn)` is Function type recieve `T1`, `T2` ... then return value as `Tn` type.
+
+[[development]]
+== icon:code[] Development
+[[prequisites]]
+=== icon:shopping-cart[] Prerequisites
+
+* Haskell Stack
+
+[[build-and-testing]]
+=== icon:terminal[] Build and Testing
+
+[[simply-building-libraries-and-application]]
+==== icon:rocket[] Simply building libraries and application
+[source,bash]
+----
+stack build
+----
+
+[[build-clean]]
+==== icon:trash[] Clean
+[source,bash]
+----
+stack clean
+----
+
+[[run-tests]]
+==== icon:fire-extinguisher[] Run Tests
+[source,bash]
+----
+# simply run test-suites
+stack test
+
+# run test-suites and generate coverage-report
+stack clean && stack test --coverage
+# open coverage-report in your browser
+open $(stack path --local-hpc-root)/index.html
+----
