@@ -10,7 +10,7 @@ maintainer:          voqn.tyrant@gmail.com
 copyright:           2017 Kazuhiro Mizushima
 category:            Language
 build-type:          Simple
-extra-source-files:  README.md
+extra-source-files:  README.asciidoc
 cabal-version:       >=1.10
 
 library
