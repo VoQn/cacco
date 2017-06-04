@@ -21,7 +21,6 @@ library
   exposed-modules:
       Lib
     , Cacco.Location
-    , Cacco.Literal
     , Cacco.Expr
     , Cacco.Lexer
     , Cacco.Parser

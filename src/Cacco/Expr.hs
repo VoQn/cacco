@@ -17,8 +17,7 @@ type Name = String
 
 data Expr
   = Undef   Location
-  | True    Location
-  | False   Location
+  | Boolean Location Bool
   | Integer Location Integer
   | Decimal Location Scientific
   | String  Location Text
@@ -29,10 +28,9 @@ data Expr
 instance Show Expr where
   show = \case
     Undef l -> "Undefined(" <> show l <> ")"
-    True  l -> "True(" <> show l <> ")"
-    False l -> "False(" <> show l <> ")"
-    Integer l x -> "Integer " <> show x <> "(" <> show l <> ")"
-    Decimal l x -> "Decimal " <> show x <> "(" <> show l <> ")"
-    String  l x -> "String " <> show x <> "(" <> show l <> ")"
-    Atom    l x -> "Symbol " <> x <> "(" <> show l <> ")"
-    List    l xs -> "List[" <> foldl' (\acc x -> acc <> " " <> show x) "" xs <> "](" <> show l <> ")"
+    Boolean l x -> "Boolean " <> show x <> " (" <> show l <> ")"
+    Integer l x -> "Integer " <> show x <> " (" <> show l <> ")"
+    Decimal l x -> "Decimal " <> show x <> " (" <> show l <> ")"
+    String  l x -> "String " <> show x <> " (" <> show l <> ")"
+    Atom    l x -> "Symbol " <> x <> " (" <> show l <> ")"
+    List    l xs -> "List[" <> foldl' (\acc x -> acc <> " " <> show x) "" xs <> "] (" <> show l <> ")"

@@ -32,8 +32,8 @@ symbol = do
   first <- identFirst
   rest  <- identTail
   return $ case first : rest of
-    "true"      -> Expr.True loc
-    "false"     -> Expr.False loc
+    "true"      -> Expr.Boolean loc True
+    "false"     -> Expr.Boolean loc False
     "undefined" -> Expr.Undef loc
     name        -> Expr.Atom loc name
 
