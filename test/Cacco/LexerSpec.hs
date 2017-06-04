@@ -12,7 +12,7 @@ import qualified Cacco.Lexer      as Lexer
 
 spec_integerLiteralParser :: Spec
 spec_integerLiteralParser = describe "Cacco.Lexer.integer" $ do
-  let parseTest = parse (fst <$> Lexer.integer) "test"
+  let parseTest = parse Lexer.integer "test"
 
   context "when parsing decimal integer literal" $ do
     it "can parse 0" $
@@ -71,7 +71,7 @@ spec_integerLiteralParser = describe "Cacco.Lexer.integer" $ do
 
 spec_decimalLiteralParser :: Spec
 spec_decimalLiteralParser = describe "Cacco.Lexer.decimal" $ do
-  let parseTest = parse (fst <$> Lexer.decimal) "test"
+  let parseTest = parse Lexer.decimal "test"
 
   it "can parse 0.0" $
     parseTest "0.0" `shouldBe` Right (fromFloatDigits (0.0 :: Double))
@@ -87,7 +87,7 @@ spec_decimalLiteralParser = describe "Cacco.Lexer.decimal" $ do
 
 spec_stringLiteralParser :: Spec
 spec_stringLiteralParser = describe "Cacco.Lexer.stringLiteral" $ do
-  let parseTest = parse (fst <$> Lexer.stringLiteral) "test"
+  let parseTest = parse Lexer.stringLiteral "test"
 
   it "can parse \"\" as empty string" $
     parseTest "\"\"" `shouldBe` Right ""

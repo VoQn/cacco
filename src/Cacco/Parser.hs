@@ -42,15 +42,15 @@ atom = choice [try decimal, integer, string, symbol]
   where
     integer :: Parser Expr
     integer = do
-      (x, l) <- Lexer.integer
+      (x, l) <- Lexer.withLocation Lexer.integer
       return $ Expr.Integer l x
     decimal :: Parser Expr
     decimal = do
-      (x, l) <- Lexer.decimal
+      (x, l) <- Lexer.withLocation Lexer.decimal
       return $ Expr.Decimal l x
     string :: Parser Expr
     string = do
-      (x, l) <- Lexer.stringLiteral
+      (x, l) <- Lexer.withLocation Lexer.stringLiteral
       return $ Expr.String l x
 
 list :: Parser Expr

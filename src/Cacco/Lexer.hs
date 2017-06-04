@@ -81,8 +81,8 @@ withSign parser = do
     plus = char '+' $> id
 
 -- | Parse a integer number.
-integer :: Parser (Integer, Location)
-integer = withLocation $ try positionalNotation <|> withSign L.integer
+integer :: Parser Integer
+integer = try positionalNotation <|> withSign L.integer
   where
     -- | Parse a integer with prefix for positional notation.
     positionalNotation :: Parser Integer
@@ -97,24 +97,28 @@ integer = withLocation $ try positionalNotation <|> withSign L.integer
     binary :: Parser Integer
     binary = do
       _    <- char 'b'
-      bits <- some $  char '0' $> False
-                  <|> char '1' $> True
+      bits <- some $ zero <|> one
       return $ foldl' bitOp 0 bits
-      where
-        -- | Accumulate boolean as bit-shift
-        bitOp :: Integer -> Bool -> Integer
-        bitOp 0 False = 0
-        bitOp 0 True  = 1
-        bitOp v False = v `shiftL` 1
-        bitOp v True  = v `shiftL` 1 + 1
+    -- | Parse '0' as a boolean
+    zero :: Parser Bool
+    zero = char '0' $> False
+    -- | Parse '1' as a boolean
+    one :: Parser Bool
+    one = char '1' $> True
+    -- | Accumulate boolean as bit-shift
+    bitOp :: Integer -> Bool -> Integer
+    bitOp 0 False = 0
+    bitOp 0 True  = 1
+    bitOp v False = v `shiftL` 1
+    bitOp v True  = v `shiftL` 1 + 1
 
 -- | Parse a floating point number.
-decimal :: Parser (Scientific, Location)
-decimal = withLocation $ withSign L.scientific
+decimal :: Parser Scientific
+decimal = withSign L.scientific
 
 -- | Parse a Unicode text.
-stringLiteral :: Parser (Text, Location)
-stringLiteral = withLocation $ do
+stringLiteral :: Parser Text
+stringLiteral = do
   _   <- char '"'
   str <- manyTill L.charLiteral $ char '"'
   return $ T.pack str
