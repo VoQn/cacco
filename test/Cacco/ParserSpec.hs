@@ -16,13 +16,14 @@ spec_parseExpr = describe "Cacco.Parser" $ do
     testParse "+1.0" `shouldBe` Right (
       Expr.Decimal (Location "test" 1 1) $ fromFloatDigits (1.0 :: Double))
 
-  it "can parse \"(foo true false\n  undefined 2)\"" $
-    testParse "(foo true false\n  undefined \"hello\" 2)" `shouldBe` Right (
+  it "can parse \"(foo true false\\n undefined 2)\"" $
+    testParse "(foo true false\n undefined \"hello\" 2)" `shouldBe` Right (
       Expr.List (Location "test" 1 1) [
         Expr.Atom    (Location "test" 1  2) "foo",
         Expr.Boolean (Location "test" 1  6) True,
         Expr.Boolean (Location "test" 1 11) False,
-        Expr.Undef   (Location "test" 2  3),
-        Expr.String  (Location "test" 2 13) "hello",
-        Expr.Integer (Location "test" 2 21) 2
-      ])
+        Expr.Undef   (Location "test" 2  2),
+        Expr.String  (Location "test" 2 12) "hello",
+        Expr.Integer (Location "test" 2 20) 2
+      ]
+    )
