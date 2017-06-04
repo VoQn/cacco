@@ -24,12 +24,15 @@ library
     , Cacco.Expr
     , Cacco.Lexer
     , Cacco.Parser
+    , Cacco.REPL
   build-depends:
       base >= 4.7 && < 5
+    , mtl  >= 2.2 && < 3
     , text >= 1.2 && < 2
     , scientific >= 0.3 && < 0.4
-    , megaparsec
+    , megaparsec >= 5.2 && < 6
     , lens >= 4.15 && < 4.16
+    , haskeline >= 0.7 && < 0.8
 
 executable cacco
   default-language:  Haskell2010
