@@ -27,3 +27,13 @@ spec_parseExpr = describe "Cacco.Parser" $ do
         Expr.Integer (Location "test" 2 20) 2
       ]
     )
+
+  it "can parse expression with ignoreing line comments" $
+    testParse ";; if this comments didn't ignore, this test case was failed.\ntrue" `shouldBe` Right (
+      Expr.Boolean (Location "test" 2 1) True
+    )
+
+  it "can parse expression with ignoreing block comments" $
+    testParse ";/ if this comments didn't ignore, this test case was failed. /;\ntrue" `shouldBe` Right (
+      Expr.Boolean (Location "test" 2 1) True
+    )
