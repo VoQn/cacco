@@ -27,10 +27,10 @@ data Expr
 
 instance Show Expr where
   show = \case
-    Undef l -> "Undefined(" <> show l <> ")"
+    Undef l -> "Undef(" <> show l <> ")"
     Boolean l x -> "Boolean " <> show x <> " (" <> show l <> ")"
     Integer l x -> "Integer " <> show x <> " (" <> show l <> ")"
     Decimal l x -> "Decimal " <> show x <> " (" <> show l <> ")"
     String  l x -> "String " <> show x <> " (" <> show l <> ")"
     Atom    l x -> "Symbol " <> x <> " (" <> show l <> ")"
-    List    l xs -> "List[" <> foldl' (\acc x -> acc <> " " <> show x) "" xs <> "] (" <> show l <> ")"
+    List    l xs -> "[" <> foldl' (\acc x -> acc <> " " <> show x) "" xs <> "] (" <> show l <> ")"
