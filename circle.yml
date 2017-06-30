@@ -6,10 +6,14 @@ dependencies:
     - echo 'deb http://download.fpcomplete.com/ubuntu/precise stable main'|sudo tee /etc/apt/sources.list.d/fpco.list
     - sudo apt-get update && sudo apt-get install stack -y
   override:
-    - stack setup
-    - stack build
+    - stack setup --no-terminal
+    - stack build --no-system-ghc --only-configure --no-terminal
     - stack build --test --only-dependencies
+
+compile:
+  override:
+    - stack build --no-terminal
 
 test:
   override:
-    - stack test
+    - stack test --coverage --no-terminal
