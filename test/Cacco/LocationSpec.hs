@@ -7,13 +7,13 @@ import           Cacco.Location
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
-spec_Location :: Spec
-spec_Location = describe "Cacco.Location" $ do
-    specAsInstanceOfShow
-    specAsInstanceOfOrd
+spec_Cacco_Location :: Spec
+spec_Cacco_Location = do
+    asInstanceOfShow
+    asInstanceOfOrd
 
-specAsInstanceOfShow :: Spec
-specAsInstanceOfShow = describe "a location `x` as instance of Show" $ do
+asInstanceOfShow :: Spec
+asInstanceOfShow = describe "an instance of Show" $ do
     context "when x = Location{_sourceName = \"\", _line = 1, _column = 2}" $ do
         let x = initLocation & column .~ 2
         it "show x returns \"(unknown):1,2\"" $ show x `shouldBe` "(unknown):1,2"
@@ -21,8 +21,8 @@ specAsInstanceOfShow = describe "a location `x` as instance of Show" $ do
         let x = initLocation & sourceName .~ "test" & column .~ 2
         it "show x returns \"test:1,2\"" $ show x `shouldBe` "test:1,2"
 
-specAsInstanceOfOrd :: Spec
-specAsInstanceOfOrd = describe "two locations `a` and `b` as instance of Ord" $ do
+asInstanceOfOrd :: Spec
+asInstanceOfOrd = describe "as instances of Ord" $ do
     context "when a^.sourceName /= b^.sourceName" $ do
         let a = initLocation & sourceName .~ "a"
         let b = initLocation & sourceName .~ "b"

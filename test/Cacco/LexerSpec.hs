@@ -10,8 +10,14 @@ import qualified Cacco.Lexer      as Lexer
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
-spec_integerLiteralParser :: Spec
-spec_integerLiteralParser = describe "Cacco.Lexer.integer" $ do
+spec_Cacco_Lexer :: Spec
+spec_Cacco_Lexer = do
+  integerParserSpec
+  decimalParserSpec
+  stringLiteralParserSpec
+
+integerParserSpec :: Spec
+integerParserSpec = describe "Cacco.Lexer.integer" $ do
   let parseTest = parse Lexer.integer "test"
 
   context "when parsing decimal integer literal" $ do
@@ -69,8 +75,8 @@ spec_integerLiteralParser = describe "Cacco.Lexer.integer" $ do
     it "can parse 0b00000101 as 5" $
       parseTest "0b00000101" `shouldBe` Right 5
 
-spec_decimalLiteralParser :: Spec
-spec_decimalLiteralParser = describe "Cacco.Lexer.decimal" $ do
+decimalParserSpec :: Spec
+decimalParserSpec = describe "Cacco.Lexer.decimal" $ do
   let parseTest = parse Lexer.decimal "test"
 
   it "can parse 0.0" $
@@ -85,8 +91,8 @@ spec_decimalLiteralParser = describe "Cacco.Lexer.decimal" $ do
   it "can parse -10.5" $
     parseTest "-10.5" `shouldBe` Right (fromFloatDigits ((-10.5) :: Double))
 
-spec_stringLiteralParser :: Spec
-spec_stringLiteralParser = describe "Cacco.Lexer.stringLiteral" $ do
+stringLiteralParserSpec :: Spec
+stringLiteralParserSpec = describe "Cacco.Lexer.stringLiteral" $ do
   let parseTest = parse Lexer.stringLiteral "test"
 
   it "can parse \"\" as empty string" $
