@@ -18,7 +18,7 @@ type Name = String
 data Expr
   -- Atomic Values
   -- | Undefined literal
-  = Undef   Location
+  = Undef Location
   -- | Boolean literal
   | Boolean Location Bool
   -- | Integer literal
@@ -50,41 +50,36 @@ data Expr
   deriving (Eq, Ord, Typeable)
 
 instance Show Expr where
-  show (Undef l) =
-    "Undef(" <> show l <> ")"
+  show expr = case expr of
+    Undef    l      -> "Undef (" <> show l <> ")"
+    Boolean  l x    -> "Boolean " <> show x <> " (" <> show l <> ")"
+    Integer  l x    -> "Integer " <> show x <> " (" <> show l <> ")"
+    Decimal  l x    -> "Decimal " <> show x <> " (" <> show l <> ")"
+    String   l x    -> "String " <> show x <> " (" <> show l <> ")"
+    Atom     l x    -> "Symbol " <> x <> " (" <> show l <> ")"
+    List     l xs   -> "[" <> unwords (show <$> xs) <> "] (" <> show l <> ")"
+    Declare  l n x  -> "(dec " <> n <> " " <> show x <> ") (" <> show l <> ")"
+    Let      l n x  -> "(let " <> n <> " " <> show x <> ") (" <> show l <> ")"
+    Var      l n x  -> "(var " <> n <> " " <> show x <> ") (" <> show l <> ")"
+    Reassign l n x  -> "(set! " <> n <> " " <> show x <> ") (" <> show l <> ")"
+    Proc     l ns x -> "(|" <> unwords ns <> "| " <> show x <> ") (" <> show l <> ")"
+    Call     l f xs -> "(" <> show f <> " " <> unwords (show <$> xs) <>　"(" <> show l <> ")"
 
-  show (Boolean l x) =
-    "Boolean " <> show x <> " (" <> show l <> ")"
+instance HasLocation Expr where
+  getLocation expr = case expr of
+    Undef    l     -> l
+    Boolean  l _   -> l
+    Integer  l _   -> l
+    Decimal  l _   -> l
+    String   l _   -> l
+    Atom     l _   -> l
+    List     l _   -> l
+    Declare  l _ _ -> l
+    Let      l _ _ -> l
+    Var      l _ _ -> l
+    Reassign l _ _ -> l
+    Proc     l _ _ -> l
+    Call     l _ _ -> l
 
-  show (Integer l x) =
-    "Integer " <> show x <> " (" <> show l <> ")"
 
-  show (Decimal l x) =
-    "Decimal " <> show x <> " (" <> show l <> ")"
 
-  show (String  l x) =
-    "String " <> show x <> " (" <> show l <> ")"
-
-  show (Atom l x) =
-    "Symbol " <> x <> " (" <> show l <> ")"
-
-  show (List l xs) =
-    "[" <> unwords (show <$> xs) <> "] (" <> show l <> ")"
-
-  show (Declare l n x) =
-    "(dec " <> n <> " " <> show x <> ") (" <> show l <> ")"
-
-  show (Let l n x) =
-    "(let " <> n <> " " <> show x <> ") (" <> show l <> ")"
-
-  show (Var l n x) =
-    "(var " <> n <> " " <> show x <> ") (" <> show l <> ")"
-
-  show (Reassign l n x) =
-    "(set! " <> n <> " " <> show x <> ") (" <> show l <> ")"
-
-  show (Proc l ns xp) =
-    "(|" <> unwords ns <> "| " <> show xp <> ") (" <> show l <> ")"
-
-  show (Call l f xs) =
-    "(" <> show f <> " " <> unwords (show <$> xs) <>　"(" <> show l <> ")"

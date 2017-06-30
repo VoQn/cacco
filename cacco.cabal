@@ -67,6 +67,7 @@ test-suite test
     , cacco
   other-modules:
       Cacco.LocationSpec
+    , Cacco.ExprSpec
     , Cacco.LexerSpec
     , Cacco.ParserSpec
   ghc-options:
