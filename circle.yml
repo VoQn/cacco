@@ -17,3 +17,5 @@ compile:
 test:
   override:
     - stack test --coverage --no-terminal
+  post:
+    - bash <(curl -s https://codecov.io/bash)
