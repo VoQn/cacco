@@ -8,6 +8,8 @@ import           Test.Tasty.Hspec
 import qualified Cacco.Expr       as Expr
 import           Cacco.Location
 
+{-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
+
 spec_Cacco_Expr :: Spec
 spec_Cacco_Expr =
   describe "instance of Show" $ do

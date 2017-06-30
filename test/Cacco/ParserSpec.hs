@@ -9,8 +9,14 @@ import qualified Cacco.Expr       as Expr
 import           Cacco.Location
 import           Cacco.Parser
 
-spec_parseExpr :: Spec
-spec_parseExpr = describe "Cacco.Parser" $ do
+{-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
+
+spec_Cacco_Parser :: Spec
+spec_Cacco_Parser =
+  parseExprSpec
+
+parseExprSpec:: Spec
+parseExprSpec = describe "Cacco.Parser.parseExpr" $ do
   let testParse = parseExpr "test"
   it "can parse \"+1.0\"" $
     testParse "+1.0" `shouldBe` Right
