@@ -3,6 +3,8 @@
 Cacco is a programming language.
 :toc:
 
+image::https://circleci.com/gh/VoQn/cacco.png?circle-token=:circle-token[]
+
 IMPORTANT: Cacco is still in the design stage. It's not working yet.
 
 [[introduction]]
