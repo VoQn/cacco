@@ -44,7 +44,7 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 |Fuzzy Types    | Include Types
 
 |Fuzzy_Numeric  | Word8, Word16, Word32, Word64, Nat, and Fuzzy_Integer
-|Fuzzy_Integer  | Int8, Int16, Int32, Int64, Integer, and Fuzzy_Flonum
+|Fuzzy_Integer  | Int8, Int16, Int32, Int64, Integer, and Fuzzy_Decimal
 |Fuzzy_Decimal  | Float16, Float32, Float64, Flonum
 |Fuzzy_Text     | Bytes, String_UTF8, String_UTF16, String_UTF32
 |Fuzzy_Sequence | List, Vector, Array, Sequence
@@ -79,23 +79,23 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 (foo a b c)
 
 ;; Calling closure.
-((fun [a] (* a a)) 10) ;; returns 100
+((|a| (* a a)) 10) ;; returns 100
 ----
 
 [[define-procedure]]
 === Define procedure
 ----
 ;; Declare a procedure
-(dec make_linear
-     (let: (n Number) ;;<1>
-           (fun: n n (fun: n n)))) ;;<2>
+(dec cubic
+  (forall |n| ;;<1>
+    (as n Number)
+    (-> n n))) ;;<2>
+
 ;; Define the procedure
-(let make_linear
-     (fun [a b]
-          (fun [x] (+ (* a x) b))))
+(let cubic (|x| (* x x x)))
 ----
-<1> `(let: (t Type) ...)` is Generic typing form.
-<2> `(fun: T1 T2 ... Tn)` is Function type recieve `T1`, `T2` ... then return value as `Tn` type.
+<1> `(forall |a b c ...| ...)` is Generic typing form.
+<2> `(-> T1 T2 ... Tn)` is Function type recieve `T1`, `T2` ... then return value as `Tn` type.
 
 [[development]]
 == Development
@@ -115,14 +115,14 @@ stack build
 ----
 
 [[build-clean]]
-==== icon:trash[] Clean
+==== Clean
 [source,bash]
 ----
 stack clean
 ----
 
 [[run-tests]]
-==== icon:fire-extinguisher[] Run Tests
+==== Run Tests
 [source,bash]
 ----
 # simply run test-suites
