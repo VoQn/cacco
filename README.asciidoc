@@ -53,17 +53,17 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 [[declaration-and-reassign]]
 === Declaration and Reassign
 ----
-;; Declare procedure or value or variable.
+;; Declare procedure or constant value or variable value.
 (dec x Integer)
 
-;; Define a constant value once.
-(let x 1000)
+;; Declare a constant value once.
+(val x 1000)
 
-;; Declare a mutable variable.
+;; Declare a mutable variable value.
 (var y 0)
 
 ;; Strictly typing with literal.
-(let z (as 0 Word8))
+(val z (as 0 Word8))
 (var w (as "something" Bytes))
 
 ;; Reassign
@@ -92,7 +92,7 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
     (-> n n))) ;;<2>
 
 ;; Define the procedure
-(let cubic (|x| (* x x x)))
+(def cubic (|x| (* x x x)))
 ----
 <1> `(forall |a b c ...| ...)` is Generic typing form.
 <2> `(-> T1 T2 ... Tn)` is Function type recieve `T1`, `T2` ... then return value as `Tn` type.
