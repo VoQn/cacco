@@ -63,10 +63,10 @@ brackets = between (symbol "[") (symbol "]")
 -- | Capture token's position range.
 withLocation :: Parser a -> Parser (a, Location)
 withLocation parser = do
-  begin <- getPosition
-  value <- parser
-  let location = Location.fromSourcePos begin
-  return (value, location)
+  b <- getPosition
+  v <- parser
+  let l = Location.fromSourcePos b
+  return (v, l)
 
 -- | Parse a number with sign
 withSign :: Num a => Parser a -> Parser a
@@ -96,9 +96,9 @@ integer = try positionalNotation <|> withSign L.integer
     -- | Parse a binary integer with prefix 'b' (e.g. b101010)
     binary :: Parser Integer
     binary = do
-      _    <- char 'b'
-      bits <- some $ zero <|> one
-      return $ foldl' bitOp 0 bits
+      _  <- char 'b'
+      bs <- some $ zero <|> one
+      return $ foldl' bitOp 0 bs
     -- | Parse '0' as a boolean
     zero :: Parser Bool
     zero = char '0' $> False
@@ -120,5 +120,5 @@ decimal = withSign L.scientific
 stringLiteral :: Parser Text
 stringLiteral = do
   _   <- char '"'
-  str <- manyTill L.charLiteral $ char '"'
-  return $ T.pack str
+  cs <- manyTill L.charLiteral $ char '"'
+  return $ T.pack cs
