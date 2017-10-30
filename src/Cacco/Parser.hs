@@ -21,7 +21,7 @@ symbolChar :: Parser Char
 symbolChar = oneOf "!@#$%^&*_+-=|:<>?/"
 
 identFirst :: Parser Char
-identFirst = letterChar
+identFirst = letterChar <|> symbolChar
 
 identTail :: Parser String
 identTail = many (letterChar <|> digitChar <|> symbolChar)
@@ -39,10 +39,10 @@ symbol = do
     "true"      -> Expr.Boolean l True
     "false"     -> Expr.Boolean l False
     "undefined" -> Expr.Undef l
-    name        -> Expr.Atom l name
+    name        -> Expr.Symbol l name
 
 atom :: Parser Expr
-atom = choice [try decimal, integer, string, symbol]
+atom = choice [try decimal, try integer, string, symbol]
   where
     integer :: Parser Expr
     integer = do

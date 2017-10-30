@@ -30,6 +30,6 @@ fromExpr expr = case expr of
   Expr.Integer _ x  -> Integer x
   Expr.Decimal _ x  -> Decimal x
   Expr.String  _ x  -> String x
-  Expr.Atom    _ x  -> Symbol x
+  Expr.Symbol  _ x  -> Symbol x
   Expr.List    _ xs -> List $ fromExpr <$> xs
   Expr.Vector  _ xs -> Vector $ fromExpr <$> xs

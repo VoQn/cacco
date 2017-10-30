@@ -10,10 +10,10 @@ data Type
   | TyInt32
   | TyInt64
   | TyInteger
-  | TyWord8
-  | TyWord16
-  | TyWord32
-  | TyWord64
+  | TyUint8
+  | TyUint16
+  | TyUint32
+  | TyUint64
   | TyNat
   | TyFloat16
   | TyFloat32
@@ -33,10 +33,10 @@ instance Show Type where
   show TyInt64   = "Int64"
   show TyInteger = "Integer"
 
-  show TyWord8  = "Word8"
-  show TyWord16 = "Word16"
-  show TyWord32 = "Word32"
-  show TyWord64 = "Word64"
+  show TyUint8  = "Uint8"
+  show TyUint16 = "Uint16"
+  show TyUint32 = "Uint32"
+  show TyUint64 = "Uint64"
   show TyNat    = "Nat"
 
   show TyFloat16 = "Float16"

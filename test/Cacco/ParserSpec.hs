@@ -68,6 +68,14 @@ parseExprSpec = describe "Cacco.Parser.parseExpr" $ do
         , Ast.Integer 2
         ])
 
+  it "can parse \"(+ +1 -2)\"" $
+    testParse "(+ +1 -2)" `shouldBe` Right
+       (Ast.List
+        [ Ast.Symbol "+"
+        , Ast.Integer 1
+        , Ast.Integer (-2)
+        ])
+
   it "can parse expression with ignoreing line comments" $
     testParse ";; if this comments didn't ignore, this test case was failed.\ntrue"
       `shouldBe` Right (Ast.Boolean True)

@@ -27,7 +27,7 @@ data Expr
   -- | String literal
   | String Location Text
   -- | Variable or Constant symbol
-  | Atom Location Name
+  | Symbol Location Name
 
   -- Collections
   -- | List
@@ -43,7 +43,7 @@ instance Show Expr where
     Integer   l x  -> "Integer " <> show x <> " (" <> show l <> ")"
     Decimal   l x  -> "Decimal " <> show x <> " (" <> show l <> ")"
     String    l x  -> "String " <> show x <> " (" <> show l <> ")"
-    Atom      l x  -> "Symbol " <> x <> " (" <> show l <> ")"
+    Symbol    l x  -> "Symbol " <> x <> " (" <> show l <> ")"
     List      l xs -> "(" <> unwords (show <$> xs) <> ") (" <> show l <> ")"
     Vector    l xs -> "[" <> unwords (show <$> xs) <> "] (" <> show l <> ")"
 
@@ -54,6 +54,6 @@ instance HasLocation Expr where
     Integer   l _ -> l
     Decimal   l _ -> l
     String    l _ -> l
-    Atom      l _ -> l
+    Symbol    l _ -> l
     List      l _ -> l
     Vector    l _ -> l

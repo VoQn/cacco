@@ -27,7 +27,7 @@ doInfer :: Env -> STRef s VarInfo -> Expr -> ST s Type
 doInfer _ _ (Boolean _ _) = return TyBool
 doInfer _ _ (Integer _ _) = return TyInteger
 doInfer _ _ (Decimal _ _) = return TyDecimal
-doInfer env _ (Atom _ n) =
+doInfer env _ (Symbol _ n) =
   case Map.lookup n env of
     Just t  -> return t
     Nothing -> error ("not found: " <> n)
