@@ -6,35 +6,19 @@ module Cacco.Parser
 
 import           Control.Applicative  ((*>), (<*))
 import           Data.Text            (Text)
-import           Text.Megaparsec      (Dec, ParseError, Token, choice,
-                                       digitChar, eof, letterChar, many, oneOf,
-                                       parse, sepEndBy, try, (<|>))
+import           Text.Megaparsec      (Dec, ParseError, Token, choice, eof,
+                                       many, parse, sepEndBy, try)
 import           Text.Megaparsec.Text (Parser)
 
 import           Cacco.Expr
 import qualified Cacco.Expr           as Expr
-import           Cacco.Lexer          (spaceConsumer)
+import           Cacco.Lexer          (lexeme, spaceConsumer)
 import qualified Cacco.Lexer          as Lexer
 import           Cacco.Location       ()
 
-symbolChar :: Parser Char
-symbolChar = oneOf "!@#$%^&*_+-=|:<>?/"
-
-identFirst :: Parser Char
-identFirst = letterChar <|> symbolChar
-
-identTail :: Parser String
-identTail = many (letterChar <|> digitChar <|> symbolChar)
-
-identifier :: Parser String
-identifier = do
-  x <- identFirst
-  xs <- identTail
-  return (x:xs)
-
 symbol :: Parser Expr
 symbol = do
-  (x, l) <- Lexer.withLocation identifier
+  (x, l) <- Lexer.withLocation Lexer.identifier
   return $ case x of
     "true"      -> Expr.Boolean l True
     "false"     -> Expr.Boolean l False
@@ -59,22 +43,28 @@ atom = choice [try decimal, try integer, string, symbol]
 
 list :: Parser Expr
 list = do
-    (exprs, l) <- Lexer.withLocation $ Lexer.parens (form `sepEndBy` spaceConsumer)
+    (exprs, l) <- Lexer.withLocation $ Lexer.parens elements
     return $ Expr.List l exprs
+  where
+    elements :: Parser [Expr]
+    elements = form `sepEndBy` spaceConsumer
 
 form :: Parser Expr
-form = spaceConsumer *> choice [list, atom]
+form = lexeme $ choice [list, atom]
 
 contents :: Parser a -> Parser a
-contents = (spaceConsumer *>) . (<* eof)
+contents parser = spaceConsumer *> parser <* eof
 
 topLevel :: Parser [Expr]
 topLevel = many form
 
-parseExpr :: String -> Text -> Either (ParseError (Token Text) Dec) Expr
+type SourceName = String
+type SourceCode = Text
+
+parseExpr :: SourceName -> SourceCode -> Either (ParseError (Token Text) Dec) Expr
 parseExpr []   = parseExpr "<stdin>"
 parseExpr name = parse (contents form) name
 
-parseTopLevel :: String -> Text -> Either (ParseError (Token Text) Dec) [Expr]
+parseTopLevel :: SourceName -> SourceCode -> Either (ParseError (Token Text) Dec) [Expr]
 parseTopLevel []   = parseTopLevel "<stdin>"
 parseTopLevel name = parse (contents topLevel) name

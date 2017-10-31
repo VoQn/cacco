@@ -10,16 +10,20 @@ module Cacco.Lexer
   , integer
   , decimal
   , stringLiteral
+  , identifier
   ) where
 
+import           Control.Applicative   ((<*>))
 import           Data.Bits             (shiftL)
 import           Data.Functor          (void, ($>))
 import           Data.List             (foldl')
 import           Data.Scientific       (Scientific)
 import           Data.Text             (Text)
 import qualified Data.Text             as T
-import           Text.Megaparsec       (between, char, choice, getPosition,
-                                        manyTill, some, spaceChar, try, (<|>))
+import           Text.Megaparsec       (between, char, choice, digitChar,
+                                        getPosition, letterChar, many, manyTill,
+                                        oneOf, option, some, spaceChar, try,
+                                        (<?>), (<|>))
 import qualified Text.Megaparsec.Lexer as L
 import           Text.Megaparsec.Text  (Parser)
 
@@ -29,16 +33,16 @@ import qualified Cacco.Location        as Location
 -- | Skipping space characters and comments.
 spaceConsumer :: Parser ()
 spaceConsumer = L.space skipSpace skipLineComment skipBlockComment
-    where
-      -- | Ignore a space-characters.
-      skipSpace :: Parser ()
-      skipSpace = void spaceChar
-      -- | Ignore single line comment.
-      skipLineComment :: Parser ()
-      skipLineComment = L.skipLineComment ";;"
-      -- | Ignore nested block comment.
-      skipBlockComment :: Parser ()
-      skipBlockComment = L.skipBlockCommentNested ";/" "/;"
+  where
+    -- | Ignore a space-characters.
+    skipSpace :: Parser ()
+    skipSpace = void spaceChar
+    -- | Ignore single line comment.
+    skipLineComment :: Parser ()
+    skipLineComment = L.skipLineComment ";;"
+    -- | Ignore nested block comment.
+    skipBlockComment :: Parser ()
+    skipBlockComment = L.skipBlockCommentNested ";/" "/;"
 
 -- | Make parser to ignore any space and comment expressions
 lexeme :: Parser a -> Parser a
@@ -49,16 +53,16 @@ symbol :: String -> Parser String
 symbol = L.symbol spaceConsumer
 
 parens :: Parser a -> Parser a
-parens = between (symbol "(") (symbol ")")
+parens = symbol "(" `between` symbol ")"
 
 braces :: Parser a -> Parser a
-braces = between (symbol "{") (symbol "}")
+braces = symbol "{" `between` symbol "}"
 
 angles :: Parser a -> Parser a
-angles = between (symbol "<") (symbol ">")
+angles = symbol "<" `between` symbol ">"
 
 brackets :: Parser a -> Parser a
-brackets = between (symbol "[") (symbol "]")
+brackets = symbol "[" `between` symbol "]"
 
 -- | Capture token's position range.
 withLocation :: Parser a -> Parser (a, Location)
@@ -70,11 +74,10 @@ withLocation parser = do
 
 -- | Parse a number with sign
 withSign :: Num a => Parser a -> Parser a
-withSign parser = do
-    f <- minus <|> plus <|> return id
-    x <- parser
-    return $ f x
+withSign parser = sign <*> parser
   where
+    sign :: Num a => Parser (a -> a)
+    sign = option id (minus <|> plus)
     minus :: Num a => Parser (a -> a)
     minus = char '-' $> negate
     plus :: Num a => Parser (a -> a)
@@ -82,7 +85,7 @@ withSign parser = do
 
 -- | Parse a integer number.
 integer :: Parser Integer
-integer = try positionalNotation <|> withSign L.integer
+integer = try positionalNotation <|> withSign L.integer <?> "integer number"
   where
     -- | Parse a integer with prefix for positional notation.
     positionalNotation :: Parser Integer
@@ -95,10 +98,7 @@ integer = try positionalNotation <|> withSign L.integer
     octal = char 'o' >> L.octal
     -- | Parse a binary integer with prefix 'b' (e.g. b101010)
     binary :: Parser Integer
-    binary = do
-      _  <- char 'b'
-      bs <- some $ zero <|> one
-      return $ foldl' bitOp 0 bs
+    binary = foldl' bitOp 0 <$> (char 'b' >> some (zero <|> one))
     -- | Parse '0' as a boolean
     zero :: Parser Bool
     zero = char '0' $> False
@@ -114,11 +114,21 @@ integer = try positionalNotation <|> withSign L.integer
 
 -- | Parse a floating point number.
 decimal :: Parser Scientific
-decimal = withSign L.scientific
+decimal = withSign L.scientific <?> "floating point number"
 
 -- | Parse a Unicode text.
 stringLiteral :: Parser Text
-stringLiteral = do
-  _   <- char '"'
-  cs <- manyTill L.charLiteral $ char '"'
-  return $ T.pack cs
+stringLiteral = T.pack <$> string <?> "string literal"
+  where
+    string = char '"' >> L.charLiteral `manyTill` char '"'
+
+symbolChar :: Parser Char
+symbolChar = oneOf "!@#$%^&*_+-=|:<>?/"
+
+identifier :: Parser String
+identifier = (:) <$> initialChar <*> many tailChar
+  where
+    initialChar :: Parser Char
+    initialChar = letterChar <|> symbolChar
+    tailChar :: Parser Char
+    tailChar = letterChar <|> digitChar <|> symbolChar
