@@ -118,9 +118,8 @@ decimal :: Parser Scientific
 decimal = withSign float <?> "floating point number"
   where
     float :: Parser Scientific
-    float = lookAhead (try $ digits >> char '.') >> L.scientific
-    digits :: Parser String
-    digits = some $ digitChar
+    float = lookAhead foresee >> L.scientific
+    foresee = try $ (some digitChar) >> (char '.' <|> char 'e')
 
 -- | Parse a Unicode text.
 stringLiteral :: Parser Text

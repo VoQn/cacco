@@ -81,16 +81,19 @@ decimalParserSpec = describe "Cacco.Lexer.decimal" $ do
 
   it "can parse 0.0" $
     parseTest "0.0" `shouldBe` Right (fromFloatDigits (0.0 :: Double))
-
+  --
   it "can parse 0.01" $
     parseTest "0.01" `shouldBe` Right (fromFloatDigits (0.01 :: Double))
-
+  --
   it "can parse 1.0" $
     parseTest "1.0" `shouldBe` Right (fromFloatDigits (1.0 :: Double))
-
+  --
   it "can parse -10.5" $
     parseTest "-10.5" `shouldBe` Right (fromFloatDigits ((-10.5) :: Double))
-
+  --
+  it "can parse 1e+5" $
+    parseTest "1e+5" `shouldBe` Right (fromFloatDigits (1e+5 :: Double))
+  --
 stringLiteralParserSpec :: Spec
 stringLiteralParserSpec = describe "Cacco.Lexer.stringLiteral" $ do
   let parseTest = parse Lexer.stringLiteral "test"
