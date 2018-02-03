@@ -1,35 +1,25 @@
 module Cacco.Ast
   ( Ast(..)
-  , fromExpr
+  , pureAst
   ) where
 
-import           Data.Functor    ((<$>))
-import           Data.Scientific (Scientific)
-import           Data.Text       (Text)
-import           Data.Typeable   (Typeable)
+import           Data.Functor  ((<$>))
+import           Data.Typeable (Typeable)
+import           Cacco.Literal (Literal)
 
-import           Cacco.Expr      (Expr)
-import qualified Cacco.Expr      as Expr
-
-data Ast
+data Ast a
   -- | Undefined literal
-  = Undefined
-  | Boolean Bool
-  | Integer Integer
-  | Decimal Scientific
-  | String  Text
+  = Literal Literal
   | Symbol  String
-  | List    [Ast]
-  | Vector  [Ast]
+  | List    [Ast a]
+  | Vector  [Ast a]
+  | With    a (Ast a)
   deriving (Eq, Ord, Show, Typeable)
 
-fromExpr :: Expr -> Ast
-fromExpr expr = case expr of
-  Expr.Undef   _    -> Undefined
-  Expr.Boolean _ x  -> Boolean x
-  Expr.Integer _ x  -> Integer x
-  Expr.Decimal _ x  -> Decimal x
-  Expr.String  _ x  -> String x
-  Expr.Symbol  _ x  -> Symbol x
-  Expr.List    _ xs -> List $ fromExpr <$> xs
-  Expr.Vector  _ xs -> Vector $ fromExpr <$> xs
+pureAst :: Ast a -> Ast a
+pureAst x = case x of
+  (Literal _) -> x
+  (Symbol  _) -> x
+  (With _  y) -> pureAst y
+  (List   xs) -> List $ pureAst <$> xs
+  (Vector xs) -> Vector $ pureAst <$> xs

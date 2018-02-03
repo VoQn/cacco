@@ -1,5 +1,8 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Cacco.Lexer
-  ( spaceConsumer
+  ( Parser
+  , spaceConsumer
   , lexeme
   , withLocation
   , symbol
@@ -13,43 +16,40 @@ module Cacco.Lexer
   , identifier
   ) where
 
-import           Control.Applicative   ((<*>))
-import           Data.Bits             (shiftL)
-import           Data.Functor          (void, ($>))
-import           Data.List             (foldl')
-import           Data.Scientific       (Scientific)
-import           Data.Text             (Text)
-import qualified Data.Text             as T
-import           Text.Megaparsec       (between, char, choice, digitChar,
-                                        getPosition, letterChar, many, manyTill,
-                                        oneOf, option, some, spaceChar, try,
-                                        (<?>), (<|>))
-import qualified Text.Megaparsec.Lexer as L
-import           Text.Megaparsec.Text  (Parser)
+import           Control.Applicative        ((<*>))
+import           Data.Bits                  (shiftL)
+import           Data.Functor               (($>))
+import           Data.List                  (foldl')
+import           Data.Scientific            (Scientific)
+import           Data.Text                  (Text)
+import qualified Data.Text                  as T
+import           Data.Void                  (Void)
+import           Text.Megaparsec
+import           Text.Megaparsec.Char       hiding (symbolChar)
+import qualified Text.Megaparsec.Char.Lexer as L
 
-import           Cacco.Location        (Location (..))
-import qualified Cacco.Location        as Location
+import           Cacco.Location             (Location (..))
+import qualified Cacco.Location             as Location
+
+type Parser = Parsec Void Text
 
 -- | Skipping space characters and comments.
 spaceConsumer :: Parser ()
-spaceConsumer = L.space skipSpace skipLineComment skipBlockComment
+spaceConsumer = L.space space1 lineComment blockComment
   where
-    -- | Ignore a space-characters.
-    skipSpace :: Parser ()
-    skipSpace = void spaceChar
     -- | Ignore single line comment.
-    skipLineComment :: Parser ()
-    skipLineComment = L.skipLineComment ";;"
+    lineComment :: Parser ()
+    lineComment = L.skipLineComment ";;"
     -- | Ignore nested block comment.
-    skipBlockComment :: Parser ()
-    skipBlockComment = L.skipBlockCommentNested ";/" "/;"
+    blockComment :: Parser ()
+    blockComment = L.skipBlockCommentNested ";/" "/;"
 
 -- | Make parser to ignore any space and comment expressions
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme spaceConsumer
 
 -- | Make specified string to token parser
-symbol :: String -> Parser String
+symbol :: Text -> Parser Text
 symbol = L.symbol spaceConsumer
 
 parens :: Parser a -> Parser a
@@ -69,7 +69,8 @@ withLocation :: Parser a -> Parser (a, Location)
 withLocation parser = do
   b <- getPosition
   v <- parser
-  let l = Location.fromSourcePos b
+  e <- getPosition
+  let l = Location.fromSourcePos b e
   return (v, l)
 
 -- | Parse a number with sign
@@ -85,8 +86,10 @@ withSign parser = sign <*> parser
 
 -- | Parse a integer number.
 integer :: Parser Integer
-integer = try positionalNotation <|> withSign L.integer <?> "integer number"
+integer = try positionalNotation <|> naiveInteger <?> "integer number"
   where
+    naiveInteger :: Parser Integer
+    naiveInteger = withSign L.decimal
     -- | Parse a integer with prefix for positional notation.
     positionalNotation :: Parser Integer
     positionalNotation = char '0' >> choice [hexadecimal, octal, binary]
@@ -118,12 +121,12 @@ decimal = withSign L.scientific <?> "floating point number"
 
 -- | Parse a Unicode text.
 stringLiteral :: Parser Text
-stringLiteral = T.pack <$> string <?> "string literal"
+stringLiteral = T.pack <$> quoted <?> "string literal"
   where
-    string = char '"' >> L.charLiteral `manyTill` char '"'
+    quoted = char '"' >> L.charLiteral `manyTill` char '"'
 
 symbolChar :: Parser Char
-symbolChar = oneOf "!@#$%^&*_+-=|:<>?/"
+symbolChar = oneOf ("!@#$%^&*_+-=|:<>?/" :: String)
 
 identifier :: Parser String
 identifier = (:) <$> initialChar <*> many tailChar

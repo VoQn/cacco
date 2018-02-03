@@ -3,63 +3,92 @@
 
 module Cacco.Location
   ( Location(..)
-  , HasLocation(..)
   , sourceName
-  , line
-  , column
+  , startLine
+  , startColumn
+  , endLine
+  , endColumn
   , initLocation
   , fromSourcePos
+  , toPostions
   ) where
 
-import           Control.Lens        (makeLenses, (^.))
+import           Cacco.Position      (Position)
+import qualified Cacco.Position      as P
+import           Control.Lens        (makeLenses, (&), (.~), (^.))
 import           Data.Monoid         ((<>))
 import           Data.Typeable       (Typeable)
 import           Text.Megaparsec.Pos (SourcePos)
-import qualified Text.Megaparsec.Pos as Pos
+-- import qualified Text.Megaparsec.Pos as Pos
 
 -- | The abstract data type @Location@ hints source positions.
 data Location = Location
   { -- | the name of the source-file or input.
-    _sourceName :: FilePath,
-    -- | the line number in the source-file or input.
-    _line       :: Word,
-    -- | the column number in the source-file or input.
-    _column     :: Word
+    _sourceName  :: FilePath,
+    -- | the start line number in the source-file or input.
+    _startLine   :: Word,
+    -- | the start column number in the source-file or input.
+    _startColumn :: Word,
+    -- | the end line number in the source-file or input.
+    _endLine     :: Word,
+    -- | the end column number in the source-file or input.
+    _endColumn   :: Word
   } deriving (Eq, Typeable)
 
 makeLenses ''Location
 
-class HasLocation a where
-  getLocation :: a -> Location
-
-instance HasLocation Location where
-  getLocation = id
-
 initLocation :: Location
-initLocation = Location{ _sourceName = "", _line = 1, _column = 1}
+initLocation = Location{
+  _sourceName = "",
+  _startLine = 1,
+  _startColumn = 1,
+  _endLine = 1,
+  _endColumn = 1
+  }
 
 -- | Convert from two @SourcePos@ to @Location@.
-fromSourcePos :: SourcePos -> Location
-fromSourcePos p =
+fromSourcePos :: SourcePos -> SourcePos -> Location
+fromSourcePos s e =
   let
-    n = Pos.sourceName p
-    l = Pos.unPos $ Pos.sourceLine p
-    c = Pos.unPos $ Pos.sourceColumn p
+    startPos = P.fromSourcePos s
+    endPos = P.fromSourcePos e
   in
-    Location { _sourceName = n, _line = l, _column = c }
+    Location {
+      _sourceName = startPos ^. P.sourceName,
+      _startLine = startPos ^. P.line,
+      _startColumn = startPos ^. P.column,
+      _endLine = endPos ^. P.line,
+      _endColumn = endPos ^. P.column
+      }
 
-instance Ord Location where
-  compare Location{_sourceName = n1, _line = l1, _column = c1}
-          Location{_sourceName = n2, _line = l2, _column = c2}
-    | n1 /= n2  = n1 `compare` n2
-    | l1 /= l2  = l1 `compare` l2
-    | otherwise = c1 `compare` c2
+toPostions :: Location -> (Position, Position)
+toPostions Location {
+    _sourceName  = n,
+    _startLine   = sl,
+    _startColumn = sc,
+    _endLine     = el,
+    _endColumn   = ec
+  } =
+  let
+    s = P.initPosition
+        & P.sourceName .~ n
+        & P.line .~ sl
+        & P.column .~ sc
+    e = P.initPosition
+        & P.sourceName .~ n
+        & P.line .~ el
+        & P.column .~ ec
+  in (s, e)
 
 instance Show Location where
-  show location =
+  show Location {
+    _sourceName  = n,
+    _startLine   = sl,
+    _startColumn = sc,
+    _endLine     = el,
+    _endColumn   = ec
+  } =
     let
-      n = location ^. sourceName
-      l = show $ location ^. line
-      c = show $ location ^. column
+      n' = if n == "" then "(unknown)" else n
     in
-      (if n == "" then "(unknown)" else n) <> ":" <> l <> "," <> c
+      "(" <> n' <> ":" <> show sl <> "," <> show sc <> "-" <> show el <> "," <> show ec <> ")"
