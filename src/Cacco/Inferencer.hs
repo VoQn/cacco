@@ -7,27 +7,34 @@ import           Control.Monad.ST (ST, runST)
 import           Data.Map         (Map)
 import qualified Data.Map         as Map
 import           Data.Monoid      ((<>))
-import           Data.STRef       (STRef, newSTRef, readSTRef, writeSTRef)
+import           Data.STRef       (STRef, newSTRef, readSTRef)
 
-import           Cacco.Expr
+import           Cacco.Ast
+import qualified Cacco.Literal    as Literal
+-- import           Cacco.Expr
+import           Cacco.Location
 import           Cacco.Type
 
 type Env = Map String Type
 
 type VarInfo = (Int, Map Int Type)
 
-infer :: [(String, Type)] -> Expr -> Type
+infer :: [(String, Type)] -> Ast Location -> Type
 infer env expr = runST $ do
   varInfoRef <- newSTRef (0, Map.empty)
   t <- doInfer (Map.fromList env) varInfoRef expr
   (_, varDict) <- readSTRef varInfoRef
   return $ refer t varDict
 
-doInfer :: Env -> STRef s VarInfo -> Expr -> ST s Type
-doInfer _ _ (Boolean _ _) = return TyBool
-doInfer _ _ (Integer _ _) = return TyInteger
-doInfer _ _ (Decimal _ _) = return TyDecimal
-doInfer env _ (Symbol _ n) =
+doInfer :: Env -> STRef s VarInfo -> Ast Location -> ST s Type
+doInfer _ _ (Literal x) = case x of
+  (Literal.Boolean _) -> return TyBool
+  (Literal.Integer _) -> return TyInteger
+  (Literal.Decimal _) -> return TyDecimal
+
+doInfer env ref (With _ l@(Literal _)) = doInfer env ref l
+
+doInfer env _ (With _ (Symbol n)) =
   case Map.lookup n env of
     Just t  -> return t
     Nothing -> error ("not found: " <> n)
