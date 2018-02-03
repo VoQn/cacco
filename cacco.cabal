@@ -20,8 +20,9 @@ library
     -Wall
   exposed-modules:
       Lib
+    , Cacco.Literal
+    , Cacco.Position
     , Cacco.Location
-    , Cacco.Expr
     , Cacco.Ast
     , Cacco.Lexer
     , Cacco.Parser
@@ -34,7 +35,7 @@ library
     , containers >= 0.5 && < 0.6
     , text >= 1.2 && < 2
     , scientific >= 0.3 && < 0.4
-    , megaparsec >= 5.2 && < 6
+    , megaparsec >= 6 && < 7
     , lens >= 4.15 && < 4.16
     , haskeline >= 0.7 && < 0.8
 
@@ -67,8 +68,8 @@ test-suite test
     , lens
     , cacco
   other-modules:
-      Cacco.LocationSpec
-    , Cacco.ExprSpec
+      Cacco.PositionSpec
+    , Cacco.LiteralSpec
     , Cacco.LexerSpec
     , Cacco.ParserSpec
   ghc-options:
