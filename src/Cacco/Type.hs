@@ -51,8 +51,8 @@ instance Show Type where
       pp :: [Type] -> String
       pp [fun@(TyFunc _ _)]    = "(" <> show fun <> ")"
       pp (fun@(TyFunc _ _):ts) = "(" <> show fun <> ") -> " <> pp ts
-      pp (t:ts)                = show t <> " -> " <> pp ts
       pp [t]                   = show t
+      pp (t:ts)                = show t <> " -> " <> pp ts
       pp []                    = ""
 
 data TypeSchema = TypeSchema [Int] Type
