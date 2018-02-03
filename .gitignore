@@ -8,6 +8,9 @@ dist/*
 .hpc/*
 *.tix
 
+*.hi
+*.o
+
 # Misc
 .direnv
 .vscode/*
