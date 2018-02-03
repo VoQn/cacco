@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Cacco.Literal
   ( Literal(..)
   ) where

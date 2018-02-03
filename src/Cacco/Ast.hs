@@ -1,11 +1,13 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Cacco.Ast
   ( Ast(..)
   , pureAst
   ) where
 
+import           Cacco.Literal (Literal)
 import           Data.Functor  ((<$>))
 import           Data.Typeable (Typeable)
-import           Cacco.Literal (Literal)
 
 data Ast a
   -- | Undefined literal

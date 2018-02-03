@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Cacco.Type where
 
 import           Data.Monoid ((<>))
