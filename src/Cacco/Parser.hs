@@ -37,7 +37,7 @@ decimal :: Parser Literal
 decimal = Lit.Decimal <$> Lexer.decimal <?> "decimal literal"
 
 numeric :: Parser Literal
-numeric = try integer <|> decimal
+numeric = try decimal <|> integer
 
 text :: Parser Literal
 text = Lit.Text <$> Lexer.stringLiteral

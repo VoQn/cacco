@@ -86,10 +86,8 @@ withSign parser = sign <*> parser
 
 -- | Parse a integer number.
 integer :: Parser Integer
-integer = try positionalNotation <|> naiveInteger <?> "integer number"
+integer = try positionalNotation <|> withSign L.decimal <?> "integer number"
   where
-    naiveInteger :: Parser Integer
-    naiveInteger = withSign L.decimal
     -- | Parse a integer with prefix for positional notation.
     positionalNotation :: Parser Integer
     positionalNotation = char '0' >> choice [hexadecimal, octal, binary]
@@ -117,7 +115,12 @@ integer = try positionalNotation <|> naiveInteger <?> "integer number"
 
 -- | Parse a floating point number.
 decimal :: Parser Scientific
-decimal = withSign L.scientific <?> "floating point number"
+decimal = withSign float <?> "floating point number"
+  where
+    float :: Parser Scientific
+    float = lookAhead (try $ digits >> char '.') >> L.scientific
+    digits :: Parser String
+    digits = some $ digitChar
 
 -- | Parse a Unicode text.
 stringLiteral :: Parser Text
