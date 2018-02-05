@@ -42,7 +42,7 @@ spaceConsumer = L.space space1 lineComment blockComment
     lineComment = L.skipLineComment ";;"
     -- | Ignore nested block comment.
     blockComment :: Parser ()
-    blockComment = L.skipBlockCommentNested ";/" "/;"
+    blockComment = L.skipBlockCommentNested "(;" ";)"
 
 -- | Make parser to ignore any space and comment expressions
 lexeme :: Parser a -> Parser a

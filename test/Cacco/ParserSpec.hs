@@ -113,5 +113,5 @@ parseExprSpec = describe "Cacco.Parser.parseExpr" $ do
       `shouldBe` Right (Ast.Literal $ Lit.Boolean True)
 
   it "can parse expression with ignoreing block comments" $
-    testParse ";/ if this comments didn't ignore, this test case was failed. /;\ntrue"
+    testParse "(; if this comments didn't ignore, this test case was failed. ;)\ntrue"
       `shouldBe` Right (Ast.Literal $ Lit.Boolean True)

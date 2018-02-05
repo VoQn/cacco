@@ -15,15 +15,15 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 ----
 ;; This is inline comment (to the end of the line).
 
-;/ This is block comment. ;;<1>
-   block comment is keeping until the terminator -> /; ;;<2>
+(; This is block comment. <1>
+   block comment is keeping until the terminator -> ;) <2>
 
-;/
-  ;/ These block comments can be nested. /; ;;<3>
-/;
+(;
+  (; These block comments can be nested. ;) <3>
+;)
 ----
-<1> `;/` is the start of block comment
-<2> `/;` is the end of block comment
+<1> `(;` is the start of block comment
+<2> `;)` is the end of block comment
 <3> Block comments can be nested
 
 [[literals]]
