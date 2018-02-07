@@ -33,7 +33,7 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 -1 +1 ;; Fuzzy Integer.  (default: Integer)
 0.0   ;; Fuzyy Decimal.  (default: Decimal)
 1/2   ;; Rational.
-'a'   ;; Charactor.      (same as Word32)
+'a'   ;; Charactor.      (same as Uint32)
 ""    ;; Fuzzy Text.     (default: String_UTF8)
 :key  ;; Keyword.
 []    ;; Fuzzy Sequence. (default: List)
@@ -43,7 +43,7 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 |===
 |Fuzzy Types    | Include Types
 
-|Fuzzy_Numeric  | Uint8, Uint16, Uint32, Uint64, Nat, and Fuzzy_Integer
+|Fuzzy_Numeric  | Uint8, Uint16, Uint32, Uint64, Natural, and Fuzzy_Integer
 |Fuzzy_Integer  | Int8, Int16, Int32, Int64, Integer, and Fuzzy_Decimal
 |Fuzzy_Decimal  | Float16, Float32, Float64, Flonum
 |Fuzzy_Text     | Bytes, String_UTF8, String_UTF16, String_UTF32
@@ -63,7 +63,7 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 (var y 0)
 
 ;; Strictly typing with literal.
-(val z (as 0 Word8))
+(val z (as 0 Uint8))
 (var w (as "something" Bytes))
 
 ;; Reassign
