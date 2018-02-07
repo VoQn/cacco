@@ -11,7 +11,6 @@ import           Data.STRef       (STRef, newSTRef, readSTRef)
 
 import           Cacco.Ast
 import qualified Cacco.Literal    as Literal
--- import           Cacco.Expr
 import           Cacco.Location
 import           Cacco.Type
 
