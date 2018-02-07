@@ -8,8 +8,7 @@ module Cacco.Parser
 
 import           Cacco.Ast           (Ast)
 import qualified Cacco.Ast           as Ast
-import           Cacco.Lexer         (Parser, lexeme, parens, spaceConsumer,
-                                      withLocation)
+import           Cacco.Lexer         (Parser, lexeme, parens, spaceConsumer)
 import qualified Cacco.Lexer         as Lexer
 import           Cacco.Literal       (Literal)
 import qualified Cacco.Literal       as Lit
@@ -21,13 +20,20 @@ import           Text.Megaparsec     (Token, choice, eof, many, parse, sepEndBy,
                                       try, (<?>), (<|>))
 import qualified Text.Megaparsec     as Megaparsec
 
+withLocation :: Parser (Ast Location) -> Parser (Ast Location)
+withLocation p = do
+  (x, l) <- Lexer.withLocation p
+  return $ Ast.With l x
+
 undef :: Parser Literal
 undef = (Lexer.symbol "undefined" >> return Lit.Undefined) <?> "undefined"
 
 bool :: Parser Literal
-bool = Lit.Boolean <$> (true <|> false) <?> "boolean"
+bool = Lit.Boolean <$> choice [true, false] <?> "boolean"
   where
+    true :: Parser Bool
     true = Lexer.symbol "true" >> return True
+    false :: Parser Bool
     false = Lexer.symbol "false" >> return False
 
 integer :: Parser Literal
@@ -49,19 +55,13 @@ symbol :: Parser (Ast a)
 symbol = Ast.Symbol <$> Lexer.identifier
 
 atom :: Parser (Ast Location)
-atom = located $ try lit <|> symbol
+atom = withLocation $ try lit <|> symbol
   where
     lit :: Parser (Ast a)
     lit = Ast.Literal <$> literal
-    located :: Parser (Ast Location) -> Parser (Ast Location)
-    located p = do
-      (x, l) <- withLocation p
-      return $ Ast.With l x
 
 list :: Parser (Ast Location)
-list = do
-    (exprs, l) <- withLocation $ parens elements
-    return $ Ast.With l $ Ast.List exprs
+list = withLocation $ Ast.List <$> parens elements
   where
     elements :: Parser [Ast Location]
     elements = form `sepEndBy` spaceConsumer
