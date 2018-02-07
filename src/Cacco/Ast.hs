@@ -12,9 +12,13 @@ import           Data.Typeable (Typeable)
 data Ast a
   -- | Undefined literal
   = Literal Literal
+  -- | Symbol
   | Symbol  String
+  -- | Linked List
   | List    [Ast a]
+  -- | Vector
   | Vector  [Ast a]
+  -- | Ast with something meta data
   | With    a (Ast a)
   deriving (Eq, Ord, Show, Typeable)
 

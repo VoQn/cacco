@@ -1,52 +1,52 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric      #-}
 {-# LANGUAGE TemplateHaskell    #-}
 
 module Cacco.Position where
 
-import           Control.Lens        (makeLenses, (^.))
+import           Control.DeepSeq     (NFData)
+import           Control.Lens        (makeLenses)
+import           Data.Data           (Data)
 import           Data.Monoid         ((<>))
 import           Data.Typeable       (Typeable)
-import           Text.Megaparsec.Pos (SourcePos)
+import           GHC.Generics        (Generic)
+import           Text.Megaparsec.Pos (SourcePos, sourceColumn, sourceLine,
+                                      unPos)
 import qualified Text.Megaparsec.Pos as Pos
 
 -- | The abstract data type @Position@ hints source positions.
 data Position = Position
-  { -- | the name of the source-file or input.
+  { -- | the name of the source-file or input
     _sourceName :: FilePath,
     -- | the line number in the source-file or input.
-    _line       :: Word,
+    _line       :: !Word,
     -- | the column number in the source-file or input.
-    _column     :: Word
-  } deriving (Eq, Typeable)
+    _column     :: !Word
+  } deriving (Eq, Ord, Data, Typeable, Generic)
+
+instance NFData Position
 
 makeLenses ''Position
 
+-- | Constant initial position (line 1, column 1)
 initPosition :: Position
-initPosition = Position { _sourceName = "", _line = 1, _column = 1}
+initPosition = Position { _sourceName = "", _line = 1, _column = 1 }
 
 -- | Convert from two @SourcePos@ to @Position@.
 fromSourcePos :: SourcePos -> Position
 fromSourcePos p =
-  let
-    n = Pos.sourceName p
-    l = fromIntegral $ Pos.unPos $ Pos.sourceLine p
-    c = fromIntegral $ Pos.unPos $ Pos.sourceColumn p
-  in
-    Position { _sourceName = n, _line = l, _column = c }
-
-instance Ord Position where
-  compare Position{_sourceName = n1, _line = l1, _column = c1}
-          Position{_sourceName = n2, _line = l2, _column = c2}
-    | n1 /= n2  = n1 `compare` n2
-    | l1 /= l2  = l1 `compare` l2
-    | otherwise = c1 `compare` c2
+    Position {
+      _sourceName = Pos.sourceName p,
+      _line = fromInt $ sourceLine p,
+      _column = fromInt $ sourceColumn p
+    }
+  where
+    fromInt = fromIntegral . unPos
+    {-# INLINE fromInt #-}
 
 instance Show Position where
-  show x =
-    let
-      n = x ^. sourceName
-      n' = if n == "" then "(unknown)" else n
-      l = show $ x ^. line
-      c = show $ x ^. column
-    in
-      "(" <> n' <> ":" <> l <> "," <> c <> ")"
+  show Position { _sourceName = n, _line = l, _column = c }
+    = let
+        name | n == "" = "(unknown)" | otherwise = n
+      in
+        "(" <> name <> ":" <> show l <> "," <> show c <> ")"
