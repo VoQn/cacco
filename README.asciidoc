@@ -15,16 +15,16 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 ----
 ;; This is inline comment (to the end of the line).
 
-(; This is block comment. <1>
-   block comment is keeping until the terminator -> ;) <2>
+(; <1>
+  This is block comment.
+  block comment is keeping until the terminator -> ;) ;; <2>
 
 (;
-  (; These block comments can be nested. ;) <3>
+  (; These block comments can be nested. ;)
 ;)
 ----
 <1> `(;` is the start of block comment
 <2> `;)` is the end of block comment
-<3> Block comments can be nested
 
 [[literals]]
 === Literals
@@ -125,7 +125,8 @@ stack clean
 stack test
 
 # run test-suites and generate coverage-report
-stack clean && stack test --coverage
+stack test --coverage
+
 # open coverage-report in your browser
 open $(stack path --local-hpc-root)/index.html
 ----
