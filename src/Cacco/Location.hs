@@ -35,7 +35,7 @@ data Location = Location
     _endLine     :: !Word,
     -- | the end column number in the source-file or input.
     _endColumn   :: !Word
-  } deriving (Eq, Typeable, Generic)
+  } deriving (Eq, Ord, Typeable, Generic)
 
 instance NFData Location
 
