@@ -5,6 +5,8 @@ import qualified Data.Text                as T
 import           Control.Monad.Trans
 import           System.Console.Haskeline
 
+import           Cacco.Core               (pretty)
+import           Cacco.Eval               (eval)
 import           Cacco.Parser
 
 process :: String -> IO ()
@@ -12,7 +14,10 @@ process line = do
   let res = parseTopLevel [] $ T.pack line
   case res of
     Left err -> print err
-    Right ex -> mapM_ print ex
+    Right ex -> (`mapM_` ex) $ \e ->
+      case eval e [] of
+        Left err  -> print err
+        Right val -> putStrLn $ pretty val
 
 replLoop :: IO ()
 replLoop = runInputT defaultSettings loop
