@@ -119,7 +119,7 @@ decimal = withSign float <?> "floating point number"
   where
     float :: Parser Scientific
     float = lookAhead foresee >> L.scientific
-    foresee = try $ (some digitChar) >> (char '.' <|> char 'e')
+    foresee = try $ some digitChar >> (char '.' <|> char 'e')
 
 -- | Parse a Unicode text.
 stringLiteral :: Parser Text
