@@ -1,17 +1,17 @@
 module Cacco.Inferencer where
 
-import           Prelude          hiding (lookup)
+import           Prelude    hiding (lookup)
 
-import           Control.Monad.ST (ST, runST)
+-- import           Control.Monad.ST (ST, runST)
 
-import           Data.Map         (Map)
-import qualified Data.Map         as Map
-import           Data.Monoid      ((<>))
-import           Data.STRef       (STRef, newSTRef, readSTRef)
+import           Data.Map   (Map)
+-- import qualified Data.Map         as Map
+-- import           Data.Monoid      ((<>))
+-- import           Data.STRef       (STRef, newSTRef, readSTRef)
 
-import           Cacco.Expr       (AnnExpr, Expr)
-import qualified Cacco.Expr       as Expr
-import           Cacco.Location
+-- import           Cacco.Expr       (AnnExpr, Expr)
+-- import qualified Cacco.Expr       as Expr
+-- import           Cacco.Location
 import           Cacco.Type
 
 type Env = Map String Type
