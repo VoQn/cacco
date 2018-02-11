@@ -2,7 +2,7 @@
 module Cacco.Eval where
 
 import           Cacco.Core     (Env, EvalF, add, eq, mul, sub)
-import           Cacco.Expr     (AnnExpr, ExprF (..), Info (..))
+import           Cacco.Expr     (Annotated, ExprF (..), Info (..))
 import           Cacco.Fix      (fold)
 import qualified Cacco.Literal  as Lit
 import           Cacco.Location (Location)
@@ -38,5 +38,5 @@ evalAcc (Info i (LisF exprs)) = \env ->
 
 evalAcc (Info i _) = const $ Left (show i)
 
-eval :: AnnExpr Location -> Env -> Either String Val
+eval :: Annotated Location -> Env -> Either String Val
 eval = fold evalAcc

@@ -7,7 +7,7 @@ module Cacco.Parser
   , numeric
   ) where
 
-import           Cacco.Expr          (AnnExpr, Expr, ExprF, Info (..))
+import           Cacco.Expr          (Annotated, Expr, ExprF, Info (..))
 import qualified Cacco.Expr          as Expr
 import           Cacco.Fix           (Fix (..))
 import           Cacco.Literal       (Literal (..))
@@ -78,13 +78,13 @@ exprF p = lexeme $ choice
     elements :: Parser a -> Parser [a]
     elements = (`sepEndBy` spaceConsumer)
 
-expr' :: Parser Expr
-expr' = fixParser exprF
+ast :: Parser Expr
+ast = fixParser exprF
 
-expr :: Parser (AnnExpr Location)
-expr = fixParser (withLocation . exprF)
+expr :: Parser (Annotated Location)
+expr = fixParser $ withLocation . exprF
 
-topLevel :: Parser [AnnExpr Location]
+topLevel :: Parser [Annotated Location]
 topLevel = many expr
 
 type SourceName = String
@@ -99,10 +99,10 @@ frontend p []   = frontend p "<stdin>"
 frontend p name = parse (contents p) name
 
 parseAst :: FontendParser Expr
-parseAst = frontend expr'
+parseAst = frontend ast
 
-parseExpr :: FontendParser (AnnExpr Location)
+parseExpr :: FontendParser (Annotated Location)
 parseExpr = frontend expr
 
-parseTopLevel :: FontendParser [AnnExpr Location]
+parseTopLevel :: FontendParser [Annotated Location]
 parseTopLevel = frontend topLevel
