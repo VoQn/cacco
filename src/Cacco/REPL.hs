@@ -5,9 +5,9 @@ import qualified Data.Text                as T
 import           Control.Monad.Trans
 import           System.Console.Haskeline
 
-import           Cacco.Core               (pretty)
 import           Cacco.Eval               (eval)
 import           Cacco.Parser
+import           Cacco.Val                (pretty)
 
 process :: String -> IO ()
 process line = do

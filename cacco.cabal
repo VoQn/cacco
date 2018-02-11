@@ -24,17 +24,22 @@ library
     -Wall
   exposed-modules:
       Lib
-    , Cacco.Literal
     , Cacco.Position
     , Cacco.Location
-    , Cacco.Ast
+    , Cacco.Literal
+    , Cacco.Fix
+    , Cacco.Expr
     , Cacco.Lexer
     , Cacco.Parser
+    , Cacco.Val
+    , Cacco.Core
+    , Cacco.Eval
     , Cacco.REPL
     , Cacco.Type
     , Cacco.Inferencer
   build-depends:
       base >= 4.7 && < 5
+    , vector
     , deepseq >= 1.4 && < 2
     , mtl  >= 2.2 && < 3
     , containers >= 0.5 && < 0.6

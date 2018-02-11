@@ -3,35 +3,8 @@
 module Cacco.Core where
 
 import           Cacco.Location (Location)
+import           Cacco.Val      (Val (..), getLocation, pretty)
 import           Data.Monoid    ((<>))
-
-data Val
-  = ValUnit Location
-  | ValBool !Bool Location
-  | ValInteger !Integer Location
-  | ValSymbol !String Location
-  | ValList [Val] Location
-  deriving (Eq, Ord, Show)
-
-getLocation :: Val -> Location
-getLocation v = case v of
-  ValUnit l      -> l
-  ValBool _ l    -> l
-  ValInteger _ l -> l
-  ValSymbol _ l  -> l
-  ValList _ l    -> l
-
-pretty :: Val -> String
-pretty val = case val of
-  ValUnit _ -> "()"
-  ValBool True _  -> "true"
-  ValBool False _ -> "false"
-  ValInteger x _  -> show x
-  ValSymbol s _   -> s
-  ValList [] _ -> "()"
-  ValList (v : vs) _ -> case v of
-    ValSymbol "list" _ -> "(" <> unwords (pretty <$> vs) <> ")"
-    _                  -> "(" <> unwords (pretty <$> (v:vs)) <> ")"
 
 type Env = [(String, Val)]
 type EvalF = Env -> Either String Val
@@ -72,20 +45,20 @@ eq :: BuiltInFunc
 eq l [] = Left $ arityMismatch l "==" 2 False 0
 eq l [_] = Left $ arityMismatch l "==" 2 False 1
 
-eq l (ValBool x _ : xs) = ValBool <$> acc xs <*> pure l
+eq l (Bool x _ : xs) = Bool <$> acc xs <*> pure l
   where
     acc :: [Val] -> Either String Bool
     acc [] = return True
-    acc (ValBool y _ : ys)
+    acc (Bool y _ : ys)
       | x /= y = return False
       | x == y = acc ys
     acc (a : _) = Left $ typeMismatch "==" "boolean" a
 
-eq l (ValInteger x _ : xs) = ValBool <$> acc xs <*> pure l
+eq l (Integer x _ : xs) = Bool <$> acc xs <*> pure l
   where
     acc :: [Val] -> Either String Bool
     acc [] = return True
-    acc (ValInteger y _ : ys)
+    acc (Integer y _ : ys)
       | x /= y = return False
       | x == y = acc ys
     acc (a : _) = Left $ typeMismatch "==" "integer" a
@@ -94,36 +67,36 @@ eq _ (a : _) = Left $ typeMismatch "==" "boolean" a
 
 add :: BuiltInFunc
 add l [] = Left $ arityMismatch l "+" 1 False 0
-add l (ValInteger x _ : xs) = ValInteger <$> acc x xs <*> pure l
+add l (Integer x _ : xs) = Integer <$> acc x xs <*> pure l
   where
     acc :: Integer -> [Val] -> Either String Integer
     acc !r vs = case vs of
-      []                    -> return r
-      (ValInteger y _ : ys) -> acc (r + y) ys
-      (a:_)                 -> Left $ typeMismatch "+" "numeric" a
+      []                 -> return r
+      (Integer y _ : ys) -> acc (r + y) ys
+      (a:_)              -> Left $ typeMismatch "+" "numeric" a
 add _ (x : _) = Left $ typeMismatch "+" "numeric" x
 
 sub :: BuiltInFunc
 -- arity mismatch
 sub l [] = Left $ arityMismatch l "-" 1 False 0
 -- nenagte
-sub l [ValInteger x _] = return $ ValInteger (-x) l
+sub l [Integer x _] = return $ Integer (-x) l
 -- subtraction
-sub l (ValInteger x _ : rest) = ValInteger <$> acc x rest <*> pure l
+sub l (Integer x _ : rest) = Integer <$> acc x rest <*> pure l
   where
     acc :: Integer -> [Val] -> Either String Integer
-    acc r []                    = return r
-    acc r (ValInteger y _ : ys) = acc (r - y) ys
-    acc _ (a : _)               = Left $ typeMismatch "-" "numeric" a
+    acc r []                 = return r
+    acc r (Integer y _ : ys) = acc (r - y) ys
+    acc _ (a : _)            = Left $ typeMismatch "-" "numeric" a
 -- other case is mismatch types
 sub _ (x : _) = Left $ typeMismatch "-" "numeric" x
 
 mul :: BuiltInFunc
 mul l [] = Left $ arityMismatch l "*" 1 False 0
-mul l (ValInteger x _ : vs) = ValInteger <$> acc x vs <*> pure l
+mul l (Integer x _ : vs) = Integer <$> acc x vs <*> pure l
   where
     acc :: Integer -> [Val] -> Either String Integer
-    acc r []                    = return r
-    acc r (ValInteger y _ : ys) = acc (r * y) ys
-    acc _ (a : _)               = Left $ typeMismatch "*" "numeric" a
+    acc r []                 = return r
+    acc r (Integer y _ : ys) = acc (r * y) ys
+    acc _ (a : _)            = Left $ typeMismatch "*" "numeric" a
 mul _ (a : _) = Left $ typeMismatch "*" "numeric" a
