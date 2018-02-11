@@ -70,10 +70,9 @@ add l [] = Left $ arityMismatch l "+" 1 False 0
 add l (Integer x _ : xs) = Integer <$> acc x xs <*> pure l
   where
     acc :: Integer -> [Val] -> Either String Integer
-    acc !r vs = case vs of
-      []                 -> return r
-      (Integer y _ : ys) -> acc (r + y) ys
-      (a:_)              -> Left $ typeMismatch "+" "numeric" a
+    acc r []                 = return r
+    acc r (Integer y _ : ys) = acc (r + y) ys
+    acc r (a : _)            = Left $ typeMismatch "+" "numeric" a
 add _ (x : _) = Left $ typeMismatch "+" "numeric" x
 
 sub :: BuiltInFunc

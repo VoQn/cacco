@@ -116,7 +116,7 @@ removeAnn (Fix (Info _ expr)) = rm expr
     rm (AppF fn args)     = App (removeAnn fn) (removeAnn <$> args)
     rm (LamF params body) = Fix $ LamF (removeAnn <$> params) (removeAnn body)
 --
-prettyfy :: Expr->  String
+prettyfy :: Expr -> String
 prettyfy Hole = "_"
 prettyfy (Symbol s) = s
 prettyfy (Literal l) = case l of
