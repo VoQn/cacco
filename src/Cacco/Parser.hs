@@ -52,14 +52,11 @@ bool = Bool <$> choice [true, false] <?> "boolean"
     false = Lexer.symbol "false"
           >> return False
 
-integer :: Parser Literal
-integer = Lexer.integer <?> "integer literal"
-
 decimal :: Parser Literal
 decimal = Flonum <$> Lexer.decimal <?> "decimal literal"
 
 numeric :: Parser Literal
-numeric = try decimal <|> integer
+numeric = try decimal <|> Lexer.integer
 
 text :: Parser Literal
 text = Text <$> Lexer.stringLiteral
