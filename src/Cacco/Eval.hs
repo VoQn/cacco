@@ -14,7 +14,7 @@ import           Data.Monoid    ((<>))
 evalAcc :: Info Location ExprF EvalF -> EvalF
 evalAcc (Info i (LitF l)) = lit l
   where
-    lit (Lit.Boolean b) = const $ return $ Bool b i
+    lit (Lit.Bool b)    = const $ return $ Bool b i
     lit (Lit.Integer v) = const $ return $ Integer v i
 
 evalAcc (Info i (SymF s)) = case s of

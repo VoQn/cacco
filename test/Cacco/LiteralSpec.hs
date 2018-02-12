@@ -11,14 +11,14 @@ import           Cacco.Literal    (Literal (..))
 spec_Cacco_Expr :: Spec
 spec_Cacco_Expr =
   describe "instance of Show" $ do
-    it "Undef" $ show Undefined
-      `shouldBe` "Undefined"
+    it "Undef" $ show Undef
+      `shouldBe` "Undef"
 
-    it "True" $ show (Boolean True)
-      `shouldBe` "Boolean True"
+    it "True" $ show (Bool True)
+      `shouldBe` "Bool True"
 
-    it "False" $ show (Boolean False)
-      `shouldBe` "Boolean False"
+    it "False" $ show (Bool False)
+      `shouldBe` "Bool False"
 
     it "1 as Integer" $ show (Integer 1)
       `shouldBe` "Integer 1"

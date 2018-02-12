@@ -14,9 +14,9 @@ import           Data.Word       (Word16, Word32, Word64, Word8)
 import           GHC.Generics    (Generic)
 
 data Literal
-  = Undefined
+  = Undef
   | Unit
-  | Boolean !Bool
+  | Bool !Bool
 
   -- Integers
   -- Signed integers

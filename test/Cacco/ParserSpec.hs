@@ -52,15 +52,15 @@ parseExprSpec = describe "Cacco.Parser.parseExpr" $ do
   --
   it "can parse \"true\"" $
     testParse "true" `shouldBe` Right
-      (Literal $ Boolean True)
+      (Literal $ Bool True)
   --
   it "can parse \"false\"" $
     testParse "false" `shouldBe` Right
-      (Literal $ Boolean False)
+      (Literal $ Bool False)
   --
   it "can parse \"undefined\"" $
     testParse "undefined" `shouldBe` Right
-      (Literal Undefined)
+      (Literal Undef)
   --
   it "can parse \"(dec x Integer)\"" $
     testParse "(dec x Integer)" `shouldBe` Right
@@ -106,9 +106,9 @@ parseExprSpec = describe "Cacco.Parser.parseExpr" $ do
     testParse "(foo true false\n undefined \"hello\" 2)" `shouldBe` Right
       (List
         [ Symbol "foo"
-        , Literal $ Boolean True
-        , Literal $ Boolean False
-        , Literal Undefined
+        , Literal $ Bool True
+        , Literal $ Bool False
+        , Literal Undef
         , Literal $ Text "hello"
         , Literal $ Integer 2
         ])
@@ -123,8 +123,8 @@ parseExprSpec = describe "Cacco.Parser.parseExpr" $ do
   --
   it "can parse expression with ignoreing line comments" $
     testParse ";; if this comments didn't ignore, this test case was failed.\ntrue"
-      `shouldBe` Right (Literal $ Boolean True)
+      `shouldBe` Right (Literal $ Bool True)
 
   it "can parse expression with ignoreing block comments" $
     testParse "(; if this comments didn't ignore, this test case was failed. ;)\ntrue"
-      `shouldBe` Right (Literal $ Boolean True)
+      `shouldBe` Right (Literal $ Bool True)

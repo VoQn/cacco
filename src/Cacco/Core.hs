@@ -72,7 +72,7 @@ add l (Integer x _ : xs) = Integer <$> acc x xs <*> pure l
     acc :: Integer -> [Val] -> Either String Integer
     acc r []                 = return r
     acc r (Integer y _ : ys) = acc (r + y) ys
-    acc r (a : _)            = Left $ typeMismatch "+" "numeric" a
+    acc _ (a : _)            = Left $ typeMismatch "+" "numeric" a
 add _ (x : _) = Left $ typeMismatch "+" "numeric" x
 
 sub :: BuiltInFunc

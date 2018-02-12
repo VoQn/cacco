@@ -40,10 +40,10 @@ withLocation p = do
   return $ Info l x
 
 undef :: Parser Literal
-undef = Lexer.symbol "undefined" >> return Undefined <?> "undefined"
+undef = Lexer.symbol "undefined" >> return Undef <?> "undefined"
 
 bool :: Parser Literal
-bool = Boolean <$> choice [true, false] <?> "boolean"
+bool = Bool <$> choice [true, false] <?> "boolean"
   where
     true :: Parser Bool
     true = Lexer.symbol "true"

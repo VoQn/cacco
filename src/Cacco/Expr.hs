@@ -120,12 +120,12 @@ prettyfy :: Expr -> String
 prettyfy Hole = "_"
 prettyfy (Symbol s) = s
 prettyfy (Literal l) = case l of
-  Lit.Undefined     -> "undefined"
-  Lit.Boolean True  -> "true"
-  Lit.Boolean False -> "false"
-  Lit.Integer x     -> show x
-  Lit.Flonum x      -> show x
-  _                 -> undefined
+  Lit.Undef      -> "undefined"
+  Lit.Bool True  -> "true"
+  Lit.Bool False -> "false"
+  Lit.Integer x  -> show x
+  Lit.Flonum x   -> show x
+  _              -> undefined
 prettyfy (List elems) =
   let
     es = prettyfy <$> elems
