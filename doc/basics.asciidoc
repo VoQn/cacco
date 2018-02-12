@@ -1,0 +1,113 @@
+= Basics
+Cacco Language Basics
+v0.1.0, 2018-02-12
+:toc:
+
+[[Syntax]]
+== Syntax
+
+=== Comment
+[source,cacco]
+----
+;; this is single line comment
+
+(; this is block comment ;)
+----
+
+=== Declaration
+
+----
+;; declare a constant value
+(dec x Integer)
+
+;; declare a simple function
+(dec not? (-> Bool Bool))
+
+;; declare a variadic function
+(dec and? (-> Bool Bool ... Bool Bool))
+
+;; declare a generic function
+(dec even? (let: [(i : Integral)] (-> i Bool)))
+----
+
+
+=== Definition
+----
+(def x 10) ;; x is 10 as Integer
+
+;; using pattern match
+(def (not? true) false)
+(def (not? false) true)
+
+;; using pattern match
+(def (and? false _ ... _) false)
+(def (and? _ false ... _) false)
+(def (and? _ _ ... []) true)
+(def (and? _ _ ... rest) (and? ... rest)
+
+(def (even? x) (== (mod x 2) 0))
+----
+
+=== Apply
+----
+(+ 1 2 3 4) ;; 10
+
+(and? true true) ;; true
+(and? true true false) ;; false
+
+(even? 2) ;; true
+(even? 1) ;; false
+----
+
+[[Literals]]
+== Literals and Primitive Types
+
+[[Fuzzy_Types]]
+=== Fuzzy_Type
+
+cacco has `Fuzzy_*` types for literals.
+[%header%, cols=3*]
+|===
+|Expression
+|Fuzzy_Type
+|Default Type
+
+|`0, 0b1010, 0o060, 0xF0A`
+|`Fuzzy_Numeric`|`Natural`
+
+|`-1, +1`
+|`Fuzzy_Integer`|`Integer`
+
+|`0.0, +1.0, -0.5, 1.0e5, 0x1.0p-126`
+|`Fuzzy_Decimal`|`Flonum`
+
+|`"", "Hello", "こんにちは", "你好", "🐟"`
+|`Fuzzy_Text`|`String_UTF8`
+|===
+
+==== Why Fuzzy?
+
+
+
+=== Strict type literals
+
+Of cause, cacco has strict type literals
+
+[cols="2,1,3"]
+|===
+|Expression|Type|Description
+
+|`true, false`|`Bool`|The boolean type
+|`0_i8`|`Int8`|8bit integer
+|`0_i16`|`Int16`|16bit integer
+|`0_i32`|`Int32`|32bit integer
+|`0_i64`|`Int64`|64bit integer
+|`0_u8`|`UInt8`|8bit unsigned integer
+|`0_u16`|`UInt16`|16bit unsigned integer
+|`0_u32`|`UInt32`|32bit unsigned integer
+|`0_u64`|`UInt64`|64bit unsigned integer
+|`0.0_f16`|`Float16`|16bit floating point number (IEEE 754-2008 binary16)
+|`0.0_f32`|`Float32`|32bit floating point number (IEEE 754-2008 binary32)
+|`0.0_f64`|`Float64`|64bit floating point number (IEEE 754-2008 binary64)
+
+|===
