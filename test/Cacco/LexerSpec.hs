@@ -131,9 +131,15 @@ stringLiteralParserSpec = describe "Cacco.Lexer.stringLiteral" $ do
   it "can parse \"\\\"\" as valid string" $
     parseTest "\"\\\"\"" `shouldBe` Right "\""
   --
-  it "can parse \"hello\" as string using ASCII characters" $
+  it "can parse \"hello\"" $
     parseTest "\"hello\"" `shouldBe` Right "hello"
   --
-  it "can parse \"こんにちは\" as string using multi-byte characters" $
+  it "can parse \"こんにちは\"" $
     parseTest "\"こんにちは\"" `shouldBe` Right "こんにちは"
+  --
+  it "can parse \"您好\"" $
+    parseTest "\"您好\"" `shouldBe` Right "您好"
+  --
+  it "can parse \"💯\"" $
+    parseTest "\"💯\"" `shouldBe` Right "💯"
   --
