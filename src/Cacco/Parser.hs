@@ -42,16 +42,6 @@ withLocation p = do
 undef :: Parser Literal
 undef = Lexer.symbol "undefined" >> return Undef <?> "undefined"
 
-bool :: Parser Literal
-bool = Bool <$> choice [true, false] <?> "boolean"
-  where
-    true :: Parser Bool
-    true = Lexer.symbol "true"
-         >> return True
-    false :: Parser Bool
-    false = Lexer.symbol "false"
-          >> return False
-
 decimal :: Parser Literal
 decimal = Flonum <$> Lexer.decimal <?> "decimal literal"
 
@@ -62,7 +52,7 @@ text :: Parser Literal
 text = Text <$> Lexer.stringLiteral
 
 literal :: Parser Literal
-literal = undef <|> bool <|> text <|> numeric
+literal = undef <|> Lexer.bool <|> text <|> numeric
 
 exprF :: Parser a -> Parser (ExprF a)
 exprF p = lexeme $ choice

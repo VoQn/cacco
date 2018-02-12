@@ -7,6 +7,7 @@ module Cacco.Lexer
   , withLocation
   , symbol
   , parens, braces, angles, brackets
+  , bool
   , integer
   , decimal
   , stringLiteral
@@ -81,6 +82,15 @@ withSign parser = sign <*> parser
     minus = char '-' $> negate
     plus :: Num a => Parser (a -> a)
     plus = char '+' $> id
+
+-- | Parse a boolean literal
+bool :: Parser Literal
+bool = Lit.Bool <$> (true <|> false) <?> "boolean literal: true or false"
+  where
+    true :: Parser Bool
+    true = symbol "true" $> True
+    false :: Parser Bool
+    false = symbol "false" $> False
 
 -- | Parse a integer with prefix for positional notation.
 positionalNotation :: Parser Integer
@@ -177,3 +187,4 @@ identifier = (:) <$> initialChar <*> many tailChar
     initialChar = letterChar <|> symbolChar
     tailChar :: Parser Char
     tailChar = letterChar <|> digitChar <|> symbolChar
+
