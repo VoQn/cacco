@@ -6,16 +6,17 @@ module Cacco.Lexer
   , lexeme
   , withLocation
   , symbol
-  , parens
-  , braces
-  , angles
-  , brackets
+  , parens, braces, angles, brackets
   , integer
   , decimal
   , stringLiteral
   , identifier
   ) where
 
+import           Cacco.Literal              (Literal)
+import qualified Cacco.Literal              as Lit
+import           Cacco.Location             (Location (..))
+import qualified Cacco.Location             as Location
 import           Control.Applicative        ((<*>))
 import           Data.Bits                  (shiftL)
 import           Data.Functor               (($>))
@@ -27,9 +28,6 @@ import           Data.Void                  (Void)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char       hiding (symbolChar)
 import qualified Text.Megaparsec.Char.Lexer as L
-
-import           Cacco.Location             (Location (..))
-import qualified Cacco.Location             as Location
 
 type Parser = Parsec Void Text
 
@@ -84,13 +82,10 @@ withSign parser = sign <*> parser
     plus :: Num a => Parser (a -> a)
     plus = char '+' $> id
 
--- | Parse a integer number.
-integer :: Parser Integer
-integer = try positionalNotation <|> withSign L.decimal <?> "integer number"
+-- | Parse a integer with prefix for positional notation.
+positionalNotation :: Parser Integer
+positionalNotation = char '0' >> choice [hexadecimal, octal, binary]
   where
-    -- | Parse a integer with prefix for positional notation.
-    positionalNotation :: Parser Integer
-    positionalNotation = char '0' >> choice [hexadecimal, octal, binary]
     -- | Parse a hexadecimal integer with prefix 'x' (e.g. xFA901)
     hexadecimal :: Parser Integer
     hexadecimal = char 'x' >> L.hexadecimal
@@ -112,6 +107,51 @@ integer = try positionalNotation <|> withSign L.decimal <?> "integer number"
     bitOp 0 True  = 1
     bitOp v False = v `shiftL` 1
     bitOp v True  = v `shiftL` 1 + 1
+
+-- | Parse a integer number with optional signed.
+integer :: Parser Literal
+integer = integer' <?> "integer literal"
+  where
+    integer' :: Parser Literal
+    integer' = do
+      (num, signed) <- try notated <|> decimalInt
+      wrapper       <- option Lit.Integer (suffix signed)
+      return $ wrapper num
+
+    notated :: Parser (Integer, Bool)
+    notated = flip (,) False <$> positionalNotation
+
+    decimalInt :: Parser (Integer, Bool)
+    decimalInt = do
+      (f, s) <- option (id, False) (minus <|> plus)
+      n <- L.decimal
+      return (f n, s)
+
+    minus :: Num a => Parser (a -> a, Bool)
+    minus = char '-' $> (negate, True)
+
+    plus :: Num a => Parser (a -> a, Bool)
+    plus = char '+' $> (id, True)
+
+    suffix :: Bool -> Parser (Integer -> Literal)
+    suffix signed
+      | signed    = char '_' >> signedInt
+      | otherwise = char '_' >> (signedInt <|> unsignedInt)
+
+    signedInt = char 'i' >> choice [i8, i16, i32, i64]
+    unsignedInt = char 'u' >> choice [u8, u16, u32, u64]
+
+    i8, i16, i32, i64 :: Parser (Integer -> Literal)
+    i8  = char '8'    $> (Lit.Int8  . fromInteger)
+    i16 = symbol "16" $> (Lit.Int16 . fromInteger)
+    i32 = symbol "32" $> (Lit.Int32 . fromInteger)
+    i64 = symbol "64" $> (Lit.Int64 . fromInteger)
+
+    u8, u16, u32, u64 :: Parser (Integer -> Literal)
+    u8  = char '8'    $> (Lit.Uint8  . fromInteger)
+    u16 = symbol "16" $> (Lit.Uint16 . fromInteger)
+    u32 = symbol "32" $> (Lit.Uint32 . fromInteger)
+    u64 = symbol "64" $> (Lit.Uint64 . fromInteger)
 
 -- | Parse a floating point number.
 decimal :: Parser Scientific

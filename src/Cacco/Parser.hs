@@ -53,7 +53,7 @@ bool = Bool <$> choice [true, false] <?> "boolean"
           >> return False
 
 integer :: Parser Literal
-integer = Integer <$> Lexer.integer <?> "integer literal"
+integer = Lexer.integer <?> "integer literal"
 
 decimal :: Parser Literal
 decimal = Flonum <$> Lexer.decimal <?> "decimal literal"
