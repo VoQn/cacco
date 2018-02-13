@@ -74,7 +74,6 @@ test-suite test
     , tasty-hspec
     , tasty-quickcheck
     , tasty-smallcheck
-    , hspec-smallcheck
     , megaparsec
     , scientific
     , lens

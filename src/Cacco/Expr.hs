@@ -100,22 +100,18 @@ instance (Functor f, Traversable f) => Traversable (Info i f) where
 
 type Annotated i = Fix (Info i ExprF)
 
-cata :: Functor f
-  => (f a -> a)
-  -> (Fix f -> a)
-cata phi = phi . fmap (cata phi) . out
-
 removeAnn :: Annotated i -> Expr
 removeAnn (Fix (Info _ expr)) = rm expr
   where
     rm HolF               = Hole
     rm (LitF literal)     = Literal literal
     rm (SymF symbol)      = Symbol symbol
-    rm (LisF elements)    = List $ removeAnn <$> elements
-    rm (VecF elements)    = Vector $ removeAnn <$> elements
-    rm (AppF fn args)     = App (removeAnn fn) (removeAnn <$> args)
-    rm (LamF params body) = Fix $ LamF (removeAnn <$> params) (removeAnn body)
+    rm (LisF elements)    = List $ map removeAnn elements
+    rm (VecF elements)    = Vector $ map removeAnn elements
+    rm (AppF fn args)     = App (removeAnn fn) $ map removeAnn args
+    rm (LamF params body) = Lam (map removeAnn params) $ removeAnn body
 --
+
 prettyfy :: Expr -> String
 prettyfy Hole = "_"
 prettyfy (Symbol s) = s
