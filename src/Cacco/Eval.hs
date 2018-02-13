@@ -2,7 +2,7 @@
 module Cacco.Eval where
 
 import           Cacco.Core     (Env, EvalF, add, eq, mul, sub)
-import           Cacco.Expr     (Annotated (..), ExprF (..), Info (..))
+import           Cacco.Expr     (Annotated (..), AstF (..), Expr, Info (..))
 import           Cacco.Fix      (Fix, cata)
 import qualified Cacco.Literal  as Lit
 import           Cacco.Location (Location)
@@ -11,7 +11,7 @@ import           Control.Monad  (sequence)
 import           Data.Function  ((&))
 import           Data.Monoid    ((<>))
 
-evalAcc :: Info Location ExprF EvalF -> EvalF
+evalAcc :: Info Location AstF EvalF -> EvalF
 evalAcc (Info i (LitF l)) = lit l
   where
     lit (Lit.Bool b)    = const $ return $ Bool b i
@@ -38,5 +38,5 @@ evalAcc (Info i (LisF exprs)) = \env ->
 
 evalAcc (Info i _) = const $ Left (show i)
 
-eval :: Fix (Annotated Location) -> Env -> Either String Val
+eval :: Expr Location -> Env -> Either String Val
 eval = cata (evalAcc . unAnn)

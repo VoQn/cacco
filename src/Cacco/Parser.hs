@@ -7,16 +7,6 @@ module Cacco.Parser
   , numeric
   ) where
 
-import           Cacco.Expr          (Annotated (..), Expr, ExprF, Info (..))
-import qualified Cacco.Expr          as Expr
-import           Cacco.Fix           (Fix (..))
-import           Cacco.Literal       (Literal (..))
-
-import           Cacco.Lexer         (Parser, brackets, lexeme, parens,
-                                      spaceConsumer)
-import qualified Cacco.Lexer         as Lexer
-
-import           Cacco.Location      (Location)
 import           Control.Applicative ((*>), (<*))
 import           Data.Functor        (Functor)
 import           Data.Text           (Text)
@@ -24,6 +14,15 @@ import           Data.Void           (Void)
 import           Text.Megaparsec     (ParsecT, Token, choice, eof, many, parse,
                                       sepEndBy, try, (<?>), (<|>))
 import qualified Text.Megaparsec     as Megaparsec
+
+import           Cacco.Expr          (Annotated (..), Ast, AstF (..), Expr,
+                                      Info (..))
+import           Cacco.Fix           (Fix (..))
+import           Cacco.Lexer         (Parser, brackets, lexeme, parens,
+                                      spaceConsumer)
+import qualified Cacco.Lexer         as Lexer
+import           Cacco.Literal       (Literal (..))
+import           Cacco.Location      (Location)
 
 contents :: Parser a -> Parser a
 contents parser = spaceConsumer *> parser <* eof
@@ -53,24 +52,24 @@ text = Text <$> Lexer.stringLiteral
 literal :: Parser Literal
 literal = undef <|> Lexer.bool <|> text <|> numeric
 
-exprF :: Parser a -> Parser (ExprF a)
+exprF :: Parser a -> Parser (AstF a)
 exprF p = lexeme $ choice
-    [ Expr.LitF <$> try literal
-    , Expr.SymF <$> Lexer.identifier
-    , parens $ Expr.LisF <$> elements p
-    , brackets $ Expr.VecF <$> elements p
+    [ LitF <$> try literal
+    , SymF <$> Lexer.identifier
+    , LisF <$> parens (elements p)
+    , VecF <$> brackets (elements p)
     ]
   where
     elements :: Parser a -> Parser [a]
     elements = (`sepEndBy` spaceConsumer)
 
-ast :: Parser Expr
+ast :: Parser Ast
 ast = fixParser exprF
 
-expr :: Parser (Fix (Annotated Location))
+expr :: Parser (Expr Location)
 expr = fixParser $ (Ann <$>) . withLocation . exprF
 
-topLevel :: Parser [Fix (Annotated Location)]
+topLevel :: Parser [Expr Location]
 topLevel = many expr
 
 type SourceName = String
@@ -84,11 +83,11 @@ frontend :: Parser a -> FontendParser a
 frontend p []   = frontend p "<stdin>"
 frontend p name = parse (contents p) name
 
-parseAst :: FontendParser Expr
+parseAst :: FontendParser Ast
 parseAst = frontend ast
 
-parseExpr :: FontendParser (Fix (Annotated Location))
+parseExpr :: FontendParser (Expr Location)
 parseExpr = frontend expr
 
-parseTopLevel :: FontendParser [Fix (Annotated Location)]
+parseTopLevel :: FontendParser [Expr Location]
 parseTopLevel = frontend topLevel

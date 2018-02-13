@@ -21,7 +21,7 @@ import           Data.Traversable
 import           Data.Typeable    (Typeable)
 import           GHC.Generics     (Generic)
 
-data ExprF a
+data AstF a
   = HolF
   | LitF Lit.Literal
   -- | Symbol
@@ -38,35 +38,35 @@ data ExprF a
   | LamF [a] a
   deriving (Eq, Ord, Show, Typeable, Generic, Functor)
 
-type Expr = Fix ExprF
-pattern Hole :: Expr
+type Ast = Fix AstF
+pattern Hole :: Ast
 pattern Hole = Fix HolF
 
-pattern Literal :: Literal -> Expr
+pattern Literal :: Literal -> Ast
 pattern Literal lit = Fix (LitF lit)
 
-pattern Symbol :: String -> Expr
+pattern Symbol :: String -> Ast
 pattern Symbol sym = Fix (SymF sym)
 
-pattern List :: [Expr] -> Expr
+pattern List :: [Ast] -> Ast
 pattern List vals = Fix (LisF vals)
 
-pattern Vector :: [Expr] -> Expr
+pattern Vector :: [Ast] -> Ast
 pattern Vector vals = Fix (VecF vals)
 
-pattern Struct :: Map String Expr -> Expr
+pattern Struct :: Map String Ast -> Ast
 pattern Struct map = Fix (StrF map)
 
-pattern App :: Expr -> [Expr] -> Expr
+pattern App :: Ast -> [Ast] -> Ast
 pattern App fn args = Fix (AppF fn args)
 
-pattern Lam :: [Expr] -> Expr -> Expr
+pattern Lam :: [Ast] -> Ast -> Ast
 pattern Lam params body = Fix (LamF params body)
 
-instance Foldable ExprF where
+instance Foldable AstF where
   foldMap = foldMapDefault
 
-instance Traversable ExprF where
+instance Traversable AstF where
   traverse _ HolF     = pure HolF
   traverse _ (SymF v) = SymF <$> pure v
   traverse _ (LitF l) = LitF <$> pure l
@@ -94,15 +94,17 @@ instance (Functor f, Traversable f) => Foldable (Info i f) where
 instance (Functor f, Traversable f) => Traversable (Info i f) where
   traverse f (Info i c) = Info i <$> traverse f c
 
-newtype Annotated i a = Ann { unAnn :: Info i ExprF a }
+newtype Annotated i a = Ann { unAnn :: Info i AstF a }
   deriving (Eq, Ord, Show, Typeable, Generic, Functor)
 
-removeAnn :: Fix (Annotated i) -> Expr
+type Expr i = Fix (Annotated i)
+
+removeAnn :: Expr i -> Ast
 removeAnn = cata $ Fix . content . unAnn
 
 --
 
-prettyfy :: Expr -> String
+prettyfy :: Ast -> String
 prettyfy Hole = "_"
 prettyfy (Symbol s) = s
 prettyfy (Literal l) = case l of
@@ -118,13 +120,13 @@ prettyfy (List elems) =
     oneline = unwords es
   in "`(" <> oneline <> ")"
 
-isAtomic :: ExprF a -> Bool
+isAtomic :: AstF a -> Bool
 isAtomic (LisF _) = False
 isAtomic (VecF _) = False
 isAtomic (StrF _) = False
 isAtomic _        = True
 
-isCollection :: ExprF a -> Bool
+isCollection :: AstF a -> Bool
 isCollection (LisF _) = True
 isCollection (VecF _) = True
 isCollection (StrF _) = True
