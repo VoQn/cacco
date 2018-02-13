@@ -1,15 +1,11 @@
 {-# LANGUAGE DataKinds            #-}
-{-# LANGUAGE DeriveFoldable       #-}
 {-# LANGUAGE DeriveFunctor        #-}
 {-# LANGUAGE DeriveGeneric        #-}
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE GADTs                #-}
-{-# LANGUAGE KindSignatures       #-}
-{-# LANGUAGE LambdaCase           #-}
 {-# LANGUAGE PatternSynonyms      #-}
 {-# LANGUAGE PolyKinds            #-}
 {-# LANGUAGE RankNTypes           #-}
-{-# LANGUAGE StandaloneDeriving   #-}
 {-# LANGUAGE TypeFamilies         #-}
 {-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -44,7 +40,7 @@ data ExprF a
 
 type Expr = Fix ExprF
 pattern Hole :: Expr
-pattern Hole = Fix (HolF)
+pattern Hole = Fix HolF
 
 pattern Literal :: Literal -> Expr
 pattern Literal lit = Fix (LitF lit)
@@ -87,29 +83,23 @@ data Info i f a = Info
   {
     info    :: i,
     content :: f a
-  } deriving (Eq, Show, Typeable, Generic)
+  } deriving (Eq, Ord, Show, Typeable, Generic)
 
 instance Functor f => Functor (Info i f) where
-  fmap f (Info i c) = (Info i) $ f <$> c
+  fmap f (Info i c) = Info i $ f <$> c
 
 instance (Functor f, Traversable f) => Foldable (Info i f) where
   foldMap = foldMapDefault
 
 instance (Functor f, Traversable f) => Traversable (Info i f) where
-  traverse f (Info i c) = (Info i) <$> traverse f c
+  traverse f (Info i c) = Info i <$> traverse f c
 
-type Annotated i = Fix (Info i ExprF)
+newtype Annotated i a = Ann { unAnn :: Info i ExprF a }
+  deriving (Eq, Ord, Show, Typeable, Generic, Functor)
 
-removeAnn :: Annotated i -> Expr
-removeAnn (Fix (Info _ expr)) = rm expr
-  where
-    rm HolF               = Hole
-    rm (LitF literal)     = Literal literal
-    rm (SymF symbol)      = Symbol symbol
-    rm (LisF elements)    = List $ map removeAnn elements
-    rm (VecF elements)    = Vector $ map removeAnn elements
-    rm (AppF fn args)     = App (removeAnn fn) $ map removeAnn args
-    rm (LamF params body) = Lam (map removeAnn params) $ removeAnn body
+removeAnn :: Fix (Annotated i) -> Expr
+removeAnn = cata $ Fix . content . unAnn
+
 --
 
 prettyfy :: Expr -> String

@@ -47,12 +47,12 @@ data AstIxProxy (i :: AstIx) where
   TypeProxy :: AstIxProxy AstType
 
 data AstF (f :: AstIx -> *) (i :: AstIx) where
+  HolF :: AstF f AstPatt
   VarF :: Var -> AstIxProxy i -> AstF f i
   LitF :: Literal -> AstF f AstExpr
   LisF :: [f AstExpr] -> AstF f AstExpr
   AppF :: f i -> [f i] -> AstF f i
   LamF :: [f AstPatt] -> f AstExpr -> AstF f AstExpr
-  HoleF :: AstF f AstPatt
 
 type Ast = IxFix AstF
 
@@ -90,7 +90,7 @@ pattern Lam patterns expr = In (LamF patterns expr)
 pattern Hole :: forall (i :: AstIx).()
              => i ~ AstPatt
              => Ast i
-pattern Hole = In HoleF
+pattern Hole = In HolF
 
 newtype AnnAstF an fn ix = Ann { unAnn :: (an, AstF fn ix) }
 
@@ -101,9 +101,9 @@ instance IxFunctor (AnnAstF x) where
   imap = imapDefault
 
 instance IxTraversable AstF where
+  itraverse _ HolF       = pure HolF
   itraverse _ (VarF v i) = VarF <$> pure v <*> pure i
   itraverse _ (LitF l)   = LitF <$> pure l
-  itraverse _ HoleF      = pure HoleF
 
   itraverse f ast = case ast of
       LisF elems   -> LisF <$> mapList f elems
