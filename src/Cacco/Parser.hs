@@ -29,15 +29,14 @@ contents :: Parser a -> Parser a
 contents parser = spaceConsumer *> parser <* eof
 
 fixParser :: Functor f
- => (forall a. ParsecT e s m a -> ParsecT e s m (f a))
- -> ParsecT e s m (Fix f)
+          => (forall a. ParsecT e s m a -> ParsecT e s m (f a))
+          -> ParsecT e s m (Fix f)
 fixParser f = Fix <$> f (fixParser f)
 
-withLocation :: Parser (f a)
-             -> Parser (Info Location f a)
+withLocation :: Parser (f a) -> Parser (Info Location f a)
 withLocation p = do
-  (x, l) <- Lexer.withLocation p
-  return (Info l x)
+    (l, x) <- Lexer.withLocation p
+    return (Info l x)
 
 undef :: Parser Literal
 undef = Lexer.symbol "undefined" >> return Undef <?> "undefined"

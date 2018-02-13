@@ -45,6 +45,7 @@ library
     , mtl  >= 2.2 && < 3
     , containers >= 0.5 && < 0.6
     , text >= 1.2 && < 2
+    , half >= 0.2 && < 1
     , scientific >= 0.3 && < 0.4
     , megaparsec >= 6 && < 7
     , lens >= 4.15 && < 4.16
