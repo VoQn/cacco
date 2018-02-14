@@ -14,10 +14,7 @@ module Cacco.Lexer
   , identifier
   ) where
 
-import           Cacco.Literal              (Literal)
-import qualified Cacco.Literal              as Lit
-import           Cacco.Location             (Location (..))
-import qualified Cacco.Location             as Location
+
 import           Control.Applicative        ((<*>))
 import           Data.Bits                  (shiftL)
 import           Data.Functor               (($>))
@@ -29,6 +26,11 @@ import           Data.Void                  (Void)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char       hiding (symbolChar)
 import qualified Text.Megaparsec.Char.Lexer as L
+
+import           Cacco.Literal              (Literal)
+import qualified Cacco.Literal              as Lit
+import           Cacco.Location             (Location (..))
+import qualified Cacco.Location             as Location
 
 type Parser = Parsec Void Text
 
@@ -63,40 +65,50 @@ angles = symbol "<" `between` symbol ">"
 brackets :: Parser a -> Parser a
 brackets = symbol "[" `between` symbol "]"
 
--- | Capture token's position range.
 withLocation :: Parser a -> Parser (Location, a)
+-- ^ Capture token's 'Location'.
+--
+-- >>> parse (withLocation integer) "test" "10"
+-- (test:1,1-1,3,Integer 10)
+--
 withLocation parser = do
-  b <- getPosition
-  v <- parser
-  e <- getPosition
-  let l = Location.fromSourcePos b e
-  return (l, v)
+  begin <- getPosition
+  value <- parser
+  end   <- getPosition
+  let location = Location.fromSourcePos begin end
+  return (location, value)
 
 -- | Parse a number with optional sign
 withSign :: Num a => Parser a -> Parser (Bool, a)
-withSign p = do
-    (signed, fn) <- option (False, id) $ minus <|> plus
-    number       <- p
-    return (signed, fn number)
+withSign parser = do
+    (isSigned, fn) <- option (False, id) $ minus <|> plus
+    number         <- parser
+    return (isSigned, fn number)
   where
     minus :: Num a => Parser (Bool, a -> a)
     minus = char '-' $> (True, negate)
     plus :: Num a => Parser (Bool, a -> a)
     plus = char '+' $> (True, id)
 
--- | Parse a boolean literal
 bool :: Parser Literal
+-- ^ Parse a boolean literal
+--
+-- >>> parseTest bool "true"
+-- Bool True
+--
+-- >>> parseTest bool "false"
+-- Bool False
+--
 bool = Lit.Bool <$> (true <|> false) <?> "boolean literal: true or false"
   where
     true :: Parser Bool
     true = symbol "true" $> True
     false :: Parser Bool
     false = symbol "false" $> False
---
 
 -- | Parse a binary integer with prefix 'b' (e.g. 101010)
 binary' :: Parser Integer
-binary' = foldl' bitOp 0 <$> some (zero <|> one)
+binary' = foldl' acc 0 <$> some (zero <|> one)
   where
     -- | Parse '0' as a boolean
     zero :: Parser Bool
@@ -105,11 +117,11 @@ binary' = foldl' bitOp 0 <$> some (zero <|> one)
     one :: Parser Bool
     one = char '1' $> True
     -- | Accumulate boolean as bit-shift
-    bitOp :: Integer -> Bool -> Integer
-    bitOp 0 False = 0
-    bitOp 0 True  = 1
-    bitOp v False = v `shiftL` 1
-    bitOp v True  = v `shiftL` 1 + 1
+    acc :: Integer -> Bool -> Integer
+    acc 0 False = 0
+    acc 0 True  = 1
+    acc v False = v `shiftL` 1
+    acc v True  = v `shiftL` 1 + 1
 
 -- | Parse a integer with prefix for positional notation.
 positional :: Parser Integer
@@ -125,26 +137,64 @@ positional = char '0' >> choice [hexadecimal, octal, binary]
     binary :: Parser Integer
     binary = char 'b' >> binary'
 
--- | Parse a integer number with optional signed.
 integer :: Parser Literal
+-- ^ Parse a integer number literal.
+-- Integer literals:
+--
+-- [@unsigned-decimals@] @0@, @1@, @10@, ...
+-- [@signed-decimals@] @-1@, @+10@, ...
+-- [@octal@] @0o000@, @0o701@, ...
+-- [@hexadecimal@] @0x00@, @0xFF@ ...
+-- [@binary@] @0b0101@, ...
+--
+-- and /optional/ strict type suffix:
+--
+-- [@_i8@] 8bit integer
+-- [@_u8@] 8bit unsigned-integer
+-- [@_i16@] 16bit integer
+-- [@_u16@] 16bit unsigned-integer
+-- [@_i32@] 32bit integer
+-- [@_u32@] 32bit unsigned-integer
+-- [@_i64@] 64bit integer
+-- [@_u64@] 64bit unsigned-integer
+--
+-- >>> parseTest integer "1"
+-- Integer 1
+--
+-- >>> parseTest integer "0xFF"
+-- Integer 256
+--
+-- >>> parseTest integer "1_i8"
+-- Int8 1
+--
+-- >>> parseTest integer "1_u32"
+-- Uint32 1
+--
 integer = integer' <?> "integer literal"
-  where
-    integer' :: Parser Literal
-    integer' = do
-      (signed, num) <- (try notated <|> withSign L.decimal)
-      wrapper       <- option Lit.Integer $ suffix signed
-      return $ wrapper num
 
+integer' :: Parser Literal
+integer' = do
+    (isSigned, num) <- try notated <|> withSign L.decimal
+    wrapperFn       <- option Lit.Integer $ suffix isSigned
+    return $ wrapperFn num
+  where
+    -- | parse positional notated integer
     notated :: Parser (Bool, Integer)
     notated = (,) False <$> positional
 
-    suffix :: Bool -> Parser (Integer -> Literal)
-    suffix signed
-      | signed    = char '_' >> signedInt
-      | otherwise = char '_' >> (signedInt <|> unsignedInt)
+    -- | parse strict integer-type suffix
+    suffix :: Bool -- ^ prefix was exist
+           -> Parser (Integer -> Literal)
+    suffix True  = char '_' >> signed
+    suffix False = char '_' >> signed <|> unsigned
 
-    signedInt = char 'i' >> choice [i8, i16, i32, i64]
-    unsignedInt = char 'u' >> choice [u8, u16, u32, u64]
+    -- | parse signed-integer-type suffix
+    signed :: Parser (Integer -> Literal)
+    signed = char 'i' >> choice [i8, i16, i32, i64]
+
+    -- | parse unsigned-integer-type suffix
+    unsigned :: Parser (Integer -> Literal)
+    unsigned = char 'u' >> choice [u8, u16, u32, u64]
 
     i8, i16, i32, i64 :: Parser (Integer -> Literal)
     i8  = symbol "8"  $> (Lit.Int8  . fromInteger)
@@ -168,7 +218,6 @@ decimal = snd <$> withSign float <?> "floating point number"
       f <- L.scientific
       return f
     digitFloat = try $ some digitChar >> (char '.' <|> char 'e')
-
 
 -- | Parse a Unicode text.
 stringLiteral :: Parser Text
