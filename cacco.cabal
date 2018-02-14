@@ -72,6 +72,7 @@ test-suite test
   build-depends:
       base
     , text
+    , half
     , tasty >= 1.0 && < 2.0
     , tasty-discover >= 4.0 && < 5.0
     , tasty-hspec

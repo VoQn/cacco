@@ -39,11 +39,11 @@ addLocation p = AnnF <$> withLocation p
 undef :: Parser Literal
 undef = Lexer.symbol "undefined" >> return Undef <?> "undefined"
 
-decimal :: Parser Literal
-decimal = Flonum <$> Lexer.decimal <?> "decimal literal"
+-- decimal :: Parser Literal
+-- decimal = Flonum <$> Lexer.decimal <?> "decimal literal"
 
 numeric :: Parser Literal
-numeric = try decimal <|> Lexer.integer
+numeric = try Lexer.flonum <|> Lexer.integer
 
 text :: Parser Literal
 text = Text <$> Lexer.stringLiteral

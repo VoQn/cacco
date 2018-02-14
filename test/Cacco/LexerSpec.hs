@@ -6,7 +6,6 @@ import qualified Cacco.Lexer      as Lexer
 import           Cacco.Literal
 import           Data.Int         ()
 import           Data.Monoid      ((<>))
-import           Data.Scientific  (fromFloatDigits)
 import qualified Data.Text        as Text
 import           Data.Word
 import           Test.Tasty.Hspec (Spec, context, it, shouldBe)
@@ -164,31 +163,60 @@ prop_Lexer_integer_parse_uint64 x =
     expr = Text.pack $ show x <> "_u64"
   in parse' expr == Right (Uint64 x)
 
-spec_Lexer_decimal :: Spec
-spec_Lexer_decimal = do
-  let parseTest = parse Lexer.decimal "test"
+spec_Lexer_flonum :: Spec
+spec_Lexer_flonum = do
+  let parseTest = parse Lexer.flonum "test"
 
-  it "can parse 0.0" $
-    parseTest "0.0" `shouldBe` Right (fromFloatDigits (0.0 :: Double))
-  --
-  it "can parse 0.01" $
-    parseTest "0.01" `shouldBe` Right (fromFloatDigits (0.01 :: Double))
-  --
-  it "can parse 1.0" $
-    parseTest "1.0" `shouldBe` Right (fromFloatDigits (1.0 :: Double))
-  --
-  it "can parse -10.5" $
-    parseTest "-10.5" `shouldBe` Right (fromFloatDigits ((-10.5) :: Double))
-  --
-  it "can parse 1e5" $
-    parseTest "1e5" `shouldBe` Right (fromFloatDigits (1e5 :: Double))
-  --
-  it "can parse 1e+5" $
-    parseTest "1e+5" `shouldBe` Right (fromFloatDigits (1e+5 :: Double))
-  --
-  it "can parse 1e-5" $
-    parseTest "1e-5" `shouldBe` Right (fromFloatDigits (1e-5 :: Double))
-  --
+  context "when parsing floating point number expression" $ do
+    it "can parse 0.0" $
+      parseTest "0.0" `shouldBe` Right (Flonum 0)
+    --
+    it "can parse 0.01" $
+      parseTest "0.01" `shouldBe` Right (Flonum 0.01)
+    --
+    it "can parse 1.0" $
+      parseTest "1.0" `shouldBe` Right (Flonum 1.0)
+    --
+    it "can parse -10.5" $
+      parseTest "-10.5" `shouldBe` Right (Flonum (-10.5))
+    --
+    it "can parse 1e5" $
+      parseTest "1e5" `shouldBe` Right (Flonum 1e5)
+    --
+    it "can parse 1e+5" $
+      parseTest "1e+5" `shouldBe` Right (Flonum 1e+5)
+    --
+    it "can parse 1e-5" $
+      parseTest "1e-5" `shouldBe` Right (Flonum 1e-5)
+    --
+  context "when parsing number with \"_f16\" suffix" $ do
+    it "can parse 0.0_f16" $
+      parseTest "0.0_f16" `shouldBe` Right (Float16 0)
+    --
+    it "can parse 1.0_f16" $
+      parseTest "1.0_f16" `shouldBe` Right (Float16 1)
+    --
+    it "can parse -1.0_f16" $
+      parseTest "-1.0_f16" `shouldBe` Right (Float16 (-1))
+    --
+    it "can parse 1.0e2_f16" $
+      parseTest "1.0e2_f16" `shouldBe` Right (Float16 1e2)
+    --
+
+prop_Lexer_flonum_parse_float32 :: Float -> Bool
+prop_Lexer_flonum_parse_float32 x =
+  let
+    parse' = parse Lexer.flonum "test"
+    expr = Text.pack $ show x <> "_f32"
+  in parse' expr == Right (Float32 x)
+--
+
+prop_Lexer_flonum_parse_float64 :: Double -> Bool
+prop_Lexer_flonum_parse_float64 x =
+  let
+    parse' = parse Lexer.flonum "test"
+    expr = Text.pack $ show x <> "_f64"
+  in parse' expr == Right (Float64 x)
 
 spec_Lexer_stringLiteral :: Spec
 spec_Lexer_stringLiteral = do

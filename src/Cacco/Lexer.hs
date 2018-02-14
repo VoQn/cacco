@@ -9,17 +9,16 @@ module Cacco.Lexer
   , parens, braces, angles, brackets
   , bool
   , integer
-  , decimal
+  , flonum
   , stringLiteral
   , identifier
   ) where
-
 
 import           Control.Applicative        ((<*>))
 import           Data.Bits                  (shiftL)
 import           Data.Functor               (($>))
 import           Data.List                  (foldl')
-import           Data.Scientific            (Scientific)
+import           Data.Scientific            (Scientific, toRealFloat)
 import           Data.Text                  (Text)
 import qualified Data.Text                  as T
 import           Data.Void                  (Void)
@@ -37,13 +36,16 @@ type Parser = Parsec Void Text
 -- | Skipping space characters and comments.
 spaceConsumer :: Parser ()
 spaceConsumer = L.space space1 lineComment blockComment
-  where
-    -- | Ignore single line comment.
-    lineComment :: Parser ()
-    lineComment = L.skipLineComment ";;"
-    -- | Ignore nested block comment.
-    blockComment :: Parser ()
-    blockComment = L.skipBlockCommentNested "(;" ";)"
+
+-- | Ignore single line comment.
+lineComment :: Parser ()
+lineComment = L.skipLineComment ";;"
+{-# INLINE lineComment #-}
+
+-- | Ignore nested block comment.
+blockComment :: Parser ()
+blockComment = L.skipBlockCommentNested "(;" ";)"
+{-# INLINE blockComment #-}
 
 -- | Make parser to ignore any space and comment expressions
 lexeme :: Parser a -> Parser a
@@ -87,8 +89,11 @@ withSign parser = do
   where
     minus :: Num a => Parser (Bool, a -> a)
     minus = char '-' $> (True, negate)
+    {-# INLINE minus #-}
+
     plus :: Num a => Parser (Bool, a -> a)
     plus = char '+' $> (True, id)
+    {-# INLINE plus #-}
 
 bool :: Parser Literal
 -- ^ Parse a boolean literal
@@ -103,8 +108,11 @@ bool = Lit.Bool <$> (true <|> false) <?> "boolean literal: true or false"
   where
     true :: Parser Bool
     true = symbol "true" $> True
+    {-# INLINE true #-}
+
     false :: Parser Bool
     false = symbol "false" $> False
+    {-# INLINE false #-}
 
 -- | Parse a binary integer with prefix 'b' (e.g. 101010)
 binary' :: Parser Integer
@@ -113,9 +121,13 @@ binary' = foldl' acc 0 <$> some (zero <|> one)
     -- | Parse '0' as a boolean
     zero :: Parser Bool
     zero = char '0' $> False
+    {-# INLINE zero #-}
+
     -- | Parse '1' as a boolean
     one :: Parser Bool
     one = char '1' $> True
+    {-# INLINE one #-}
+
     -- | Accumulate boolean as bit-shift
     acc :: Integer -> Bool -> Integer
     acc 0 False = 0
@@ -130,12 +142,17 @@ positional = char '0' >> choice [hexadecimal, octal, binary]
     -- | Parse a hexadecimal integer with prefix 'x' (e.g. xFA901)
     hexadecimal :: Parser Integer
     hexadecimal = char 'x' >> L.hexadecimal
+    {-# INLINE hexadecimal #-}
+
     -- | Parse a octal integer with prefix 'o' (e.g. o080)
     octal :: Parser Integer
     octal = char 'o' >> L.octal
+    {-# INLINE octal #-}
+
     -- | Parse a binary integer with prefix 'b' (e.g. b101010)
     binary :: Parser Integer
     binary = char 'b' >> binary'
+    {-# INLINE binary #-}
 
 integer :: Parser Literal
 -- ^ Parse a integer number literal.
@@ -174,66 +191,113 @@ integer = integer' <?> "integer literal"
 
 integer' :: Parser Literal
 integer' = do
-    (isSigned, num) <- try notated <|> withSign L.decimal
-    wrapperFn       <- option Lit.Integer $ suffix isSigned
-    return $ wrapperFn num
+    (isSigned, number) <- try notated <|> withSign L.decimal
+    wrapper            <- option Lit.Integer $ suffix isSigned
+    return $ wrapper number
   where
     -- | parse positional notated integer
     notated :: Parser (Bool, Integer)
     notated = (,) False <$> positional
+    {-# INLINE notated #-}
 
     -- | parse strict integer-type suffix
     suffix :: Bool -- ^ prefix was exist
            -> Parser (Integer -> Literal)
-    suffix True  = char '_' >> signed
-    suffix False = char '_' >> signed <|> unsigned
+    suffix True  = char '_' >> signedInt
+    suffix False = char '_' >> signedInt <|> unsignedInt
 
-    -- | parse signed-integer-type suffix
-    signed :: Parser (Integer -> Literal)
-    signed = char 'i' >> choice [i8, i16, i32, i64]
+-- | parse signed-integer-type suffix
+signedInt :: Parser (Integer -> Literal)
+signedInt = char 'i' >> choice [i8, i16, i32, i64]
+{-# INLINE signedInt #-}
 
-    -- | parse unsigned-integer-type suffix
-    unsigned :: Parser (Integer -> Literal)
-    unsigned = char 'u' >> choice [u8, u16, u32, u64]
+-- | parse unsigned-integer-type suffix
+unsignedInt :: Parser (Integer -> Literal)
+unsignedInt = char 'u' >> choice [u8, u16, u32, u64]
+{-# INLINE unsignedInt #-}
 
-    i8, i16, i32, i64 :: Parser (Integer -> Literal)
-    i8  = symbol "8"  $> (Lit.Int8  . fromInteger)
-    i16 = symbol "16" $> (Lit.Int16 . fromInteger)
-    i32 = symbol "32" $> (Lit.Int32 . fromInteger)
-    i64 = symbol "64" $> (Lit.Int64 . fromInteger)
+i8 :: Parser (Integer -> Literal)
+i8  = symbol "8"  $> Lit.Int8  . fromInteger
+{-# INLINE i8 #-}
 
-    u8, u16, u32, u64 :: Parser (Integer -> Literal)
-    u8  = symbol "8"  $> (Lit.Uint8  . fromInteger)
-    u16 = symbol "16" $> (Lit.Uint16 . fromInteger)
-    u32 = symbol "32" $> (Lit.Uint32 . fromInteger)
-    u64 = symbol "64" $> (Lit.Uint64 . fromInteger)
+i16 :: Parser (Integer -> Literal)
+i16 = symbol "16" $> Lit.Int16 . fromInteger
+{-# INLINE i16 #-}
+
+i32 :: Parser (Integer -> Literal)
+i32 = symbol "32" $> Lit.Int32 . fromInteger
+{-# INLINE i32 #-}
+
+i64 :: Parser (Integer -> Literal)
+i64 = symbol "64" $> Lit.Int64 . fromInteger
+{-# INLINE i64 #-}
+
+u8 :: Parser (Integer -> Literal)
+u8  = symbol "8"  $> Lit.Uint8  . fromInteger
+{-# INLINE u8 #-}
+
+u16 :: Parser (Integer -> Literal)
+u16 = symbol "16" $> Lit.Uint16 . fromInteger
+{-# INLINE u16 #-}
+
+u32 :: Parser (Integer -> Literal)
+u32 = symbol "32" $> Lit.Uint32 . fromInteger
+{-# INLINE u32 #-}
+
+u64 :: Parser (Integer -> Literal)
+u64 = symbol "64" $> Lit.Uint64 . fromInteger
+{-# INLINE u64 #-}
 
 -- | Parse a floating point number.
-decimal :: Parser Scientific
-decimal = snd <$> withSign float <?> "floating point number"
+flonum :: Parser Literal
+flonum = float <?> "floating point number"
   where
-    float :: Parser Scientific
+    float :: Parser Literal
     float = do
-      _ <- lookAhead digitFloat
-      f <- L.scientific
-      -- TODO
-      -- parsing strict type suffix and casting each float types.
-      return f
-    digitFloat = try $ some digitChar >> (char '.' <|> char 'e')
+      _       <- lookAhead $ try digitFloatFormat
+      number  <- snd <$> withSign L.scientific
+      wrapper <- option Lit.Flonum suffix
+      return $ wrapper number
+
+    suffix :: Parser (Scientific -> Literal)
+    suffix = symbol "_f" >> choice [f16, f32, f64]
+
+digitFloatFormat :: Parser Bool
+digitFloatFormat = sign >> some digitChar >> (char '.' <|> char 'e') $> True
+  where
+    sign :: Parser ()
+    sign = option () $ (char '-' <|> char '+') $> ()
+    {-# INLINE sign #-}
+
+f16 :: Parser (Scientific -> Literal)
+f16 = symbol "16" $> Lit.Float16 . toRealFloat
+{-# INLINE f16 #-}
+
+f32 :: Parser (Scientific -> Literal)
+f32 = symbol "32" $> Lit.Float32 . toRealFloat
+{-# INLINE f32 #-}
+
+f64 :: Parser (Scientific -> Literal)
+f64 = symbol "64" $> Lit.Float64 . toRealFloat
+{-# INLINE f64 #-}
 
 -- | Parse a Unicode text.
 stringLiteral :: Parser Text
 stringLiteral = T.pack <$> quoted <?> "string literal"
   where
     quoted = char '"' >> L.charLiteral `manyTill` char '"'
+    {-# INLINE quoted #-}
 
 symbolChar :: Parser Char
 symbolChar = oneOf ("!@#$%^&*_+-=|:<>?/" :: String)
 
 identifier :: Parser String
-identifier = (:) <$> initialChar <*> many tailChar
-  where
-    initialChar :: Parser Char
-    initialChar = letterChar <|> symbolChar
-    tailChar :: Parser Char
-    tailChar = letterChar <|> digitChar <|> symbolChar
+identifier = (:) <$> identInitial <*> many identTrail
+
+identInitial :: Parser Char
+identInitial = letterChar <|> symbolChar
+{-# INLINE identInitial #-}
+
+identTrail :: Parser Char
+identTrail = letterChar <|> digitChar <|> symbolChar
+{-# INLINE identTrail #-}
