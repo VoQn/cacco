@@ -15,11 +15,12 @@ import           Text.Megaparsec     (ParsecT, Token, choice, eof, many, parse,
                                       sepEndBy, try, (<?>), (<|>))
 import qualified Text.Megaparsec     as Megaparsec
 
-import           Cacco.Expr          (Annotated (..), Ast, AstF (..), Expr,
-                                      Info (..))
+import           Cacco.Ann           (AnnF (AnnF))
+import qualified Cacco.Ann           as Ann
+import           Cacco.Expr          (Ast, AstF (..), Expr)
 import           Cacco.Fix           (Fix (..))
 import           Cacco.Lexer         (Parser, brackets, lexeme, parens,
-                                      spaceConsumer)
+                                      spaceConsumer, withLocation)
 import qualified Cacco.Lexer         as Lexer
 import           Cacco.Literal       (Literal (..))
 import           Cacco.Location      (Location)
@@ -32,10 +33,8 @@ fixParser :: Functor f
           -> ParsecT e s m (Fix f)
 fixParser f = Fix <$> f (fixParser f)
 
-withLocation :: Parser (f a) -> Parser (Info Location f a)
-withLocation p = do
-    (l, x) <- Lexer.withLocation p
-    return (Info l x)
+addLocation :: Parser (f a) -> Parser (AnnF Location f a)
+addLocation p = AnnF <$> withLocation p
 
 undef :: Parser Literal
 undef = Lexer.symbol "undefined" >> return Undef <?> "undefined"
@@ -52,8 +51,8 @@ text = Text <$> Lexer.stringLiteral
 literal :: Parser Literal
 literal = undef <|> Lexer.bool <|> text <|> numeric
 
-exprF :: Parser a -> Parser (AstF a)
-exprF p = lexeme $ choice
+astF :: Parser a -> Parser (AstF a)
+astF p = lexeme $ choice
     [ LitF <$> try literal
     , SymF <$> Lexer.identifier
     , LisF <$> parens (elements p)
@@ -63,11 +62,8 @@ exprF p = lexeme $ choice
     elements :: Parser a -> Parser [a]
     elements = (`sepEndBy` spaceConsumer)
 
-ast :: Parser Ast
-ast = fixParser exprF
-
 expr :: Parser (Expr Location)
-expr = fixParser $ (Ann <$>) . withLocation . exprF
+expr = fixParser $ addLocation . astF
 
 topLevel :: Parser [Expr Location]
 topLevel = many expr
@@ -84,7 +80,7 @@ frontend p []   = frontend p "<stdin>"
 frontend p name = parse (contents p) name
 
 parseAst :: FontendParser Ast
-parseAst = frontend ast
+parseAst = frontend $ Ann.remove <$> expr
 
 parseExpr :: FontendParser (Expr Location)
 parseExpr = frontend expr

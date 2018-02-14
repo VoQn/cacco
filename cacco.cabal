@@ -28,6 +28,7 @@ library
     , Cacco.Location
     , Cacco.Literal
     , Cacco.Fix
+    , Cacco.Ann
     , Cacco.Expr
     , Cacco.Lexer
     , Cacco.Parser

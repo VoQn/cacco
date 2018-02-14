@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds            #-}
+{-# LANGUAGE DeriveFoldable       #-}
 {-# LANGUAGE DeriveFunctor        #-}
 {-# LANGUAGE DeriveGeneric        #-}
 {-# LANGUAGE FlexibleContexts     #-}
@@ -12,33 +13,43 @@
 
 module Cacco.Expr where
 
+import           Data.Map.Lazy (Map)
+import           Data.Typeable (Typeable)
+import           GHC.Generics  (Generic)
+
+import           Cacco.Ann
 import           Cacco.Fix
-import           Cacco.Literal    (Literal)
-import qualified Cacco.Literal    as Lit
-import           Data.Map         (Map)
-import           Data.Monoid      ((<>))
-import           Data.Traversable
-import           Data.Typeable    (Typeable)
-import           GHC.Generics     (Generic)
+import           Cacco.Literal (Literal)
+import qualified Cacco.Literal as Lit
 
 data AstF a
-  = HolF
-  | LitF Lit.Literal
-  -- | Symbol
-  | SymF String
-  -- | Linked list
-  | LisF [a]
-  -- | Fixed size vector
-  | VecF [a]
-  -- | Struct
-  | StrF (Map String a)
-  -- | Apply function
-  | AppF a [a]
-  -- | Lambda (anonymous) function
-  | LamF [a] a
-  deriving (Eq, Ord, Show, Typeable, Generic, Functor)
+  -- Atomic
+  = HolF         -- ^ Hole `_`
+  | LitF Literal -- ^ Literal
+  | SymF String  -- ^ Symbol
+
+  -- Collections
+  | LisF [a]            -- ^ Linked list
+  | VecF [a]            -- ^ Fixed size vector
+  | StrF (Map String a) -- ^ Struct
+
+  -- Fuctors
+  | AppF  a [a] -- ^ Apply function
+  | LamF [a] a  -- ^ Lambda (anonymous) function
+  deriving (Eq, Ord, Show, Typeable, Generic, Functor, Foldable)
+
+instance Traversable AstF where
+  traverse _ HolF        = pure HolF
+  traverse _ (SymF x)    = SymF <$> pure x
+  traverse _ (LitF x)    = LitF <$> pure x
+  traverse f (LisF xs)   = LisF <$> traverse f xs
+  traverse f (VecF xs)   = VecF <$> traverse f xs
+  traverse f (StrF xs)   = StrF <$> traverse f xs
+  traverse f (AppF x xs) = AppF <$> f x <*> traverse f xs
+  traverse f (LamF xs x) = LamF <$> traverse f xs <*> f x
 
 type Ast = Fix AstF
+
 pattern Hole :: Ast
 pattern Hole = Fix HolF
 
@@ -63,46 +74,7 @@ pattern App fn args = Fix (AppF fn args)
 pattern Lam :: [Ast] -> Ast -> Ast
 pattern Lam params body = Fix (LamF params body)
 
-instance Foldable AstF where
-  foldMap = foldMapDefault
-
-instance Traversable AstF where
-  traverse _ HolF     = pure HolF
-  traverse _ (SymF v) = SymF <$> pure v
-  traverse _ (LitF l) = LitF <$> pure l
-
-  traverse f expr = case expr of
-      LisF elements    -> LisF <$> mapList f elements
-      VecF elements    -> VecF <$> mapList f elements
-      AppF func args   -> AppF <$> f func <*> mapList f args
-      LamF params body -> LamF <$> mapList f params <*> f body
-    where
-      mapList fn xs = sequenceA $ fn <$> xs
-
-data Info i f a = Info
-  {
-    info    :: i,
-    content :: f a
-  } deriving (Eq, Ord, Show, Typeable, Generic)
-
-instance Functor f => Functor (Info i f) where
-  fmap f (Info i c) = Info i $ f <$> c
-
-instance (Functor f, Traversable f) => Foldable (Info i f) where
-  foldMap = foldMapDefault
-
-instance (Functor f, Traversable f) => Traversable (Info i f) where
-  traverse f (Info i c) = Info i <$> traverse f c
-
-newtype Annotated i a = Ann { unAnn :: Info i AstF a }
-  deriving (Eq, Ord, Show, Typeable, Generic, Functor)
-
-type Expr i = Fix (Annotated i)
-
-removeAnn :: Expr i -> Ast
-removeAnn = cata $ Fix . content . unAnn
-
---
+type Expr i = Ann i AstF
 
 prettyfy :: Ast -> String
 prettyfy Hole = "_"
@@ -118,7 +90,7 @@ prettyfy (List elems) =
   let
     es = prettyfy <$> elems
     oneline = unwords es
-  in "`(" <> oneline <> ")"
+  in "`(" ++ oneline ++ ")"
 
 isAtomic :: AstF a -> Bool
 isAtomic (LisF _) = False
