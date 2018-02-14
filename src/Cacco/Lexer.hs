@@ -216,6 +216,8 @@ decimal = snd <$> withSign float <?> "floating point number"
     float = do
       _ <- lookAhead digitFloat
       f <- L.scientific
+      -- TODO
+      -- parsing strict type suffix and casting each float types.
       return f
     digitFloat = try $ some digitChar >> (char '.' <|> char 'e')
 
@@ -235,4 +237,3 @@ identifier = (:) <$> initialChar <*> many tailChar
     initialChar = letterChar <|> symbolChar
     tailChar :: Parser Char
     tailChar = letterChar <|> digitChar <|> symbolChar
-

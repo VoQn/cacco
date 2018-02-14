@@ -20,12 +20,12 @@ import           GHC.Generics  (Generic)
 import           Cacco.Ann
 import           Cacco.Fix
 import           Cacco.Literal (Literal)
-import qualified Cacco.Literal as Lit
 
+-- | Abstruct syntax tree of Cacco language
 data AstF a
   -- Atomic
-  = HolF         -- ^ Hole `_`
-  | LitF Literal -- ^ Literal
+  = HolF         -- ^ Hole @_@
+  | LitF Literal -- ^ 'Literal'
   | SymF String  -- ^ Symbol
 
   -- Collections
@@ -48,6 +48,7 @@ instance Traversable AstF where
   traverse f (AppF x xs) = AppF <$> f x <*> traverse f xs
   traverse f (LamF xs x) = LamF <$> traverse f xs <*> f x
 
+-- | 'Fix'ed version 'AstF'
 type Ast = Fix AstF
 
 pattern Hole :: Ast
@@ -74,32 +75,5 @@ pattern App fn args = Fix (AppF fn args)
 pattern Lam :: [Ast] -> Ast -> Ast
 pattern Lam params body = Fix (LamF params body)
 
+-- | 'Expr' is some annotated Fixed 'AstF'
 type Expr i = Ann i AstF
-
-prettyfy :: Ast -> String
-prettyfy Hole = "_"
-prettyfy (Symbol s) = s
-prettyfy (Literal l) = case l of
-  Lit.Undef      -> "undefined"
-  Lit.Bool True  -> "true"
-  Lit.Bool False -> "false"
-  Lit.Integer x  -> show x
-  Lit.Flonum x   -> show x
-  _              -> undefined
-prettyfy (List elems) =
-  let
-    es = prettyfy <$> elems
-    oneline = unwords es
-  in "`(" ++ oneline ++ ")"
-
-isAtomic :: AstF a -> Bool
-isAtomic (LisF _) = False
-isAtomic (VecF _) = False
-isAtomic (StrF _) = False
-isAtomic _        = True
-
-isCollection :: AstF a -> Bool
-isCollection (LisF _) = True
-isCollection (VecF _) = True
-isCollection (StrF _) = True
-isCollection _        = False
