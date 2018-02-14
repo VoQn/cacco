@@ -31,9 +31,9 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 ----
 0     ;; Fuzzy Numeric.  (default: Natural)
 -1 +1 ;; Fuzzy Integer.  (default: Integer)
-0.0   ;; Fuzyy Decimal.  (default: Decimal)
+0.0   ;; Fuzzy Decimal.  (default: Decimal)
 1/2   ;; Rational.
-'a'   ;; Charactor.      (same as Uint32)
+'a'   ;; Character.      (same as Uint32)
 ""    ;; Fuzzy Text.     (default: String_UTF8)
 :key  ;; Keyword.
 []    ;; Fuzzy Sequence. (default: List)
@@ -68,8 +68,8 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 
 ;; Reassign
 (set! y 1000)    ;; OK
-(set! y "hello") ;; Can't. `y` has been declered as Number type.
-(set! x 10)      ;; Can't. `x` has been declered as immutable.
+(set! y "hello") ;; Can't. `y` has been declared as Number type.
+(set! x 10)      ;; Can't. `x` has been declared as immutable.
 ----
 
 [[calling-procedure]]
@@ -91,7 +91,7 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 ;; Define the procedure
 (def (cubic x) (* x x x))
 ----
-<1> `(-> T1 T2 ... Tn)` is Function type recieve `T1`, `T2` ... then return value as `Tn` type.
+<1> `(-> T1 T2 ... Tn)` is Function type receive `T1`, `T2` ... then return value as `Tn` type.
 
 [[development]]
 == Development
