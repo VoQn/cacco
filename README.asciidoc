@@ -130,3 +130,12 @@ stack test --coverage
 # open coverage-report in your browser
 open $(stack path --local-hpc-root)/index.html
 ----
+
+[[haddock]]
+==== Check Haddock
+[source, bash]
+----
+stack haddock
+
+open $(stack path --local-doc-root)/index.html
+----

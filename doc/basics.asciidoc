@@ -43,7 +43,7 @@ v0.1.0, 2018-02-12
 (def (and? false _ ... _) false)
 (def (and? _ false ... _) false)
 (def (and? _ _ ... []) true)
-(def (and? _ _ ... rest) (and? ... rest)
+(def (and? _ _ ... rest) (and? ... rest))
 
 (def (even? x) (== (mod x 2) 0))
 ----
