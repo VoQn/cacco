@@ -7,7 +7,10 @@
 module Cacco.Val
   ( Val(..)
   , Fn
+  , bool
+  , integer
   , info
+  , removeInfo
   , pretty
   ) where
 
@@ -20,25 +23,31 @@ import           Data.Vector     (Vector)
 import qualified Data.Vector     as Vec
 import           GHC.Generics    (Generic)
 
-data Val ann
-  = Unit ann
+data Val i
+  = Unit (Maybe i)
 
-  | Bool    !Bool ann
-  | Integer !Integer ann
-  | Flonum  !Scientific ann
-  | Text    !Text ann
+  | Bool    !Bool (Maybe i)
+  | Integer !Integer (Maybe i)
+  | Flonum  !Scientific (Maybe i)
+  | Text    !Text (Maybe i)
 
-  | Symbol  !String ann
+  | Symbol  !String (Maybe i)
 
-  | List    [Val ann] ann
-  | Vector  (Vector (Val ann)) ann
-  | Struct  (Map String (Val ann)) ann
+  | List    [Val i] (Maybe i)
+  | Vector  (Vector (Val i)) (Maybe i)
+  | Struct  (Map String (Val i)) (Maybe i)
 
-  | BultIn  (Fn ann) ann
-  | Func    (Fn ann) ann
+  | BultIn  (Fn i) (Maybe i)
+  | Func    (Fn i) (Maybe i)
   deriving (Typeable, Generic)
 
-type Fn ann = [Val ann] -> Either String (Val ann)
+type Fn i = [Val i] -> Either String (Val i)
+
+bool :: Bool -> Val i
+bool b = Bool b Nothing
+
+integer :: Integer -> Val i
+integer x = Integer x Nothing
 
 instance Eq (Val a) where
   (==) (Unit _) (Unit _)           = True
@@ -65,7 +74,7 @@ instance (Show a) => Show (Val a) where
   show (BultIn _ i)  = unwords ["BultIn", show i]
   show (Func _ i)    = unwords ["Func", show i]
 
-info :: Val i -> i
+info :: Val i -> Maybe i
 info (Unit i)      = i
 info (Bool _ i)    = i
 info (Integer _ i) = i
@@ -77,6 +86,19 @@ info (Vector _ i)  = i
 info (Struct _ i)  = i
 info (BultIn _ i)  = i
 info (Func _ i)    = i
+
+removeInfo :: Val i -> Val i
+removeInfo (Unit _)      = Unit Nothing
+removeInfo (Bool x _)    = Bool x Nothing
+removeInfo (Integer x _) = Integer x Nothing
+removeInfo (Flonum x _)  = Flonum x Nothing
+removeInfo (Text x _)    = Text x Nothing
+removeInfo (Symbol x _)  = Symbol x Nothing
+removeInfo (List x _)    = List (removeInfo <$> x) Nothing
+removeInfo (Vector x _)  = Vector (removeInfo <$> x) Nothing
+removeInfo (Struct x _)  = Struct (removeInfo <$> x) Nothing
+removeInfo (BultIn x _)  = BultIn x Nothing
+removeInfo (Func x _)    = Func x Nothing
 
 pretty :: Val i -> String
 pretty (Unit _)       = "()"

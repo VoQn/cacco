@@ -87,6 +87,7 @@ test-suite test
     , Cacco.LiteralSpec
     , Cacco.LexerSpec
     , Cacco.ParserSpec
+    , Cacco.EvalSpec
   ghc-options:
     -threaded
     -rtsopts

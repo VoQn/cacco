@@ -28,7 +28,7 @@ eq :: BuiltInFunc
 eq l [] = raise $ eqArityError l 0
 eq l [_] = raise $ eqArityError l 1
 
-eq l (Bool x _ : xs) = Bool <$> acc xs <*> pure l
+eq l (Bool x _ : xs) = Bool <$> acc xs <*> pure (Just l)
   where
     acc :: [Val Location] -> Either String Bool
     acc [] = return True
@@ -37,7 +37,7 @@ eq l (Bool x _ : xs) = Bool <$> acc xs <*> pure l
       | x == y = acc ys
     acc (a : _) = raise $ eqTypeError "boolean" a
 
-eq l (Integer x _ : xs) = Bool <$> acc xs <*> pure l
+eq l (Integer x _ : xs) = Bool <$> acc xs <*> pure (Just l)
   where
     acc :: [Val Location] -> Either String Bool
     acc [] = return True
@@ -50,7 +50,7 @@ eq _ (a : _) = raise $ eqTypeError "boolean" a
 
 add :: BuiltInFunc
 add l [] = raise $ ArityMismatch l "+" 1 False 0
-add l (Integer x _ : xs) = Integer <$> acc x xs <*> pure l
+add l (Integer x _ : xs) = Integer <$> acc x xs <*> pure (Just l)
   where
     acc :: Integer -> [Val Location] -> Either String Integer
     acc r []                 = return r
@@ -62,9 +62,9 @@ sub :: BuiltInFunc
 -- arity mismatch
 sub l [] = raise $ ArityMismatch l "-" 1 False 0
 -- nenagte
-sub l [Integer x _] = return $ Integer (-x) l
+sub l [Integer x _] = Integer <$> pure (-x) <*> pure (Just l)
 -- subtraction
-sub l (Integer x _ : rest) = Integer <$> acc x rest <*> pure l
+sub l (Integer x _ : rest) = Integer <$> acc x rest <*> pure (Just l)
   where
     acc :: Integer -> [Val Location] -> Either String Integer
     acc r []                 = return r
@@ -75,7 +75,7 @@ sub _ (x : _) = raise $ TypeMismatch "-" "numeric" x
 
 mul :: BuiltInFunc
 mul l [] = raise $ ArityMismatch l "*" 1 False 0
-mul l (Integer x _ : vs) = Integer <$> acc x vs <*> pure l
+mul l (Integer x _ : vs) = Integer <$> acc x vs <*> pure (Just l)
   where
     acc :: Integer -> [Val Location] -> Either String Integer
     acc r []                 = return r
