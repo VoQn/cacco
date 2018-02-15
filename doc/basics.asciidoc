@@ -65,29 +65,68 @@ v0.1.0, 2018-02-12
 [[Fuzzy_Types]]
 === Fuzzy_Type
 
-cacco has `Fuzzy_*` types for literals.
+cacco has `Fuzzy` types for literals.
 [%header%, cols=3*]
 |===
 |Expression
-|Fuzzy_Type
+|Fuzzy Type
 |Default Type
 
 |`0, 0b1010, 0o060, 0xF0A`
-|`Fuzzy_Numeric`|`Natural`
+|`Fuzzy-Numeric`|`Natural`
 
 |`-1, +1`
-|`Fuzzy_Integer`|`Integer`
+|`Fuzzy-Integer`|`Integer`
 
 |`0.0, +1.0, -0.5, 1.0e5, 0x1.0p-126`
-|`Fuzzy_Decimal`|`Flonum`
+|`Fuzzy-Decimal`|`Flonum`
 
 |`"", "Hello", "こんにちは", "你好", "🐟"`
-|`Fuzzy_Text`|`String_UTF8`
+|`Fuzzy-Text`|`String-UTF8`
 |===
 
-==== Why Fuzzy?
+===== How to guess fuzzy literal
 
+----
+(def x 1)
+;; ('-') cacco guess `x` is maybe Natural
 
+(def y (/. x 2))
+;; ('o') ! cacco changed their idea that `x` is Flonum
+;; -- and the `y` is maybe same type.
+
+(dec z (-> Float32 Float32))
+(def z (+ y y))
+;; (0_0) !! cacco find `y` is strictly used as Float32.
+;; -- and `x` too.
+;;
+;; Result
+;; ------
+;; ('-') < `x` and `y` are `Float32`
+----
+
+But, if this expression was wrote after lines, cacco cannot decide actual type.
+
+----
+(odd? x)
+;; (?_?) cacco confused `x` is also used as some `Integral` type.
+;; and then they will warn before evaluation.
+----
+
+For safe using, recommend to write type annotation and use converter.
+
+----
+;; rewrite version
+(dec x Integer)
+(def x 1)
+
+(dec y Float32)
+(def y
+  (val x' (float x))
+  (/. x' 2))
+
+(odd? x) ;; (^_^) OK
+----
 
 === Strict type literals
 
@@ -102,10 +141,10 @@ Of cause, cacco has strict type literals
 |`0_i16`|`Int16`|16bit integer
 |`0_i32`|`Int32`|32bit integer
 |`0_i64`|`Int64`|64bit integer
-|`0_u8`|`UInt8`|8bit unsigned integer
-|`0_u16`|`UInt16`|16bit unsigned integer
-|`0_u32`|`UInt32`|32bit unsigned integer
-|`0_u64`|`UInt64`|64bit unsigned integer
+|`0_u8`|`Uint8`|8bit unsigned integer
+|`0_u16`|`Uint16`|16bit unsigned integer
+|`0_u32`|`Uint32`|32bit unsigned integer
+|`0_u64`|`Uint64`|64bit unsigned integer
 |`0.0_f16`|`Float16`|16bit floating point number (IEEE 754-2008 binary16)
 |`0.0_f32`|`Float32`|32bit floating point number (IEEE 754-2008 binary32)
 |`0.0_f64`|`Float64`|64bit floating point number (IEEE 754-2008 binary64)
