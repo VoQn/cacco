@@ -29,8 +29,8 @@ data AstF a
   | SymF String  -- ^ Symbol
 
   -- Collections
-  | LisF [a]            -- ^ Linked list
-  | VecF [a]            -- ^ Fixed size vector
+  | LisF [a] -- ^ Linked list
+  | VecF [a] -- ^ Fixed size vector
   | StrF (Map String a) -- ^ Struct
 
   -- Fuctors

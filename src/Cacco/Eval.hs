@@ -40,5 +40,5 @@ evalAcc (i, LisF exprs) = \env ->
 
 evalAcc (i, _) = const $ Left (show i)
 
-eval :: Expr Location -> Env -> Either String Val
+eval :: Expr Location -> Env -> Either String (Val Location)
 eval = cata (evalAcc . unAnnF)

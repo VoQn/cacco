@@ -5,7 +5,7 @@
 {-# LANGUAGE TemplateHaskell       #-}
 
 module Cacco.Error where
-import           Cacco.Val      (Val, getLocation, pretty)
+import           Cacco.Val      (Val, info, pretty)
 import           Data.Typeable  (Typeable)
 import           GHC.Generics   (Generic)
 
@@ -17,12 +17,16 @@ class Error a where
 
 -- | An error type mismatch function arguments count
 data ArityMismatch = ArityMismatch
-  {
-    _location   :: Location, -- ^ Location at the function was called
-    _funcName   :: String,   -- ^ The function name
-    _arity      :: Int,      -- ^ Arity count of the function
-    _isVariadic :: Bool,     -- ^ Is the function variadic
-    _applied    :: Int       -- ^ Applied arguments count
+  { -- | Location at the function was called
+    _location   :: Location,
+    -- | The function name
+    _funcName   :: String,
+    -- | Arity count of the function
+    _arity      :: Int,
+    -- | Is the function variadic
+    _isVariadic :: Bool,
+    -- | Applied arguments count
+    _applied    :: Int
   } deriving (Eq, Ord, Show, Typeable, Generic)
 
 makeFields ''ArityMismatch
@@ -49,11 +53,13 @@ instance Error ArityMismatch where
 
 -- | An error type mismatch types between the function and applied arguments
 data TypeMismatch = TypeMismatch
-  {
-    _funcName     :: String, -- ^ The function name
-    _expectedType :: String, -- ^ Expected type
-    _applied      :: Val     -- ^ Applied Value
-  } deriving (Eq, Ord, Show, Typeable, Generic)
+  { -- | The function name
+    _funcName     :: String,
+    -- | Expected type
+    _expectedType :: String,
+    -- | Applied Value
+    _applied      :: Val Location
+  } deriving (Eq, Show, Typeable, Generic)
 
 makeFields ''TypeMismatch
 
@@ -68,4 +74,4 @@ instance Error TypeMismatch where
     where
       name = '`' : _funcName ++ "`"
       acutal = '`' : pretty _applied ++ "`"
-      location = show (getLocation _applied)
+      location = show (info _applied)
