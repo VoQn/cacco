@@ -54,22 +54,22 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 === Declaration and Reassign
 ----
 ;; Declare procedure or constant value or variable value.
-(dec x Integer)
+(: x Integer)
 
 ;; Declare a constant value once.
-(val x 1000)
+(= x 1000)
 
 ;; Declare a mutable variable value.
-(var y 0)
+(:= y 0)
 
 ;; Strictly typing with literal.
-(val z (as 0 Uint8))
-(var w (as "something" Bytes))
+(= z (: 0 Uint8))
+(:= w (: "something" Bytes))
 
 ;; Reassign
-(set! y 1000)    ;; OK
-(set! y "hello") ;; Can't. `y` has been declared as Number type.
-(set! x 10)      ;; Can't. `x` has been declared as immutable.
+(=! y 1000)    ;; OK
+(=! y "hello") ;; Can't. `y` has been declared as Number type.
+(=! x 10)      ;; Can't. `x` has been declared as immutable.
 ----
 
 [[calling-procedure]]
@@ -79,17 +79,17 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 (foo a b c)
 
 ;; Calling closure.
-((=> (a) (* a a)) 10) ;; returns 100
+((|a| (* a a)) 10) ;; returns 100
 ----
 
 [[define-procedure]]
 === Define procedure
 ----
 ;; Declare a procedure
-(dec cubic (-> Number Number)) ;;<1>
+(: cubic (-> Number Number)) ;;<1>
 
 ;; Define the procedure
-(def (cubic x) (* x x x))
+(= (cubic x) (* x x x))
 ----
 <1> `(-> T1 T2 ... Tn)` is Function type receive `T1`, `T2` ... then return value as `Tn` type.
 

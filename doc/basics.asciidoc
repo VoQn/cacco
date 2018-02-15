@@ -18,34 +18,34 @@ v0.1.0, 2018-02-12
 
 ----
 ;; declare a constant value
-(dec x Integer)
+(: x Integer)
 
 ;; declare a simple function
-(dec not? (-> Bool Bool))
+(: not? (-> Bool Bool))
 
 ;; declare a variadic function
-(dec and? (-> Bool Bool ... Bool Bool))
+(: and? (-> Bool Bool ... Bool Bool))
 
 ;; declare a generic function
-(dec even? (let: [(i : Integral)] (-> i Bool)))
+(: even? (: i Integral) (-> i Bool))
+(: odd? (: i Integral) (-> i Bool))
 ----
-
 
 === Definition
 ----
-(def x 10) ;; x is 10 as Integer
+(= x 10) ;; x is 10 as Integer
 
 ;; using pattern match
-(def (not? true) false)
-(def (not? false) true)
+(= (not? true) false)
+(= (not? false) true)
 
 ;; using pattern match
-(def (and? false _ ... _) false)
-(def (and? _ false ... _) false)
-(def (and? _ _ ... []) true)
-(def (and? _ _ ... rest) (and? ... rest))
+(= (and? false _ ... _) false)
+(= (and? _ false ... _) false)
+(= (and? _ _ ... []) true)
+(= (and? _ _ ... rest) (and? ... rest))
 
-(def (even? x) (== (mod x 2) 0))
+(= (even? x) (== (mod x 2) 0))
 ----
 
 === Apply
@@ -57,6 +57,9 @@ v0.1.0, 2018-02-12
 
 (even? 2) ;; true
 (even? 1) ;; false
+
+(odd? 2) ;; false
+(odd? 1) ;; true
 ----
 
 [[Literals]]
@@ -88,15 +91,15 @@ cacco has `Fuzzy` types for literals.
 ===== How to guess fuzzy literal
 
 ----
-(def x 1)
+(= x 1)
 ;; ('-') cacco guess `x` is maybe Natural
 
-(def y (/. x 2))
+(= y (/. x 2))
 ;; ('o') ! cacco changed their idea that `x` is Flonum
 ;; -- and the `y` is maybe same type.
 
-(dec z (-> Float32 Float32))
-(def z (+ y y))
+(: z (-> Float32 Float32))
+(= z (+ y y))
 ;; (0_0) !! cacco find `y` is strictly used as Float32.
 ;; -- and `x` too.
 ;;
@@ -117,11 +120,11 @@ For safe using, recommend to write type annotation and use converter.
 
 ----
 ;; rewrite version
-(dec x Integer)
-(def x 1)
+(: x Integer)
+(= x 1)
 
-(dec y Float32)
-(def y
+(: y Float32)
+(= y
   (val x' (from-integer x))
   (/. x' 2))
 
