@@ -122,7 +122,7 @@ For safe using, recommend to write type annotation and use converter.
 
 (dec y Float32)
 (def y
-  (val x' (float x))
+  (val x' (from-integer x))
   (/. x' 2))
 
 (odd? x) ;; (^_^) OK
