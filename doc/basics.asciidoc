@@ -35,9 +35,8 @@ v0.1.0, 2018-02-12
 ----
 (= x 10) ;; x is 10 as Integer
 
-;; using pattern match
-(= (not? true) false)
-(= (not? false) true)
+;; using if
+(= (not? x) (if x false true))
 
 ;; using pattern match
 (= (and? false _ ... _) false)
@@ -46,6 +45,10 @@ v0.1.0, 2018-02-12
 (= (and? _ _ ... rest) (and? ... rest))
 
 (= (even? x) (== (mod x 2) 0))
+
+;; using function composition
+(= odd? (. not? even?))
+;; (= (odd? x) (not? (even? x)))
 ----
 
 === Apply
@@ -60,6 +63,51 @@ v0.1.0, 2018-02-12
 
 (odd? 2) ;; false
 (odd? 1) ;; true
+----
+
+=== Conditional branch
+
+==== if (simple)
+
+`if <prod> <then> <else>` is a special form.
+
+1. At first, `<prod>` expression will be evaluated.
+2. if `<prod>` result is ...
+  a. `true` then `<then>` expression will be evaluated.
+  b. `false` then `<else>` expression will be evaluated.
+
+`<prod>` allow only an expression that will be a `Boolean` value.
+
+----
+(if true 0 1) ;; 0
+
+(if false 0 1) ;; 1
+
+(if true 0
+    (error! "this won't be evaluated")) ;; 0
+
+(if false 0
+    (error! "this would be evaluated")) ;; error
+----
+
+==== if (multiway)
+
+other version `if` is `if [<prod> <then>] ... [else <else>]`
+
+----
+(: fizz-buzz (: i Integral) (-> i String))
+(= (fizz-buzz x)
+  (= (multiple? m) (== (mod x m) 0))
+  (if
+    [(multiple? 15) "FizzBuzz"]
+    [(multiple? 3)  "Fizz"    ]
+    [(multiple? 5)  "Buzz"    ]
+    [else           (string x)]))
+
+(fizz-buzz 1) ;; "1"
+(fizz-buzz 3) ;; "Fizz"
+(fizz-buzz 10) ;; "Buzz"
+(fizz-buzz 30) ;; "FizzBuzz"
 ----
 
 [[Literals]]
