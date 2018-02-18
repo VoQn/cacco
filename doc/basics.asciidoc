@@ -100,8 +100,8 @@ other version `if` is `if [<prod> <then>] ... [else <else>]`
   (= (multiple? m) (== (mod x m) 0))
   (if
     [(multiple? 15) "FizzBuzz"]
-    [(multiple? 3)  "Fizz"    ]
-    [(multiple? 5)  "Buzz"    ]
+    [(multiple?  3) "Fizz"    ]
+    [(multiple?  5) "Buzz"    ]
     [else           (string x)]))
 
 (fizz-buzz 1) ;; "1"
