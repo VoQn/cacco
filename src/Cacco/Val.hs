@@ -11,6 +11,7 @@ module Cacco.Val
   , int8, int16, int32, int64
   , uint8, uint16, uint32, uint64
   , integer
+  , float16, float32, float64, flonum
   , info
   , removeInfo
   , pretty
@@ -26,6 +27,7 @@ import           Data.Vector     (Vector)
 import qualified Data.Vector     as Vec
 import           Data.Word       (Word16, Word32, Word64, Word8)
 import           GHC.Generics    (Generic)
+import           Numeric.Half    (Half)
 
 data Val i
   = Unit (Maybe i)
@@ -42,7 +44,11 @@ data Val i
   | Uint64  !Word64  (Maybe i)
   | Integer !Integer (Maybe i)
 
-  | Flonum !Scientific (Maybe i)
+  | Float16 !Half       (Maybe i)
+  | Float32 !Float      (Maybe i)
+  | Float64 !Double     (Maybe i)
+  | Flonum  !Scientific (Maybe i)
+
   | Text !Text (Maybe i)
 
   | Symbol !String (Maybe i)
@@ -90,25 +96,41 @@ uint64 x = Uint64 x Nothing
 integer :: Integer -> Val i
 integer x = Integer x Nothing
 
+float16 :: Half -> Val i
+float16 x = Float16 x Nothing
+
+float32 :: Float -> Val i
+float32 x = Float32 x Nothing
+
+float64 :: Double -> Val i
+float64 x = Float64 x Nothing
+
+flonum :: Scientific -> Val i
+flonum x = Flonum x Nothing
+
 instance Eq (Val a) where
-  (==) (Unit _) (Unit _)           = True
-  (==) (Bool x _) (Bool y _)       = x == y
-  (==) (Int8 x _) (Int8 y _)       = x == y
-  (==) (Int16 x _) (Int16 y _)     = x == y
-  (==) (Int32 x _) (Int32 y _)     = x == y
-  (==) (Int64 x _) (Int64 y _)     = x == y
-  (==) (Uint8 x _) (Uint8 y _)     = x == y
-  (==) (Uint16 x _) (Uint16 y _)   = x == y
-  (==) (Uint32 x _) (Uint32 y _)   = x == y
-  (==) (Uint64 x _) (Uint64 y _)   = x == y
-  (==) (Integer x _) (Integer y _) = x == y
-  (==) (Flonum x _) (Flonum y _)   = x == y
-  (==) (Symbol x _) (Symbol y _)   = x == y
-  (==) (Text x _) (Text y _)       = x == y
-  (==) (List x _) (List y _)       = x == y
-  (==) (Vector x _) (Vector y _)   = x == y
-  (==) (Struct x _) (Struct y _)   = x == y
-  (==) _ _                         = False
+  v1 == v2 = case (v1, v2) of
+    (Unit      _, Unit      _) -> True
+    (Bool    x _, Bool    y _) -> x == y
+    (Int8    x _, Int8    y _) -> x == y
+    (Int16   x _, Int16   y _) -> x == y
+    (Int32   x _, Int32   y _) -> x == y
+    (Int64   x _, Int64   y _) -> x == y
+    (Uint8   x _, Uint8   y _) -> x == y
+    (Uint16  x _, Uint16  y _) -> x == y
+    (Uint32  x _, Uint32  y _) -> x == y
+    (Uint64  x _, Uint64  y _) -> x == y
+    (Integer x _, Integer y _) -> x == y
+    (Float16 x _, Float16 y _) -> x == y
+    (Float32 x _, Float32 y _) -> x == y
+    (Float64 x _, Float64 y _) -> x == y
+    (Flonum  x _, Flonum  y _) -> x == y
+    (Symbol  x _, Symbol  y _) -> x == y
+    (Text    x _, Text    y _) -> x == y
+    (List    x _, List    y _) -> x == y
+    (Vector  x _, Vector  y _) -> x == y
+    (Struct  x _, Struct  y _) -> x == y
+    _                          -> False
 
 instance (Show a) => Show (Val a) where
   show val = case val of
@@ -123,6 +145,9 @@ instance (Show a) => Show (Val a) where
     Uint32  x i -> unwords ["Uint32", show x, show i]
     Uint64  x i -> unwords ["Uint64", show x, show i]
     Integer x i -> unwords ["Integer", show x, show i]
+    Float16 x i -> unwords ["Float16", show x, show i]
+    Float32 x i -> unwords ["Float32", show x, show i]
+    Float64 x i -> unwords ["Float64", show x, show i]
     Flonum  x i -> unwords ["Flonum", show x, show i]
     Text    x i -> unwords ["Text", show x, show i]
     Symbol  x i -> unwords ["Symbol", show x, show i]
@@ -145,6 +170,9 @@ info val = case val of
   Uint32  _ i -> i
   Uint64  _ i -> i
   Integer _ i -> i
+  Float16 _ i -> i
+  Float32 _ i -> i
+  Float64 _ i -> i
   Flonum  _ i -> i
   Text    _ i -> i
   Symbol  _ i -> i
@@ -167,6 +195,9 @@ removeInfo val = ($ Nothing) $ case val of
   Uint32  x _ -> Uint32 x
   Uint64  x _ -> Uint64 x
   Integer x _ -> Integer x
+  Float16 x _ -> Float16 x
+  Float32 x _ -> Float32 x
+  Float64 x _ -> Float64 x
   Flonum  x _ -> Flonum x
   Text    x _ -> Text x
   Symbol  x _ -> Symbol x
@@ -189,6 +220,9 @@ pretty val = case val of
   Uint32  x _ -> show x
   Uint64  x _ -> show x
   Integer x _ -> show x
+  Float16 x _ -> show x
+  Float32 x _ -> show x
+  Float64 x _ -> show x
   Flonum  x _ -> show x
   Text    x _ -> show x
   Symbol  x _ -> x
