@@ -1,6 +1,4 @@
 {-# LANGUAGE DeriveDataTypeable    #-}
-{-# LANGUAGE DeriveFoldable        #-}
-{-# LANGUAGE DeriveFunctor         #-}
 {-# LANGUAGE DeriveGeneric         #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 
@@ -30,6 +28,8 @@ import           Data.Word       (Word16, Word32, Word64, Word8)
 import           GHC.Generics    (Generic)
 import           Numeric.Half    (Half)
 
+import           Cacco.Error     (Error)
+
 data Val i
   = Unit (Maybe i)
 
@@ -58,11 +58,11 @@ data Val i
   | Vector (Vector (Val i)) (Maybe i)
   | Struct (Map String (Val i)) (Maybe i)
 
-  | BultIn (Fn i) (Maybe i)
+  | Builtin (Fn i) (Maybe i)
   | Func (Fn i) (Maybe i)
   deriving (Typeable, Generic)
 
-type Fn i = [Val i] -> Either String (Val i)
+type Fn i = [Val i] -> Either (Error i) (Val i)
 
 unit :: Val i
 unit = Unit Nothing
@@ -155,7 +155,7 @@ instance (Show a) => Show (Val a) where
     List    x i -> unwords ["List", show x, show i]
     Vector  x i -> unwords ["Vector", show x, show i]
     Struct  x i -> unwords ["Struct", show x, show i]
-    BultIn  _ i -> unwords ["BultIn", show i]
+    Builtin _ i -> unwords ["Builtin", show i]
     Func    _ i -> unwords ["Func", show i]
 
 info :: Val i -> Maybe i
@@ -180,10 +180,10 @@ info val = case val of
   List    _ i -> i
   Vector  _ i -> i
   Struct  _ i -> i
-  BultIn  _ i -> i
+  Builtin _ i -> i
   Func    _ i -> i
 
-setInfo :: (Maybe i) -> Val i -> Val i
+setInfo :: Maybe i -> Val i -> Val i
 setInfo i v = ($ i) $ case v of
   Unit      _ -> Unit
   Bool    x _ -> Bool x
@@ -205,7 +205,7 @@ setInfo i v = ($ i) $ case v of
   List    x _ -> List x
   Vector  x _ -> Vector x
   Struct  x _ -> Struct x
-  BultIn  x _ -> BultIn x
+  Builtin x _ -> Builtin x
   Func    x _ -> Func x
 
 removeInfo :: Val i -> Val i
@@ -230,7 +230,7 @@ removeInfo val = ($ Nothing) $ case val of
   List    x _ -> List $ removeInfo <$> x
   Vector  x _ -> Vector $ removeInfo <$> x
   Struct  x _ -> Struct $ removeInfo <$> x
-  BultIn  x _ -> BultIn x
+  Builtin x _ -> Builtin x
   Func    x _ -> Func x
 
 pretty :: Val i -> String
@@ -255,7 +255,7 @@ pretty val = case val of
   List    x _ -> '(' : unwords (pretty <$> x) ++ ")"
   Vector  x _ -> '[' : unwords (pretty <$> Vec.toList x) ++ "]"
   Struct  x _ -> '{' : unwords (prettyPair <$> Map.toList x) ++ "}"
-  BultIn  _ _ -> "<#Bult_In#>"
+  Builtin _ _ -> "<#Builtin#>"
   Func    _ _ -> "<#Function#>"
 
 prettyPair :: (String, Val i) -> String

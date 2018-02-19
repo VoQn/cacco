@@ -34,6 +34,9 @@ library
     , Cacco.Syntax.Parser.Numeric
     , Cacco.Syntax.Parser
     , Cacco.Val
+    , Cacco.Error.IsError
+    , Cacco.Error.ArityMismatch
+    , Cacco.Error.TypeMismatch
     , Cacco.Error
     , Cacco.Core
     , Cacco.Eval

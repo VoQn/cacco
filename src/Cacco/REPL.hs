@@ -5,6 +5,7 @@ import qualified Data.Text                as T
 import           Control.Monad.Trans
 import           System.Console.Haskeline
 
+import           Cacco.Core               (builtin)
 import           Cacco.Eval               (eval)
 import           Cacco.Syntax.Parser      (parseTopLevel)
 import           Cacco.Val                (pretty)
@@ -15,7 +16,7 @@ process line = do
   case res of
     Left err -> print err
     Right ex -> (`mapM_` ex) $ \e ->
-      case eval e [] of
+      case eval e builtin of
         Left err  -> print err
         Right val -> putStrLn $ pretty val
 

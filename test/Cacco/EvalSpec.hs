@@ -4,6 +4,8 @@ module Cacco.EvalSpec where
 import qualified Data.Text             as Text
 import           Test.Tasty.Hspec
 
+import           Cacco.Core            (builtin)
+import           Cacco.Error
 import           Cacco.Eval            (eval)
 import           Cacco.Syntax.Location (Location)
 import           Cacco.Syntax.Parser   (parseExpr)
@@ -12,10 +14,10 @@ import qualified Cacco.Val             as Val
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
-evalTest :: String -> Either String (Val Location)
+evalTest :: String -> Either (Error Location) (Val Location)
 evalTest str = case parseExpr "EvalTest" (Text.pack str) of
-  Left _ -> Left "parse error"
-  Right expr -> case eval expr [] of
+  Left e -> Left $ Message ("parse error" ++ show e) Nothing
+  Right expr -> case eval expr builtin of
     Left err     -> Left err
     Right result -> Right result
 

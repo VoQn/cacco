@@ -17,8 +17,8 @@ import           Control.Applicative          ((*>), (<*))
 import           Data.Functor                 (Functor)
 import           Data.Text                    (Text)
 import           Text.Megaparsec              (ParsecT, choice, eof, many,
-                                               parse, parseTest, sepEndBy, try,
-                                               (<?>), (<|>))
+                                               parse, parseTest, sepEndBy,
+                                               sepEndBy1, try, (<?>), (<|>))
 
 import           Cacco.Ann                    (AnnF (AnnF))
 import qualified Cacco.Ann                    as Ann
@@ -58,10 +58,13 @@ astF :: Parser a -> Parser (AstF a)
 astF p = lexeme $ choice
     [ LitF <$> try literal
     , SymF <$> Lexer.identifier
-    , LisF <$> parens (elements p)
+    , try applyForm
     , VecF <$> brackets (elements p)
     ]
   where
+    applyForm = do
+      (f:args) <- parens $ p `sepEndBy1` spaceConsumer
+      return $ AppF f args
     elements :: Parser a -> Parser [a]
     elements = (`sepEndBy` spaceConsumer)
 

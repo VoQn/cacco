@@ -1,78 +1,58 @@
-{-# LANGUAGE AutoDeriveTypeable    #-}
-{-# LANGUAGE DeriveGeneric         #-}
-{-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE RecordWildCards       #-}
-{-# LANGUAGE TemplateHaskell       #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric      #-}
 
-module Cacco.Error where
+module Cacco.Error
+  ( module Cacco.Error.IsError
+  , Error(..)
+  , TypeMismatch
+  , ArityMismatch
+  , arityMismatch
+  , typeMismatch
+  , info
+  , hasInfo
+  , setInfo
+  ) where
 
-import           Control.Lens
-import           Data.Typeable         (Typeable)
-import           GHC.Generics          (Generic)
+import           Data.Typeable             (Typeable)
+import           GHC.Generics              (Generic)
 
-import           Cacco.Syntax.Location (Location)
-import           Cacco.Val             (Val, info, pretty)
+import           Cacco.Error.ArityMismatch (ArityMismatch)
+import qualified Cacco.Error.ArityMismatch as Arity
+import           Cacco.Error.IsError
+import           Cacco.Error.TypeMismatch  (TypeMismatch)
+import           Cacco.Error.TypeMismatch  as TypeMismatch
 
-class Error a where
-  printError :: a -> String
+data Error i
+  = Message String (Maybe i)
+  | UnknownSymbol String (Maybe i)
+  | InvalidForm (Maybe i)
+  | ArityMismatch ArityMismatch (Maybe i)
+  | TypeMismatch TypeMismatch (Maybe i)
+  deriving (Eq, Show, Typeable, Generic)
 
--- | An error type mismatch function arguments count
-data ArityMismatch = ArityMismatch
-  { -- | Location at the function was called
-    _location   :: Location,
-    -- | The function name
-    _funcName   :: String,
-    -- | Arity count of the function
-    _arity      :: Int,
-    -- | Is the function variadic
-    _isVariadic :: Bool,
-    -- | Applied arguments count
-    _applied    :: Int
-  } deriving (Eq, Ord, Show, Typeable, Generic)
+info :: Error i -> Maybe i
+info err = case err of
+  Message _ i       -> i
+  UnknownSymbol _ i -> i
+  InvalidForm i     -> i
+  ArityMismatch _ i -> i
+  TypeMismatch _ i  -> i
 
-makeFields ''ArityMismatch
+hasInfo :: Error i -> Bool
+hasInfo err = case info err of
+  Nothing -> False
+  _       -> True
 
-instance Error ArityMismatch where
-  printError ArityMismatch{..} =
-      unwords [
-        "arity mismatch:", name,
-        "required", arguments ++ ".",
-        "but got", actual ++ ".",
-        location
-      ]
-    where
-      atLeast
-        | _isVariadic = ""
-        | otherwise = "at least "
-      args
-        | _arity <= 1 = "argument"
-        | otherwise = "arguments"
-      name = '`' : _funcName ++ "`"
-      arguments = unwords [ atLeast ++ show _arity, args ]
-      actual = show _applied
-      location = show _location
+setInfo :: Maybe i -> Error i -> Error i
+setInfo i e = ($ i) $ case e of
+  Message x _       -> Message x
+  UnknownSymbol x _ -> UnknownSymbol x
+  InvalidForm _     -> InvalidForm
+  ArityMismatch x _ -> ArityMismatch x
+  TypeMismatch x _  -> TypeMismatch x
 
--- | An error type mismatch types between the function and applied arguments
-data TypeMismatch = TypeMismatch
-  { -- | The function name
-    _funcName     :: String,
-    -- | Expected type
-    _expectedType :: String,
-    -- | Applied Value
-    _applied      :: Val Location
-  } deriving (Eq, Show, Typeable, Generic)
+arityMismatch :: Error i
+arityMismatch = ArityMismatch Arity.defaultError Nothing
 
-makeFields ''TypeMismatch
-
-instance Error TypeMismatch where
-  printError TypeMismatch{..} =
-    unwords [
-        "type mismatch:", name,
-        "expected:", _expectedType, "type.",
-        "but got:", acutal ++ ".",
-        location
-      ]
-    where
-      name = '`' : _funcName ++ "`"
-      acutal = '`' : pretty _applied ++ "`"
-      location = show (info _applied)
+typeMismatch :: Error i
+typeMismatch = TypeMismatch TypeMismatch.defaultError Nothing

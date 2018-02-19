@@ -64,49 +64,43 @@ parseExprSpec = describe "Cacco.Parser.parseExpr" $ do
   --
   it "can parse \"(dec x Integer)\"" $
     testParse "(dec x Integer)" `shouldBe` Right
-      (List
-        [ Symbol "dec"
-        , Symbol "x"
+      (App (Symbol "dec")
+        [ Symbol "x"
         , Symbol "Integer"
         ])
   --
   it "can parse \"(val x 100)\"" $
     testParse "(val x 100)" `shouldBe` Right
-      (List
-        [ Symbol "val"
-        , Symbol "x"
+      (App (Symbol "val")
+        [ Symbol "x"
         , Literal $ Integer 100
         ])
   --
   it "can parse \"(var x 100)\"" $
     testParse "(var x 100)" `shouldBe` Right
-      (List
-        [ Symbol "var"
-        , Symbol "x"
+      (App (Symbol "var")
+        [ Symbol "x"
         , Literal $ Integer 100
         ])
   --
   it "can parse \"(var x 10.0)\"" $
     testParse "(var x 10.0)" `shouldBe` Right
-      (List
-        [ Symbol "var"
-        , Symbol "x"
+      (App (Symbol "var")
+        [ Symbol "x"
         , Literal $ Flonum 10.0
         ])
   --
   it "can parse \"(set! x 0)\"" $
     testParse "(set! x 0)" `shouldBe` Right
-      (List
-        [ Symbol "set!"
-        , Symbol "x"
+      (App (Symbol "set!")
+        [ Symbol "x"
         , Literal $ Integer 0
         ])
   --
   it "can parse \"(foo true false\\n undefined 2)\"" $
     testParse "(foo true false\n undefined \"hello\" 2)" `shouldBe` Right
-      (List
-        [ Symbol "foo"
-        , Literal $ Bool True
+      (App (Symbol "foo")
+        [ Literal $ Bool True
         , Literal $ Bool False
         , Literal Undef
         , Literal $ Text "hello"
@@ -115,9 +109,8 @@ parseExprSpec = describe "Cacco.Parser.parseExpr" $ do
   --
   it "can parse \"(+ +1 -2)\"" $
     testParse "(+ +1 -2)" `shouldBe` Right
-      (List
-        [ Symbol "+"
-        , Literal $ Integer 1
+      (App (Symbol "+")
+        [ Literal $ Integer 1
         , Literal $ Integer (-2)
         ])
   --

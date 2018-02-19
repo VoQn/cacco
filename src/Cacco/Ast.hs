@@ -1,25 +1,19 @@
 {-# LANGUAGE DataKinds            #-}
-{-# LANGUAGE DeriveFoldable       #-}
-{-# LANGUAGE DeriveFunctor        #-}
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE GADTs                #-}
 {-# LANGUAGE KindSignatures       #-}
-{-# LANGUAGE LambdaCase           #-}
 {-# LANGUAGE PatternSynonyms      #-}
 {-# LANGUAGE PolyKinds            #-}
 {-# LANGUAGE RankNTypes           #-}
-{-# LANGUAGE StandaloneDeriving   #-}
 {-# LANGUAGE TypeFamilies         #-}
 {-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Cacco.Ast where
 
-import           Cacco.IxFix      (IxFix (..), IxFunctor (..),
-                                   IxTraversable (..), cata, imapDefault)
-import           Data.Traversable ()
-
-import           Cacco.Literal    (Literal)
+import           Cacco.IxFix          (IxFix (..), IxFunctor (..),
+                                       IxTraversable (..), cata, imapDefault)
+import           Cacco.Syntax.Literal (Literal)
 
 data Var
   = VarId String
