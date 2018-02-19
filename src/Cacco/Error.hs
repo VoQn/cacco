@@ -5,12 +5,13 @@
 {-# LANGUAGE TemplateHaskell       #-}
 
 module Cacco.Error where
-import           Cacco.Val      (Val, info, pretty)
-import           Data.Typeable  (Typeable)
-import           GHC.Generics   (Generic)
 
-import           Cacco.Location (Location)
 import           Control.Lens
+import           Data.Typeable         (Typeable)
+import           GHC.Generics          (Generic)
+
+import           Cacco.Syntax.Location (Location)
+import           Cacco.Val             (Val, info, pretty)
 
 class Error a where
   printError :: a -> String

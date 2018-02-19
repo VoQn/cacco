@@ -2,14 +2,15 @@
 
 module Cacco.LexerSpec where
 
-import qualified Cacco.Lexer      as Lexer
-import           Cacco.Literal
-import           Data.Int         ()
-import           Data.Monoid      ((<>))
-import qualified Data.Text        as Text
+import           Data.Int             ()
+import           Data.Monoid          ((<>))
+import qualified Data.Text            as Text
 import           Data.Word
-import           Test.Tasty.Hspec (Spec, context, it, shouldBe)
-import           Text.Megaparsec  (parse)
+import           Test.Tasty.Hspec     (Spec, context, it, shouldBe)
+import           Text.Megaparsec      (parse)
+
+import qualified Cacco.Syntax.Lexer   as Lexer
+import           Cacco.Syntax.Literal
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 

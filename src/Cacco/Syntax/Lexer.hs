@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Cacco.Lexer
+module Cacco.Syntax.Lexer
   ( Parser
   , spaceConsumer
   , lexeme
@@ -26,10 +26,10 @@ import           Text.Megaparsec
 import           Text.Megaparsec.Char       hiding (symbolChar)
 import qualified Text.Megaparsec.Char.Lexer as L
 
-import           Cacco.Literal              (Literal)
-import qualified Cacco.Literal              as Lit
-import           Cacco.Location             (Location (..))
-import qualified Cacco.Location             as Location
+import           Cacco.Syntax.Literal       (Literal)
+import qualified Cacco.Syntax.Literal       as Lit
+import           Cacco.Syntax.Location      (Location (..))
+import qualified Cacco.Syntax.Location      as Location
 
 type Parser = Parsec Void Text
 

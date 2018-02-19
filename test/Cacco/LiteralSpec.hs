@@ -4,7 +4,7 @@ module Cacco.LiteralSpec where
 
 import           Test.Tasty.Hspec
 
-import           Cacco.Literal    (Literal (..))
+import           Cacco.Syntax.Literal (Literal (..))
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 

@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric      #-}
 
-module Cacco.Literal
+module Cacco.Syntax.Literal
   ( Literal(..)
 
   ) where

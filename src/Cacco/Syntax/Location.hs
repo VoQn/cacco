@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveGeneric      #-}
 {-# LANGUAGE TemplateHaskell    #-}
 
-module Cacco.Location
+module Cacco.Syntax.Location
   ( Location(..)
   , sourceName
   , startLine
@@ -14,14 +14,15 @@ module Cacco.Location
   , toPostions
   ) where
 
-import           Cacco.Position      (Position)
-import qualified Cacco.Position      as P
-import           Control.DeepSeq     (NFData)
-import           Control.Lens        (makeLenses, (&), (.~), (^.))
-import           Data.Monoid         ((<>))
-import           Data.Typeable       (Typeable)
+import           Control.DeepSeq       (NFData)
+import           Control.Lens          (makeLenses, (&), (.~), (^.))
+import           Data.Monoid           ((<>))
+import           Data.Typeable         (Typeable)
 import           GHC.Generics
-import           Text.Megaparsec.Pos (SourcePos)
+import           Text.Megaparsec.Pos   (SourcePos)
+
+import           Cacco.Syntax.Position (Position)
+import qualified Cacco.Syntax.Position as P
 
 -- | The abstract data type @Location@ hints source positions.
 data Location = Location

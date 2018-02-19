@@ -1,14 +1,16 @@
 
 module Cacco.EvalSpec where
 
-import qualified Data.Text        as Text
+import qualified Data.Text             as Text
 import           Test.Tasty.Hspec
 
-import           Cacco.Eval       (eval)
-import           Cacco.Location   (Location)
-import           Cacco.Parser     (parseExpr)
-import           Cacco.Val        (Val (..))
-import qualified Cacco.Val        as Val
+import           Cacco.Eval            (eval)
+import           Cacco.Syntax.Location (Location)
+import           Cacco.Syntax.Parser   (parseExpr)
+import           Cacco.Val             (Val (..))
+import qualified Cacco.Val             as Val
+
+{-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
 evalTest :: String -> Either String (Val Location)
 evalTest str = case parseExpr "EvalTest" (Text.pack str) of

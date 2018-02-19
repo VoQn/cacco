@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveGeneric      #-}
 {-# LANGUAGE TemplateHaskell    #-}
 
-module Cacco.Position where
+module Cacco.Syntax.Position where
 
 import           Control.DeepSeq     (NFData)
 import           Control.Lens        (makeLenses)

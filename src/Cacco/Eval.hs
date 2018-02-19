@@ -1,16 +1,16 @@
 
 module Cacco.Eval where
 
-import           Control.Monad  (sequence)
+import           Control.Monad         (sequence)
 
-import           Cacco.Ann      (AnnF (..))
-import           Cacco.Core     (Env, EvalF)
-import qualified Cacco.Core     as Core
-import           Cacco.Expr     (AstF (..), Expr)
-import           Cacco.Fix      (cata)
-import qualified Cacco.Literal  as Lit
-import           Cacco.Location (Location)
-import           Cacco.Val      (Val (..))
+import           Cacco.Ann             (AnnF (..))
+import           Cacco.Core            (Env, EvalF)
+import qualified Cacco.Core            as Core
+import           Cacco.Fix             (cata)
+import           Cacco.Syntax.Expr     (AstF (..), Expr)
+import qualified Cacco.Syntax.Literal  as Lit
+import           Cacco.Syntax.Location (Location)
+import           Cacco.Val             (Val (..))
 
 evalAcc :: (Location, AstF EvalF) -> EvalF
 evalAcc (i, LitF l) = const $ case l of

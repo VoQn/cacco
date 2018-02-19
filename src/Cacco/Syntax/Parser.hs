@@ -1,29 +1,29 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes        #-}
-module Cacco.Parser
+module Cacco.Syntax.Parser
   ( parseTopLevel
   , parseExpr
   , parseAst
   , numeric
   ) where
 
-import           Control.Applicative ((*>), (<*))
-import           Data.Functor        (Functor)
-import           Data.Text           (Text)
-import           Data.Void           (Void)
-import           Text.Megaparsec     (ParsecT, Token, choice, eof, many, parse,
-                                      sepEndBy, try, (<?>), (<|>))
-import qualified Text.Megaparsec     as Megaparsec
+import           Control.Applicative   ((*>), (<*))
+import           Data.Functor          (Functor)
+import           Data.Text             (Text)
+import           Data.Void             (Void)
+import           Text.Megaparsec       (ParsecT, Token, choice, eof, many,
+                                        parse, sepEndBy, try, (<?>), (<|>))
+import qualified Text.Megaparsec       as Megaparsec
 
-import           Cacco.Ann           (AnnF (AnnF))
-import qualified Cacco.Ann           as Ann
-import           Cacco.Expr          (Ast, AstF (..), Expr)
-import           Cacco.Fix           (Fix (..))
-import           Cacco.Lexer         (Parser, brackets, lexeme, parens,
-                                      spaceConsumer, withLocation)
-import qualified Cacco.Lexer         as Lexer
-import           Cacco.Literal       (Literal (..))
-import           Cacco.Location      (Location)
+import           Cacco.Ann             (AnnF (AnnF))
+import qualified Cacco.Ann             as Ann
+import           Cacco.Fix             (Fix (..))
+import           Cacco.Syntax.Expr     (Ast, AstF (..), Expr)
+import           Cacco.Syntax.Lexer    (Parser, brackets, lexeme, parens,
+                                        spaceConsumer, withLocation)
+import qualified Cacco.Syntax.Lexer    as Lexer
+import           Cacco.Syntax.Literal  (Literal (..))
+import           Cacco.Syntax.Location (Location)
 
 contents :: Parser a -> Parser a
 contents parser = spaceConsumer *> parser <* eof

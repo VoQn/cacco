@@ -3,7 +3,7 @@ module Cacco.PositionSpec where
 import           Control.Lens
 import           Test.Tasty.Hspec
 
-import           Cacco.Position
+import           Cacco.Syntax.Position
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 

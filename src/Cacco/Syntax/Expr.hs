@@ -11,15 +11,15 @@
 {-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Cacco.Expr where
+module Cacco.Syntax.Expr where
 
-import           Data.Map.Lazy (Map)
-import           Data.Typeable (Typeable)
-import           GHC.Generics  (Generic)
+import           Data.Map.Lazy        (Map)
+import           Data.Typeable        (Typeable)
+import           GHC.Generics         (Generic)
 
 import           Cacco.Ann
 import           Cacco.Fix
-import           Cacco.Literal (Literal)
+import           Cacco.Syntax.Literal (Literal)
 
 -- | Abstruct syntax tree of Cacco language
 data AstF a

@@ -24,14 +24,14 @@ library
     -Wall
   exposed-modules:
       Lib
-    , Cacco.Position
-    , Cacco.Location
-    , Cacco.Literal
     , Cacco.Fix
     , Cacco.Ann
-    , Cacco.Expr
-    , Cacco.Lexer
-    , Cacco.Parser
+    , Cacco.Syntax.Position
+    , Cacco.Syntax.Location
+    , Cacco.Syntax.Literal
+    , Cacco.Syntax.Expr
+    , Cacco.Syntax.Lexer
+    , Cacco.Syntax.Parser
     , Cacco.Val
     , Cacco.Error
     , Cacco.Core

@@ -6,7 +6,7 @@ import           Control.Monad.Trans
 import           System.Console.Haskeline
 
 import           Cacco.Eval               (eval)
-import           Cacco.Parser
+import           Cacco.Syntax.Parser      (parseTopLevel)
 import           Cacco.Val                (pretty)
 
 process :: String -> IO ()

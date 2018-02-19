@@ -2,11 +2,12 @@
 
 module Cacco.ParserSpec where
 
-import           Cacco.Expr
-import           Cacco.Literal    (Literal (..))
-import           Cacco.Parser
 import           Test.Tasty.Hspec
-import           Text.Megaparsec  (parse)
+import           Text.Megaparsec      (parse)
+
+import           Cacco.Syntax.Expr
+import           Cacco.Syntax.Literal (Literal (..))
+import           Cacco.Syntax.Parser
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 

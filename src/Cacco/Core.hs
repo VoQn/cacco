@@ -8,15 +8,15 @@ module Cacco.Core
 
 --
 import           Data.Int
-import           Data.Scientific (Scientific)
+import           Data.Scientific       (Scientific)
 import           Data.Word
-import           Numeric.Half    (Half)
+import           Numeric.Half          (Half)
 
-import           Cacco.Error     (ArityMismatch (..), Error (..),
-                                  TypeMismatch (..), printError)
-import           Cacco.Location  (Location)
-import           Cacco.Val       (Val (..))
-import qualified Cacco.Val       as Val
+import           Cacco.Error           (ArityMismatch (..), Error (..),
+                                        TypeMismatch (..), printError)
+import           Cacco.Syntax.Location (Location)
+import           Cacco.Val             (Val (..))
+import qualified Cacco.Val             as Val
 
 type Env = [(String, Val Location)]
 type EvalF = Env -> Either String (Val Location)
