@@ -16,6 +16,7 @@ import           Cacco.Error     (ArityMismatch (..), Error (..),
                                   TypeMismatch (..), printError)
 import           Cacco.Location  (Location)
 import           Cacco.Val       (Val (..))
+import qualified Cacco.Val       as Val
 
 type Env = [(String, Val Location)]
 type EvalF = Env -> Either String (Val Location)
@@ -112,12 +113,9 @@ untilFlo n f x (v:r) = case v of
   _          -> raise $ TypeMismatch n "Flonum" v
 --
 
-eqArityError :: Location -> Int -> ArityMismatch
-eqArityError l = ArityMismatch l "==" 2 False
-
 eq :: BuiltInFunc
-eq l [] = raise $ eqArityError l 0
-eq l [_] = raise $ eqArityError l 1
+eq l [] = raise $ ArityMismatch l "==" 2 False 0
+eq l [_] = raise $ ArityMismatch l "==" 2 False 1
 eq l (v:vs) = (\b -> Bool b $ Just l) <$> case v of
     Bool    x _ -> untilBool `startWith` x
     Int8    x _ -> untilI8   `startWith` x
@@ -135,6 +133,7 @@ eq l (v:vs) = (\b -> Bool b $ Just l) <$> case v of
     Flonum  x _ -> untilFlo  `startWith` x
     _           -> raise $ TypeMismatch "==" "Eq" v
   where
+    startWith :: (Eq a) => Until a -> a -> Either String Bool
     startWith f x = f "==" (/=) x vs
     {-# INLINE startWith #-}
 
@@ -158,6 +157,7 @@ neq l (v:vs) = (\b -> Bool b $ Just l) <$> case v of
     Flonum  x _ -> untilFlo  `startWith` x
     _           -> raise $ TypeMismatch "!=" "Eq" v
   where
+    startWith :: (Eq a) => Until a -> a -> Either String Bool
     startWith f x = f "!=" (==) x vs
     {-# INLINE startWith #-}
 
@@ -180,6 +180,7 @@ gt l (v:vs) = ($ Just l) . Bool <$> case v of
     Flonum  x _ -> untilFlo `startWith` x
     _           -> raise $ TypeMismatch ">" "Ord" v
   where
+    startWith :: (Ord a) => Until a -> a -> Either String Bool
     startWith f x = f ">" (<=) x vs
     {-# INLINE startWith #-}
 --
@@ -202,6 +203,7 @@ gte l (v:vs) = ($ Just l) . Bool <$> case v of
     Flonum  x _ -> untilFlo `startWith` x
     _           -> raise $ TypeMismatch ">=" "Ord" v
   where
+    startWith :: (Ord a) => Until a -> a -> Either String Bool
     startWith f x = f ">=" (<) x vs
     {-# INLINE startWith #-}
 --
@@ -224,6 +226,7 @@ lt l (v:vs) = ($ Just l) . Bool <$> case v of
     Flonum  x _ -> untilFlo `startWith` x
     _           -> raise $ TypeMismatch "<" "Ord" v
   where
+    startWith :: (Ord a) => Until a -> a -> Either String Bool
     startWith f x = f "<" (>=) x vs
     {-# INLINE startWith #-}
 --
@@ -246,111 +249,115 @@ lte l (v:vs) = ($ Just l) . Bool <$> case v of
     Flonum  x _ -> untilFlo `startWith` x
     _           -> raise $ TypeMismatch "<=" "Ord" v
   where
+    startWith :: (Ord a) => Until a -> a -> Either String Bool
     startWith f x = f "<=" (>) x vs
     {-# INLINE startWith #-}
 --
-type Acc a = String -> (a -> a -> a) -> a -> [Val Location] -> Either String a
 
-accI8 :: Acc Int8
-accI8 _ _ x []    = return x
+type Acc a b = String -> (a -> a -> a) -> a -> [Val Location] -> Either String b
+
+accI8 :: Acc Int8 (Val i)
+accI8 _ _ x []    = return $ Val.int8 x
 accI8 n f x (v:r) = case v of
   Int8 y _ -> accI8 n f (f x y) r
   _        -> raise $ TypeMismatch n "Int8" v
 --
-accI16 :: Acc Int16
-accI16 _ _ x []    = return x
+accI16 :: Acc Int16 (Val i)
+accI16 _ _ x []    = return $ Val.int16 x
 accI16 n f x (v:r) = case v of
   Int16 y _ -> accI16 n f (f x y) r
   _         -> raise $ TypeMismatch n "Int16" v
 --
-accI32 :: Acc Int32
-accI32 _ _ x []    = return x
+accI32 :: Acc Int32 (Val i)
+accI32 _ _ x []    = return $ Val.int32 x
 accI32 n f x (v:r) = case v of
   Int32 y _ -> accI32 n f (f x y) r
   _         -> raise $ TypeMismatch n "Int32" v
 --
-accI64 :: Acc Int64
-accI64 _ _ x []    = return x
+accI64 :: Acc Int64 (Val i)
+accI64 _ _ x []    = return $ Val.int64 x
 accI64 n f x (v:r) = case v of
   Int64 y _ -> accI64 n f (f x y) r
   _         -> raise $ TypeMismatch n "Int64" v
 --
-accU8 :: Acc Word8
-accU8 _ _ x []    = return x
+accU8 :: Acc Word8 (Val i)
+accU8 _ _ x []    = return $ Val.uint8 x
 accU8 n f x (v:r) = case v of
   Uint8 y _ -> accU8 n f (f x y) r
   _         -> raise $ TypeMismatch n "Uint8" v
 
-accU16 :: Acc Word16
-accU16 _ _ x []    = return x
+accU16 :: Acc Word16 (Val i)
+accU16 _ _ x []    = return $ Val.uint16 x
 accU16 n f x (v:r) = case v of
   Uint16 y _ -> accU16 n f (f x y) r
   _          -> raise $ TypeMismatch n "Uint16" v
 
-accU32 :: Acc Word32
-accU32 _ _ x []    = return x
+accU32 :: Acc Word32 (Val i)
+accU32 _ _ x []    = return $ Val.uint32 x
 accU32 n f x (v:r) = case v of
   Uint32 y _ -> accU32 n f (f x y) r
   _          -> raise $ TypeMismatch n "Uint32" v
 
-accU64 :: Acc Word64
-accU64 _ _ x []    = return x
+accU64 :: Acc Word64 (Val i)
+accU64 _ _ x []    = return $ Val.uint64 x
 accU64 n f x (v:r) = case v of
   Uint64 y _ -> accU64 n f (f x y) r
   _          -> raise $ TypeMismatch n "Uint64" v
 
-accInt :: Acc Integer
-accInt _ _ x []    = return x
+accInt :: Acc Integer (Val i)
+accInt _ _ x []    = return $ Val.integer x
 accInt n f x (v:r) = case v of
   Integer y _ -> accInt n f (f x y) r
   _           -> raise $ TypeMismatch n "Integer" v
 --
-accF16 :: Acc Half
-accF16 _ _ x []    = return x
+accF16 :: Acc Half (Val i)
+accF16 _ _ x []    = return $ Val.float16 x
 accF16 n f x (v:r) = case v of
   Float16 y _ -> accF16 n f (f x y) r
   _           -> raise $ TypeMismatch n "Float16" v
 --
-accF32 :: Acc Float
-accF32 _ _ x []    = return x
+accF32 :: Acc Float (Val i)
+accF32 _ _ x []    = return $ Val.float32 x
 accF32 n f x (v:r) = case v of
   Float32 y _ -> accF32 n f (f x y) r
   _           -> raise $ TypeMismatch n "Float32" v
 --
-accF64 :: Acc Double
-accF64 _ _ x []    = return x
+accF64 :: Acc Double (Val i)
+accF64 _ _ x []    = return $ Val.float64 x
 accF64 n f x (v:r) = case v of
   Float64 y _ -> accF64 n f (f x y) r
   _           -> raise $ TypeMismatch n "Float64" v
 --
-accFlo :: Acc Scientific
-accFlo _ _ x []    = return x
+accFlo :: Acc Scientific (Val i)
+accFlo _ _ x []    = return $ Val.flonum x
 accFlo n f x (v:r) = case v of
   Flonum y _ -> accFlo n f (f x y) r
   _          -> raise $ TypeMismatch n "Flonum" v
 --
 
+--
 add :: BuiltInFunc
 add l []     = raise $ ArityMismatch l "+" 1 False 0
-add l (v:vs) = ($ Just l) <$> case v of
-    Int8    x _ -> Int8    <$> accI8  `startWith` x
-    Int16   x _ -> Int16   <$> accI16 `startWith` x
-    Int32   x _ -> Int32   <$> accI32 `startWith` x
-    Int64   x _ -> Int64   <$> accI64 `startWith` x
-    Uint8   x _ -> Uint8   <$> accU8  `startWith` x
-    Uint16  x _ -> Uint16  <$> accU16 `startWith` x
-    Uint32  x _ -> Uint32  <$> accU32 `startWith` x
-    Uint64  x _ -> Uint64  <$> accU64 `startWith` x
-    Integer x _ -> Integer <$> accInt `startWith` x
-    Float16 x _ -> Float16 <$> accF16 `startWith` x
-    Float32 x _ -> Float32 <$> accF32 `startWith` x
-    Float64 x _ -> Float64 <$> accF64 `startWith` x
-    Flonum  x _ -> Flonum  <$> accFlo `startWith` x
+add l (v:vs) = Val.setInfo (Just l) <$> case v of
+    Int8    x _ -> accI8  `startWith` x
+    Int16   x _ -> accI16 `startWith` x
+    Int32   x _ -> accI32 `startWith` x
+    Int64   x _ -> accI64 `startWith` x
+    Uint8   x _ -> accU8  `startWith` x
+    Uint16  x _ -> accU16 `startWith` x
+    Uint32  x _ -> accU32 `startWith` x
+    Uint64  x _ -> accU64 `startWith` x
+    Integer x _ -> accInt `startWith` x
+    Float16 x _ -> accF16 `startWith` x
+    Float32 x _ -> accF32 `startWith` x
+    Float64 x _ -> accF64 `startWith` x
+    Flonum  x _ -> accFlo `startWith` x
     _           -> raise $ TypeMismatch "+" "numeric" v
   where
+    startWith :: Num a => Acc a (Val i) -> a -> Either String (Val i)
     startWith f x = f "+" (+) x vs
     {-# INLINE startWith #-}
-
+--
 sub :: BuiltInFunc
 -- arity mismatch
 sub l [] = raise $ ArityMismatch l "-" 1 False 0
@@ -367,42 +374,44 @@ sub l [v] = ($ Just l) <$> case v of
   Flonum  x _ -> Flonum  <$> pure (negate x)
   _           -> raise $ TypeMismatch "-" "numeric" v
 -- subtraction
-sub l (v:vs) = ($ Just l) <$> case v of
-    Int8    x _ -> Int8    <$> accI8  `startWith` x
-    Int16   x _ -> Int16   <$> accI16 `startWith` x
-    Int32   x _ -> Int32   <$> accI32 `startWith` x
-    Int64   x _ -> Int64   <$> accI64 `startWith` x
-    Uint8   x _ -> Uint8   <$> accU8  `startWith` x
-    Uint16  x _ -> Uint16  <$> accU16 `startWith` x
-    Uint32  x _ -> Uint32  <$> accU32 `startWith` x
-    Uint64  x _ -> Uint64  <$> accU64 `startWith` x
-    Integer x _ -> Integer <$> accInt `startWith` x
-    Float16 x _ -> Float16 <$> accF16 `startWith` x
-    Float32 x _ -> Float32 <$> accF32 `startWith` x
-    Float64 x _ -> Float64 <$> accF64 `startWith` x
-    Flonum  x _ -> Flonum  <$> accFlo `startWith` x
+sub l (v:vs) = Val.setInfo (Just l) <$> case v of
+    Int8    x _ -> accI8  `startWith` x
+    Int16   x _ -> accI16 `startWith` x
+    Int32   x _ -> accI32 `startWith` x
+    Int64   x _ -> accI64 `startWith` x
+    Uint8   x _ -> accU8  `startWith` x
+    Uint16  x _ -> accU16 `startWith` x
+    Uint32  x _ -> accU32 `startWith` x
+    Uint64  x _ -> accU64 `startWith` x
+    Integer x _ -> accInt `startWith` x
+    Float16 x _ -> accF16 `startWith` x
+    Float32 x _ -> accF32 `startWith` x
+    Float64 x _ -> accF64 `startWith` x
+    Flonum  x _ -> accFlo `startWith` x
     _           -> raise $ TypeMismatch "-" "numeric" v
   where
+    startWith :: Num a => Acc a (Val i) -> a -> Either String (Val i)
     startWith f x = f "-" (-) x vs
     {-# INLINE startWith #-}
 
 mul :: BuiltInFunc
 mul l [] = raise $ ArityMismatch l "*" 1 False 0
-mul l (v:vs) = ($ Just l) <$> case v of
-    Int8    x _ -> Int8    <$> accI8  `startWith` x
-    Int16   x _ -> Int16   <$> accI16 `startWith` x
-    Int32   x _ -> Int32   <$> accI32 `startWith` x
-    Int64   x _ -> Int64   <$> accI64 `startWith` x
-    Uint8   x _ -> Uint8   <$> accU8  `startWith` x
-    Uint16  x _ -> Uint16  <$> accU16 `startWith` x
-    Uint32  x _ -> Uint32  <$> accU32 `startWith` x
-    Uint64  x _ -> Uint64  <$> accU64 `startWith` x
-    Integer x _ -> Integer <$> accInt `startWith` x
-    Float16 x _ -> Float16 <$> accF16 `startWith` x
-    Float32 x _ -> Float32 <$> accF32 `startWith` x
-    Float64 x _ -> Float64 <$> accF64 `startWith` x
-    Flonum  x _ -> Flonum  <$> accFlo `startWith` x
+mul l (v:vs) = Val.setInfo (Just l) <$> case v of
+    Int8    x _ -> accI8  `startWith` x
+    Int16   x _ -> accI16 `startWith` x
+    Int32   x _ -> accI32 `startWith` x
+    Int64   x _ -> accI64 `startWith` x
+    Uint8   x _ -> accU8  `startWith` x
+    Uint16  x _ -> accU16 `startWith` x
+    Uint32  x _ -> accU32 `startWith` x
+    Uint64  x _ -> accU64 `startWith` x
+    Integer x _ -> accInt `startWith` x
+    Float16 x _ -> accF16 `startWith` x
+    Float32 x _ -> accF32 `startWith` x
+    Float64 x _ -> accF64 `startWith` x
+    Flonum  x _ -> accFlo `startWith` x
     _           -> raise $ TypeMismatch "*" "numeric" v
   where
+    startWith :: Num a => Acc a (Val i) -> a -> Either String (Val i)
     startWith f x = f "*" (*) x vs
     {-# INLINE startWith #-}

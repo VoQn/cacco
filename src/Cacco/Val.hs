@@ -13,6 +13,7 @@ module Cacco.Val
   , integer
   , float16, float32, float64, flonum
   , info
+  , setInfo
   , removeInfo
   , pretty
   ) where
@@ -181,6 +182,31 @@ info val = case val of
   Struct  _ i -> i
   BultIn  _ i -> i
   Func    _ i -> i
+
+setInfo :: (Maybe i) -> Val i -> Val i
+setInfo i v = ($ i) $ case v of
+  Unit      _ -> Unit
+  Bool    x _ -> Bool x
+  Int8    x _ -> Int8 x
+  Int16   x _ -> Int16 x
+  Int32   x _ -> Int32 x
+  Int64   x _ -> Int64 x
+  Uint8   x _ -> Uint8 x
+  Uint16  x _ -> Uint16 x
+  Uint32  x _ -> Uint32 x
+  Uint64  x _ -> Uint64 x
+  Integer x _ -> Integer x
+  Float16 x _ -> Float16 x
+  Float32 x _ -> Float32 x
+  Float64 x _ -> Float64 x
+  Flonum  x _ -> Flonum x
+  Text    x _ -> Text x
+  Symbol  x _ -> Symbol x
+  List    x _ -> List x
+  Vector  x _ -> Vector x
+  Struct  x _ -> Struct x
+  BultIn  x _ -> BultIn x
+  Func    x _ -> Func x
 
 removeInfo :: Val i -> Val i
 removeInfo val = ($ Nothing) $ case val of
