@@ -30,7 +30,8 @@ library
     , Cacco.Syntax.Location
     , Cacco.Syntax.Literal
     , Cacco.Syntax.Expr
-    , Cacco.Syntax.Lexer
+    , Cacco.Syntax.Parser.Lexer
+    , Cacco.Syntax.Parser.Numeric
     , Cacco.Syntax.Parser
     , Cacco.Val
     , Cacco.Error
@@ -39,6 +40,8 @@ library
     , Cacco.REPL
     , Cacco.Type
     , Cacco.Inferencer
+  other-modules:
+      Cacco.Syntax.Parser.Internal
   build-depends:
       base >= 4.7 && < 5
     , vector

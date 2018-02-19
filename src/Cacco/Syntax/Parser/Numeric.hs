@@ -1,84 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Cacco.Syntax.Lexer
-  ( Parser
-  , spaceConsumer
-  , lexeme
-  , withLocation
-  , symbol
-  , parens, braces, angles, brackets
-  , bool
-  , integer
+module Cacco.Syntax.Parser.Numeric
+  ( integer
   , flonum
-  , stringLiteral
-  , identifier
   ) where
 
-import           Control.Applicative        ((<*>))
-import           Data.Bits                  (shiftL)
-import           Data.Functor               (($>))
-import           Data.List                  (foldl')
-import           Data.Scientific            (Scientific, toRealFloat)
-import           Data.Text                  (Text)
-import qualified Data.Text                  as T
-import           Data.Void                  (Void)
-import           Text.Megaparsec
-import           Text.Megaparsec.Char       hiding (symbolChar)
-import qualified Text.Megaparsec.Char.Lexer as L
+import           Data.Bits                    (shiftL)
+import           Data.Functor                 (($>))
+import           Data.List                    (foldl')
+import           Data.Scientific              (Scientific, toRealFloat)
+import           Text.Megaparsec              (choice, lookAhead, option, some,
+                                               try, (<?>), (<|>))
+import           Text.Megaparsec.Char         (char, digitChar)
+import qualified Text.Megaparsec.Char.Lexer   as L
 
-import           Cacco.Syntax.Literal       (Literal)
-import qualified Cacco.Syntax.Literal       as Lit
-import           Cacco.Syntax.Location      (Location (..))
-import qualified Cacco.Syntax.Location      as Location
-
-type Parser = Parsec Void Text
-
--- | Skipping space characters and comments.
-spaceConsumer :: Parser ()
-spaceConsumer = L.space space1 lineComment blockComment
-
--- | Ignore single line comment.
-lineComment :: Parser ()
-lineComment = L.skipLineComment ";;"
-{-# INLINE lineComment #-}
-
--- | Ignore nested block comment.
-blockComment :: Parser ()
-blockComment = L.skipBlockCommentNested "(;" ";)"
-{-# INLINE blockComment #-}
-
--- | Make parser to ignore any space and comment expressions
-lexeme :: Parser a -> Parser a
-lexeme = L.lexeme spaceConsumer
-
--- | Make specified string to token parser
-symbol :: Text -> Parser Text
-symbol = L.symbol spaceConsumer
-
-parens :: Parser a -> Parser a
-parens = symbol "(" `between` symbol ")"
-
-braces :: Parser a -> Parser a
-braces = symbol "{" `between` symbol "}"
-
-angles :: Parser a -> Parser a
-angles = symbol "<" `between` symbol ">"
-
-brackets :: Parser a -> Parser a
-brackets = symbol "[" `between` symbol "]"
-
-withLocation :: Parser a -> Parser (Location, a)
--- ^ Capture token's 'Location'.
---
--- >>> parse (withLocation integer) "test" "10"
--- (test:1,1-1,3,Integer 10)
---
-withLocation parser = do
-  begin <- getPosition
-  value <- parser
-  end   <- getPosition
-  let location = Location.fromSourcePos begin end
-  return (location, value)
+import           Cacco.Syntax.Literal
+import           Cacco.Syntax.Parser.Internal (Parser)
+import           Cacco.Syntax.Parser.Lexer
 
 -- | Parse a number with optional sign
 withSign :: Num a => Parser a -> Parser (Bool, a)
@@ -94,25 +32,6 @@ withSign parser = do
     plus :: Num a => Parser (Bool, a -> a)
     plus = char '+' $> (True, id)
     {-# INLINE plus #-}
-
-bool :: Parser Literal
--- ^ Parse a boolean literal
---
--- >>> parseTest bool "true"
--- Bool True
---
--- >>> parseTest bool "false"
--- Bool False
---
-bool = Lit.Bool <$> (true <|> false) <?> "boolean literal: true or false"
-  where
-    true :: Parser Bool
-    true = symbol "true" $> True
-    {-# INLINE true #-}
-
-    false :: Parser Bool
-    false = symbol "false" $> False
-    {-# INLINE false #-}
 
 -- | Parse a binary integer with prefix 'b' (e.g. 101010)
 binary' :: Parser Integer
@@ -192,7 +111,7 @@ integer = integer' <?> "integer literal"
 integer' :: Parser Literal
 integer' = do
     (isSigned, number) <- try notated <|> withSign L.decimal
-    wrapper            <- option Lit.Integer $ suffix isSigned
+    wrapper            <- option Integer $ suffix isSigned
     return $ wrapper number
   where
     -- | parse positional notated integer
@@ -217,35 +136,35 @@ unsignedInt = char 'u' >> choice [u8, u16, u32, u64]
 {-# INLINE unsignedInt #-}
 
 i8 :: Parser (Integer -> Literal)
-i8  = symbol "8"  $> Lit.Int8  . fromInteger
+i8  = symbol "8"  $> Int8  . fromInteger
 {-# INLINE i8 #-}
 
 i16 :: Parser (Integer -> Literal)
-i16 = symbol "16" $> Lit.Int16 . fromInteger
+i16 = symbol "16" $> Int16 . fromInteger
 {-# INLINE i16 #-}
 
 i32 :: Parser (Integer -> Literal)
-i32 = symbol "32" $> Lit.Int32 . fromInteger
+i32 = symbol "32" $> Int32 . fromInteger
 {-# INLINE i32 #-}
 
 i64 :: Parser (Integer -> Literal)
-i64 = symbol "64" $> Lit.Int64 . fromInteger
+i64 = symbol "64" $> Int64 . fromInteger
 {-# INLINE i64 #-}
 
 u8 :: Parser (Integer -> Literal)
-u8  = symbol "8"  $> Lit.Uint8  . fromInteger
+u8  = symbol "8"  $> Uint8  . fromInteger
 {-# INLINE u8 #-}
 
 u16 :: Parser (Integer -> Literal)
-u16 = symbol "16" $> Lit.Uint16 . fromInteger
+u16 = symbol "16" $> Uint16 . fromInteger
 {-# INLINE u16 #-}
 
 u32 :: Parser (Integer -> Literal)
-u32 = symbol "32" $> Lit.Uint32 . fromInteger
+u32 = symbol "32" $> Uint32 . fromInteger
 {-# INLINE u32 #-}
 
 u64 :: Parser (Integer -> Literal)
-u64 = symbol "64" $> Lit.Uint64 . fromInteger
+u64 = symbol "64" $> Uint64 . fromInteger
 {-# INLINE u64 #-}
 
 -- | Parse a floating point number.
@@ -256,7 +175,7 @@ flonum = float <?> "floating point number"
     float = do
       _       <- lookAhead $ try digitFloatFormat
       number  <- snd <$> withSign L.scientific
-      wrapper <- option Lit.Flonum suffix
+      wrapper <- option Flonum suffix
       return $ wrapper number
 
     suffix :: Parser (Scientific -> Literal)
@@ -270,34 +189,13 @@ digitFloatFormat = sign >> some digitChar >> (char '.' <|> char 'e') $> True
     {-# INLINE sign #-}
 
 f16 :: Parser (Scientific -> Literal)
-f16 = symbol "16" $> Lit.Float16 . toRealFloat
+f16 = symbol "16" $> Float16 . toRealFloat
 {-# INLINE f16 #-}
 
 f32 :: Parser (Scientific -> Literal)
-f32 = symbol "32" $> Lit.Float32 . toRealFloat
+f32 = symbol "32" $> Float32 . toRealFloat
 {-# INLINE f32 #-}
 
 f64 :: Parser (Scientific -> Literal)
-f64 = symbol "64" $> Lit.Float64 . toRealFloat
+f64 = symbol "64" $> Float64 . toRealFloat
 {-# INLINE f64 #-}
-
--- | Parse a Unicode text.
-stringLiteral :: Parser Text
-stringLiteral = T.pack <$> quoted <?> "string literal"
-  where
-    quoted = char '"' >> L.charLiteral `manyTill` char '"'
-    {-# INLINE quoted #-}
-
-symbolChar :: Parser Char
-symbolChar = oneOf ("!@#$%^&*_+-=|:<>?/" :: String)
-
-identifier :: Parser String
-identifier = (:) <$> identInitial <*> many identTrail
-
-identInitial :: Parser Char
-identInitial = letterChar <|> symbolChar
-{-# INLINE identInitial #-}
-
-identTrail :: Parser Char
-identTrail = letterChar <|> digitChar <|> symbolChar
-{-# INLINE identTrail #-}

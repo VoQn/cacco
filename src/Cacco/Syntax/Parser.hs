@@ -1,29 +1,35 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes        #-}
 module Cacco.Syntax.Parser
-  ( parseTopLevel
+  ( Parser
+  , ParseError
+  , parseTopLevel
   , parseExpr
   , parseAst
   , numeric
+  , module Cacco.Syntax.Parser.Lexer
+  , module Cacco.Syntax.Parser.Numeric
+  , parse
+  , parseTest
   ) where
 
-import           Control.Applicative   ((*>), (<*))
-import           Data.Functor          (Functor)
-import           Data.Text             (Text)
-import           Data.Void             (Void)
-import           Text.Megaparsec       (ParsecT, Token, choice, eof, many,
-                                        parse, sepEndBy, try, (<?>), (<|>))
-import qualified Text.Megaparsec       as Megaparsec
+import           Control.Applicative          ((*>), (<*))
+import           Data.Functor                 (Functor)
+import           Data.Text                    (Text)
+import           Text.Megaparsec              (ParsecT, choice, eof, many,
+                                               parse, parseTest, sepEndBy, try,
+                                               (<?>), (<|>))
 
-import           Cacco.Ann             (AnnF (AnnF))
-import qualified Cacco.Ann             as Ann
-import           Cacco.Fix             (Fix (..))
-import           Cacco.Syntax.Expr     (Ast, AstF (..), Expr)
-import           Cacco.Syntax.Lexer    (Parser, brackets, lexeme, parens,
-                                        spaceConsumer, withLocation)
-import qualified Cacco.Syntax.Lexer    as Lexer
-import           Cacco.Syntax.Literal  (Literal (..))
-import           Cacco.Syntax.Location (Location)
+import           Cacco.Ann                    (AnnF (AnnF))
+import qualified Cacco.Ann                    as Ann
+import           Cacco.Fix                    (Fix (..))
+import           Cacco.Syntax.Expr            (Ast, AstF (..), Expr)
+import           Cacco.Syntax.Literal         (Literal (..))
+import           Cacco.Syntax.Location        (Location)
+import           Cacco.Syntax.Parser.Internal (ParseError, Parser)
+import           Cacco.Syntax.Parser.Lexer
+import qualified Cacco.Syntax.Parser.Lexer    as Lexer
+import           Cacco.Syntax.Parser.Numeric
 
 contents :: Parser a -> Parser a
 contents parser = spaceConsumer *> parser <* eof
@@ -39,11 +45,8 @@ addLocation p = AnnF <$> withLocation p
 undef :: Parser Literal
 undef = Lexer.symbol "undefined" >> return Undef <?> "undefined"
 
--- decimal :: Parser Literal
--- decimal = Flonum <$> Lexer.decimal <?> "decimal literal"
-
 numeric :: Parser Literal
-numeric = try Lexer.flonum <|> Lexer.integer
+numeric = try flonum <|> integer
 
 text :: Parser Literal
 text = Text <$> Lexer.stringLiteral
@@ -70,8 +73,6 @@ topLevel = many expr
 
 type SourceName = String
 type SourceCode = Text
-
-type ParseError = Megaparsec.ParseError (Token Text) Void
 
 type FontendParser a = SourceName -> SourceCode -> Either ParseError a
 

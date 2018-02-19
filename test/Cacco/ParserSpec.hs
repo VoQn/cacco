@@ -3,7 +3,6 @@
 module Cacco.ParserSpec where
 
 import           Test.Tasty.Hspec
-import           Text.Megaparsec      (parse)
 
 import           Cacco.Syntax.Expr
 import           Cacco.Syntax.Literal (Literal (..))

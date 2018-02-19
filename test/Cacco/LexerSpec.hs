@@ -7,16 +7,15 @@ import           Data.Monoid          ((<>))
 import qualified Data.Text            as Text
 import           Data.Word
 import           Test.Tasty.Hspec     (Spec, context, it, shouldBe)
-import           Text.Megaparsec      (parse)
 
-import qualified Cacco.Syntax.Lexer   as Lexer
 import           Cacco.Syntax.Literal
+import           Cacco.Syntax.Parser
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
 spec_Lexer_bool :: Spec
 spec_Lexer_bool = do
-  let parseTest = parse Lexer.bool "test"
+  let parseTest = parse bool "test"
   --
   it "can parse true" $
     parseTest "true" `shouldBe` Right (Bool True)
@@ -26,7 +25,7 @@ spec_Lexer_bool = do
 --
 spec_Lexer_integer :: Spec
 spec_Lexer_integer = do
-  let parseTest = parse Lexer.integer "test"
+  let parseTest = parse integer "test"
 
   context "when parsing decimal integer literal" $ do
     it "can parse 0" $
@@ -139,34 +138,34 @@ spec_Lexer_integer = do
 prop_Lexer_integer_parse_uint8 :: Word8 -> Bool
 prop_Lexer_integer_parse_uint8 x =
   let
-    parse' = parse Lexer.integer "test"
+    parse' = parse integer "test"
     expr = Text.pack $ show x <> "_u8"
   in parse' expr == Right (Uint8 x)
 
 prop_Lexer_integer_parse_uint16 :: Word16 -> Bool
 prop_Lexer_integer_parse_uint16 x =
   let
-    parse' = parse Lexer.integer "test"
+    parse' = parse integer "test"
     expr = Text.pack $ show x <> "_u16"
   in parse' expr == Right (Uint16 x)
 
 prop_Lexer_integer_parse_uint32 :: Word32 -> Bool
 prop_Lexer_integer_parse_uint32 x =
   let
-    parse' = parse Lexer.integer "test"
+    parse' = parse integer "test"
     expr = Text.pack $ show x <> "_u32"
   in parse' expr == Right (Uint32 x)
 
 prop_Lexer_integer_parse_uint64 :: Word64 -> Bool
 prop_Lexer_integer_parse_uint64 x =
   let
-    parse' = parse Lexer.integer "test"
+    parse' = parse integer "test"
     expr = Text.pack $ show x <> "_u64"
   in parse' expr == Right (Uint64 x)
 
 spec_Lexer_flonum :: Spec
 spec_Lexer_flonum = do
-  let parseTest = parse Lexer.flonum "test"
+  let parseTest = parse flonum "test"
 
   context "when parsing floating point number expression" $ do
     it "can parse 0.0" $
@@ -207,7 +206,7 @@ spec_Lexer_flonum = do
 prop_Lexer_flonum_parse_float32 :: Float -> Bool
 prop_Lexer_flonum_parse_float32 x =
   let
-    parse' = parse Lexer.flonum "test"
+    parse' = parse flonum "test"
     expr = Text.pack $ show x <> "_f32"
   in parse' expr == Right (Float32 x)
 --
@@ -215,13 +214,13 @@ prop_Lexer_flonum_parse_float32 x =
 prop_Lexer_flonum_parse_float64 :: Double -> Bool
 prop_Lexer_flonum_parse_float64 x =
   let
-    parse' = parse Lexer.flonum "test"
+    parse' = parse flonum "test"
     expr = Text.pack $ show x <> "_f64"
   in parse' expr == Right (Float64 x)
 
 spec_Lexer_stringLiteral :: Spec
 spec_Lexer_stringLiteral = do
-  let parseTest = parse Lexer.stringLiteral "test"
+  let parseTest = parse stringLiteral "test"
 
   it "can parse \"\" as empty string" $
     parseTest "\"\"" `shouldBe` Right ""
