@@ -35,18 +35,15 @@ findFrame env key = case Map.lookup key (symbols env) of
     Nothing -> Nothing
     Just o  -> findFrame o key
 
-get :: (MonadReader (Env a) m, MonadError (Error i) m) => String -> m a
-get key = do
-  env <- ask
-  case findFrame env key of
+get :: MonadError (Error i) m => Env a -> String -> m a
+get env key = case findFrame env key of
     Nothing -> throwError $ Message ("'" ++ key ++ "' not found.") Nothing
     Just scope -> case Map.lookup key (symbols scope) of
       Nothing  -> throwError $ Message ("'" ++ key ++ "' not found") Nothing
       Just val -> return val
 
-push :: (MonadReader (Env a) m, MonadError (Error i) m) => String -> a -> m (Env a)
-push k v = do
-  env <- ask
+push :: (MonadError (Error i) m) => Env a -> String -> a -> m (Env a)
+push env k v = do
   let currentTable = symbols env
   case currentTable !? k of
     Just _ -> throwError $ Message ("Symbol '" ++ k ++ "' was already bound") Nothing

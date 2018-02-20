@@ -5,6 +5,7 @@ import           Control.Monad          (sequence)
 import           Control.Monad.Except
 import           Control.Monad.Identity
 import           Control.Monad.Reader
+import           Control.Monad.State
 
 import           Cacco.Ann              (unAnnF)
 import           Cacco.Core             ()
@@ -18,10 +19,10 @@ import qualified Cacco.Syntax.Literal   as Lit
 import           Cacco.Val              (Val (..))
 import qualified Cacco.Val              as Val
 
-type Eval i a = ReaderT (Env a) (ExceptT (Error i) Identity) a
+type Eval i a = ReaderT (Env a) (ExceptT (Error i) (StateT (Env a) Identity)) a
 
-runEval :: Eval i a -> Env a -> Either (Error i) a
-runEval ev env = runIdentity $ runExceptT $ runReaderT ev env
+runEval :: Eval i a -> Env a -> (Either (Error i) a, Env a)
+runEval ev env = runIdentity $ runStateT (runExceptT $ runReaderT ev env) env
 
 type EvalF i = Eval i (Val i)
 
@@ -45,7 +46,20 @@ evalAcc (i, LitF l) = case l of
   Lit.Flonum  x -> return $ Flonum  x $ Just i
   Lit.Text    x -> return $ Text    x $ Just i
 
-evalAcc (_, SymF s) = Env.get s
+evalAcc (i, SymF s) = do
+  result <- do env <- ask; return (Env.get env s)
+  case result of
+    Left err
+      | Error.hasInfo err -> throwError err
+      | otherwise -> throwError $ Error.setInfo (Just i) err
+    Right val -> return $ Val.setInfo (Just i) val
+
+evalAcc (i, ConF s expr) = do
+  env <- ask
+  value <- expr
+  newEnv <- Env.push env s value
+  put newEnv
+  return $ Unit $ Just i
 
 evalAcc (i, AppF fn args) = do
   res <- fn
@@ -60,5 +74,5 @@ evalAcc (i, AppF fn args) = do
 
 evalAcc (i, _) = throwError $ InvalidForm $ Just i
 
-eval :: Env (Val i) -> Expr i -> Either (Error i) (Val i)
+eval :: Env (Val i) -> Expr i -> (Either (Error i) (Val i), Env (Val i))
 eval env expr = runEval (cata (evalAcc . unAnnF) expr) env

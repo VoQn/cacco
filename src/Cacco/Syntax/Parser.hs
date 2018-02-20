@@ -58,12 +58,18 @@ astF :: Parser a -> Parser (AstF a)
 astF p = lexeme $ choice
     [ LitF <$> try literal
     , SymF <$> Lexer.identifier
-    , try applyForm
+    , form
     , VecF <$> brackets (elements p)
     ]
   where
-    applyForm = do
-      (f:args) <- parens $ p `sepEndBy1` spaceConsumer
+    form = parens (try defForm <|> fnApply)
+    defForm = do
+        _ <- Lexer.lexeme $ Lexer.symbol "="
+        n <- Lexer.lexeme Lexer.identifier
+        e <- p
+        return $ ConF n e
+    fnApply = do
+      (f:args) <- p `sepEndBy1` spaceConsumer
       return $ AppF f args
     elements :: Parser a -> Parser [a]
     elements = (`sepEndBy` spaceConsumer)
