@@ -1,23 +1,22 @@
 
 module Cacco.Eval where
 
-import           Control.Monad         (sequence)
--- import           Data.Map              (Map)
-import qualified Data.Map              as Map
+import           Control.Monad        (sequence)
+import qualified Data.Map             as Map
 
-import           Cacco.Ann             (AnnF (..))
-import           Cacco.Core            (Env, EvalF)
--- import qualified Cacco.Core            as Core
-import           Cacco.Error           (Error (..))
-import qualified Cacco.Error           as Error
-import           Cacco.Fix             (cata)
-import           Cacco.Syntax.Expr     (AstF (..), Expr)
-import qualified Cacco.Syntax.Literal  as Lit
-import           Cacco.Syntax.Location (Location)
-import           Cacco.Val             (Val (..))
-import qualified Cacco.Val             as Val
+import           Cacco.Ann            (unAnnF)
+import           Cacco.Core           (Env)
+import           Cacco.Error          (Error (..))
+import qualified Cacco.Error          as Error
+import           Cacco.Fix            (cata)
+import           Cacco.Syntax.Expr    (AstF (..), Expr)
+import qualified Cacco.Syntax.Literal as Lit
+import           Cacco.Val            (Val (..))
+import qualified Cacco.Val            as Val
 
-evalAcc :: (Location, AstF (EvalF Location)) -> EvalF Location
+type EvalF i = Env i -> Either (Error i) (Val i)
+
+evalAcc :: (i, AstF (EvalF i)) -> EvalF i
 evalAcc (i, LitF l) = const $ case l of
   Lit.Undef     -> Left $ Message "undefined" (Just i)
   Lit.Unit      -> return $ Unit      $ Just i
@@ -56,5 +55,5 @@ evalAcc (i, AppF fn args) = \env -> do
 
 evalAcc (i, _) = const $ Left $ InvalidForm $ Just i
 
-eval :: Expr Location -> Env Location -> Either (Error Location) (Val Location)
+eval :: Expr i -> Env i -> Either (Error i) (Val i)
 eval = cata (evalAcc . unAnnF)

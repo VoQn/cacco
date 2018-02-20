@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Cacco.Core
-  ( Env, EvalF
+  ( Env
   , eq, ne
   , gt, ge, lt, le
   , add, sub, mul
@@ -25,8 +25,6 @@ import           Cacco.Val                 (Fn, Val (..), pretty)
 import qualified Cacco.Val                 as Val
 
 type Env i = Map String (Val i)
-
-type EvalF i = Env i -> Either (Error i) (Val i)
 
 type Until a i = String -> (a -> a -> Bool) -> a -> [Val i] -> Either (Error i) Bool
 
@@ -406,8 +404,6 @@ accFlo name bin = go
     go x (Flonum y _:rest) = go (x `bin` y) rest
     go _ (unexpected:_)    = Left $ typeMismatch name "Flonum" unexpected
 
-
---
 add :: forall i. Fn i
 add []     = Left $ arityMismatch "+" 1 True 0
 add (v:vs) = case v of
@@ -429,7 +425,7 @@ add (v:vs) = case v of
     startWith :: Num a => Acc a i -> a -> Either (Error i) (Val i)
     startWith f x = f "+" (+) x vs
     {-# INLINE startWith #-}
---
+
 sub :: forall i. Fn i
 -- arity mismatch
 sub [] = Left $ arityMismatch "-" 1 True 0
