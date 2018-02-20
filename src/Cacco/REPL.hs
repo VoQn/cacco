@@ -16,8 +16,6 @@ import           Cacco.Val                (Val, pretty)
 prelude :: Env (Val Location)
 prelude = Env.initEnv { symbols = builtin }
 
-
-
 process :: Env (Val Location) -> String -> IO (Env (Val Location))
 process env line = case parseTopLevel [] $ T.pack line of
     Left  err   -> print err >> return env
@@ -31,7 +29,7 @@ process env line = case parseTopLevel [] $ T.pack line of
         Right val -> putStrLn (pretty val) >> go env' es
 
 replLoop :: IO ()
-replLoop = runInputT defaultSettings (loop prelude)
+replLoop = runInputT defaultSettings $ loop prelude
   where
     loop env = do
       minput <- getInputLine "cacco> "
