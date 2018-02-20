@@ -7,6 +7,7 @@ dist/*
 .stack-work/*
 .hpc/*
 *.tix
+*.prof
 
 *.hi
 *.o
