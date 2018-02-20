@@ -10,6 +10,8 @@ module Cacco.Val
   , uint8, uint16, uint32, uint64
   , integer
   , float16, float32, float64, flonum
+  , list
+  , text
   , info
   , setInfo
   , removeInfo
@@ -109,6 +111,12 @@ float64 x = Float64 x Nothing
 flonum :: Scientific -> Val i
 flonum x = Flonum x Nothing
 
+list :: [Val i] -> Val i
+list xs = List xs Nothing
+
+text :: Text -> Val i
+text tx = Text tx Nothing
+
 instance Eq (Val a) where
   v1 == v2 = case (v1, v2) of
     (Unit      _, Unit      _) -> True
@@ -135,28 +143,28 @@ instance Eq (Val a) where
 
 instance (Show a) => Show (Val a) where
   show val = case val of
-    Unit      i -> unwords ["Unit", show i]
-    Bool    x i -> unwords ["Bool", show x, show i]
-    Int8    x i -> unwords ["Int8", show x, show i]
-    Int16   x i -> unwords ["Int16", show x, show i]
-    Int32   x i -> unwords ["Int32", show x, show i]
-    Int64   x i -> unwords ["Int64", show x, show i]
-    Uint8   x i -> unwords ["Uint8", show x, show i]
-    Uint16  x i -> unwords ["Uint16", show x, show i]
-    Uint32  x i -> unwords ["Uint32", show x, show i]
-    Uint64  x i -> unwords ["Uint64", show x, show i]
+    Unit      i -> unwords ["Unit",            show i]
+    Bool    x i -> unwords ["Bool",    show x, show i]
+    Int8    x i -> unwords ["Int8",    show x, show i]
+    Int16   x i -> unwords ["Int16",   show x, show i]
+    Int32   x i -> unwords ["Int32",   show x, show i]
+    Int64   x i -> unwords ["Int64",   show x, show i]
+    Uint8   x i -> unwords ["Uint8",   show x, show i]
+    Uint16  x i -> unwords ["Uint16",  show x, show i]
+    Uint32  x i -> unwords ["Uint32",  show x, show i]
+    Uint64  x i -> unwords ["Uint64",  show x, show i]
     Integer x i -> unwords ["Integer", show x, show i]
     Float16 x i -> unwords ["Float16", show x, show i]
     Float32 x i -> unwords ["Float32", show x, show i]
     Float64 x i -> unwords ["Float64", show x, show i]
-    Flonum  x i -> unwords ["Flonum", show x, show i]
-    Text    x i -> unwords ["Text", show x, show i]
-    Symbol  x i -> unwords ["Symbol", show x, show i]
-    List    x i -> unwords ["List", show x, show i]
-    Vector  x i -> unwords ["Vector", show x, show i]
-    Struct  x i -> unwords ["Struct", show x, show i]
-    Builtin _ i -> unwords ["Builtin", show i]
-    Func    _ i -> unwords ["Func", show i]
+    Flonum  x i -> unwords ["Flonum",  show x, show i]
+    Text    x i -> unwords ["Text",    show x, show i]
+    Symbol  x i -> unwords ["Symbol",  show x, show i]
+    List    x i -> unwords ["List",    show x, show i]
+    Vector  x i -> unwords ["Vector",  show x, show i]
+    Struct  x i -> unwords ["Struct",  show x, show i]
+    Builtin _ i -> unwords ["Builtin",         show i]
+    Func    _ i -> unwords ["Func",            show i]
 
 info :: Val i -> Maybe i
 info val = case val of
@@ -186,52 +194,52 @@ info val = case val of
 setInfo :: Maybe i -> Val i -> Val i
 setInfo i v = ($ i) $ case v of
   Unit      _ -> Unit
-  Bool    x _ -> Bool x
-  Int8    x _ -> Int8 x
-  Int16   x _ -> Int16 x
-  Int32   x _ -> Int32 x
-  Int64   x _ -> Int64 x
-  Uint8   x _ -> Uint8 x
-  Uint16  x _ -> Uint16 x
-  Uint32  x _ -> Uint32 x
-  Uint64  x _ -> Uint64 x
+  Bool    x _ -> Bool    x
+  Int8    x _ -> Int8    x
+  Int16   x _ -> Int16   x
+  Int32   x _ -> Int32   x
+  Int64   x _ -> Int64   x
+  Uint8   x _ -> Uint8   x
+  Uint16  x _ -> Uint16  x
+  Uint32  x _ -> Uint32  x
+  Uint64  x _ -> Uint64  x
   Integer x _ -> Integer x
   Float16 x _ -> Float16 x
   Float32 x _ -> Float32 x
   Float64 x _ -> Float64 x
-  Flonum  x _ -> Flonum x
-  Text    x _ -> Text x
-  Symbol  x _ -> Symbol x
-  List    x _ -> List x
-  Vector  x _ -> Vector x
-  Struct  x _ -> Struct x
+  Flonum  x _ -> Flonum  x
+  Text    x _ -> Text    x
+  Symbol  x _ -> Symbol  x
+  List    x _ -> List    x
+  Vector  x _ -> Vector  x
+  Struct  x _ -> Struct  x
   Builtin x _ -> Builtin x
-  Func    x _ -> Func x
+  Func    x _ -> Func    x
 
 removeInfo :: Val i -> Val i
 removeInfo val = ($ Nothing) $ case val of
   Unit      _ -> Unit
-  Bool    x _ -> Bool x
-  Int8    x _ -> Int8 x
-  Int16   x _ -> Int16 x
-  Int32   x _ -> Int32 x
-  Int64   x _ -> Int64 x
-  Uint8   x _ -> Uint8 x
-  Uint16  x _ -> Uint16 x
-  Uint32  x _ -> Uint32 x
-  Uint64  x _ -> Uint64 x
+  Bool    x _ -> Bool    x
+  Int8    x _ -> Int8    x
+  Int16   x _ -> Int16   x
+  Int32   x _ -> Int32   x
+  Int64   x _ -> Int64   x
+  Uint8   x _ -> Uint8   x
+  Uint16  x _ -> Uint16  x
+  Uint32  x _ -> Uint32  x
+  Uint64  x _ -> Uint64  x
   Integer x _ -> Integer x
   Float16 x _ -> Float16 x
   Float32 x _ -> Float32 x
   Float64 x _ -> Float64 x
-  Flonum  x _ -> Flonum x
-  Text    x _ -> Text x
-  Symbol  x _ -> Symbol x
-  List    x _ -> List $ removeInfo <$> x
-  Vector  x _ -> Vector $ removeInfo <$> x
-  Struct  x _ -> Struct $ removeInfo <$> x
+  Flonum  x _ -> Flonum  x
+  Text    x _ -> Text    x
+  Symbol  x _ -> Symbol  x
+  List    x _ -> List    $ removeInfo <$> x
+  Vector  x _ -> Vector  $ removeInfo <$> x
+  Struct  x _ -> Struct  $ removeInfo <$> x
   Builtin x _ -> Builtin x
-  Func    x _ -> Func x
+  Func    x _ -> Func    x
 
 pretty :: Val i -> String
 pretty val = case val of
