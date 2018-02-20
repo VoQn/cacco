@@ -22,7 +22,7 @@ import           Data.Int        (Int16, Int32, Int64, Int8)
 import           Data.Map        (Map)
 import qualified Data.Map        as Map
 import           Data.Scientific (Scientific)
-import           Data.Text       (Text)
+import           Data.Text.Lazy  (Text)
 import           Data.Typeable   (Typeable)
 import           Data.Vector     (Vector)
 import qualified Data.Vector     as Vec

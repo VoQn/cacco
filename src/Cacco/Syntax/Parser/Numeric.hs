@@ -18,35 +18,31 @@ import           Cacco.Syntax.Literal
 import           Cacco.Syntax.Parser.Internal (Parser)
 import           Cacco.Syntax.Parser.Lexer
 
+minus :: Num a => Parser (Bool, a -> a)
+minus = char '-' $> (True, negate)
+
+plus :: Num a => Parser (Bool, a -> a)
+plus = char '+' $> (True, id)
+
 -- | Parse a number with optional sign
 withSign :: Num a => Parser a -> Parser (Bool, a)
 withSign parser = do
     (isSigned, fn) <- option (False, id) $ minus <|> plus
     number         <- parser
     return (isSigned, fn number)
-  where
-    minus :: Num a => Parser (Bool, a -> a)
-    minus = char '-' $> (True, negate)
-    {-# INLINE minus #-}
 
-    plus :: Num a => Parser (Bool, a -> a)
-    plus = char '+' $> (True, id)
-    {-# INLINE plus #-}
+-- | Parse '0' as a boolean
+zero :: Parser Bool
+zero = char '0' $> False
+
+-- | Parse '1' as a boolean
+one :: Parser Bool
+one = char '1' $> True
 
 -- | Parse a binary integer with prefix 'b' (e.g. 101010)
 binary' :: Parser Integer
 binary' = foldl' acc 0 <$> some (zero <|> one)
   where
-    -- | Parse '0' as a boolean
-    zero :: Parser Bool
-    zero = char '0' $> False
-    {-# INLINE zero #-}
-
-    -- | Parse '1' as a boolean
-    one :: Parser Bool
-    one = char '1' $> True
-    {-# INLINE one #-}
-
     -- | Accumulate boolean as bit-shift
     acc :: Integer -> Bool -> Integer
     acc 0 False = 0
@@ -61,17 +57,14 @@ positional = char '0' >> choice [hexadecimal, octal, binary]
     -- | Parse a hexadecimal integer with prefix 'x' (e.g. xFA901)
     hexadecimal :: Parser Integer
     hexadecimal = char 'x' >> L.hexadecimal
-    {-# INLINE hexadecimal #-}
 
     -- | Parse a octal integer with prefix 'o' (e.g. o080)
     octal :: Parser Integer
     octal = char 'o' >> L.octal
-    {-# INLINE octal #-}
 
     -- | Parse a binary integer with prefix 'b' (e.g. b101010)
     binary :: Parser Integer
     binary = char 'b' >> binary'
-    {-# INLINE binary #-}
 
 integer :: Parser Literal
 -- ^ Parse a integer number literal.
@@ -117,7 +110,6 @@ integer' = do
     -- | parse positional notated integer
     notated :: Parser (Bool, Integer)
     notated = (,) False <$> positional
-    {-# INLINE notated #-}
 
     -- | parse strict integer-type suffix
     suffix :: Bool -- ^ prefix was exist
@@ -128,32 +120,25 @@ integer' = do
 -- | parse signed-integer-type suffix
 signedInt :: Parser (Integer -> Literal)
 signedInt = char 'i' >> choice [i8, i16, i32, i64]
-{-# INLINE signedInt #-}
 
 -- | parse unsigned-integer-type suffix
 unsignedInt :: Parser (Integer -> Literal)
 unsignedInt = char 'u' >> choice [u8, u16, u32, u64]
-{-# INLINE unsignedInt #-}
 
 i8 :: Parser (Integer -> Literal)
-i8  = symbol "8"  $> Int8  . fromInteger
-{-# INLINE i8 #-}
+i8  = symbol "8" $> Int8 . fromInteger
 
 i16 :: Parser (Integer -> Literal)
 i16 = symbol "16" $> Int16 . fromInteger
-{-# INLINE i16 #-}
 
 i32 :: Parser (Integer -> Literal)
 i32 = symbol "32" $> Int32 . fromInteger
-{-# INLINE i32 #-}
 
 i64 :: Parser (Integer -> Literal)
 i64 = symbol "64" $> Int64 . fromInteger
-{-# INLINE i64 #-}
 
 u8 :: Parser (Integer -> Literal)
-u8  = symbol "8"  $> Uint8  . fromInteger
-{-# INLINE u8 #-}
+u8  = symbol "8" $> Uint8 . fromInteger
 
 u16 :: Parser (Integer -> Literal)
 u16 = symbol "16" $> Uint16 . fromInteger
@@ -190,12 +175,9 @@ digitFloatFormat = sign >> some digitChar >> (char '.' <|> char 'e') $> True
 
 f16 :: Parser (Scientific -> Literal)
 f16 = symbol "16" $> Float16 . toRealFloat
-{-# INLINE f16 #-}
 
 f32 :: Parser (Scientific -> Literal)
 f32 = symbol "32" $> Float32 . toRealFloat
-{-# INLINE f32 #-}
 
 f64 :: Parser (Scientific -> Literal)
 f64 = symbol "64" $> Float64 . toRealFloat
-{-# INLINE f64 #-}

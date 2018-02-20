@@ -14,7 +14,7 @@ module Cacco.Syntax.Parser.Lexer
 import           Control.Applicative          ((<*>))
 import           Data.Functor                 (($>))
 import           Data.Text                    (Text)
-import qualified Data.Text                    as T
+import qualified Data.Text.Lazy               as TL
 import           Text.Megaparsec              (between, getPosition, many,
                                                manyTill, (<?>), (<|>))
 import           Text.Megaparsec.Char         (char, digitChar, letterChar,
@@ -34,12 +34,10 @@ spaceConsumer = L.space space1 lineComment blockComment
 -- | Ignore single line comment.
 lineComment :: Parser ()
 lineComment = L.skipLineComment ";;"
-{-# INLINE lineComment #-}
 
 -- | Ignore nested block comment.
 blockComment :: Parser ()
 blockComment = L.skipBlockCommentNested "(;" ";)"
-{-# INLINE blockComment #-}
 
 -- | Make parser to ignore any space and comment expressions
 lexeme :: Parser a -> Parser a
@@ -73,6 +71,13 @@ withLocation parser = do
   end   <- getPosition
   let location = Location.fromSourcePos begin end
   return (location, value)
+--
+
+true :: Parser Bool
+true = symbol "true" $> True
+
+false :: Parser Bool
+false = symbol "false" $> False
 
 bool :: Parser Literal
 -- ^ Parse a boolean literal
@@ -84,22 +89,13 @@ bool :: Parser Literal
 -- Bool False
 --
 bool = Lit.Bool <$> (true <|> false) <?> "boolean literal: true or false"
-  where
-    true :: Parser Bool
-    true = symbol "true" $> True
-    {-# INLINE true #-}
 
-    false :: Parser Bool
-    false = symbol "false" $> False
-    {-# INLINE false #-}
-
+str :: Parser String
+str = char '"' >> L.charLiteral `manyTill` char '"'
 
 -- | Parse a Unicode text.
-stringLiteral :: Parser Text
-stringLiteral = T.pack <$> quoted <?> "string literal"
-  where
-    quoted = char '"' >> L.charLiteral `manyTill` char '"'
-    {-# INLINE quoted #-}
+stringLiteral :: Parser TL.Text
+stringLiteral = TL.pack <$> str <?> "string literal"
 
 symbolChar :: Parser Char
 symbolChar = oneOf ("!@#$%^&*_+-=|:<>?/" :: String)

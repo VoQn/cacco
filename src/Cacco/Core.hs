@@ -14,7 +14,7 @@ import           Data.Int
 import           Data.Map                  (Map)
 import qualified Data.Map                  as Map
 import           Data.Scientific           (Scientific)
-import qualified Data.Text                 as Text
+import qualified Data.Text.Lazy            as Text
 import           Data.Word
 import           Numeric.Half              (Half)
 
