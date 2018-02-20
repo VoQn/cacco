@@ -38,6 +38,7 @@ library
     , Cacco.Error.ArityMismatch
     , Cacco.Error.TypeMismatch
     , Cacco.Error
+    , Cacco.Env
     , Cacco.Core
     , Cacco.Eval
     , Cacco.REPL

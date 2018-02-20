@@ -6,9 +6,15 @@ import           Control.Monad.Trans
 import           System.Console.Haskeline
 
 import           Cacco.Core               (builtin)
+import           Cacco.Env                (Env (..))
+import qualified Cacco.Env                as Env
 import           Cacco.Eval               (eval)
+import           Cacco.Syntax.Location    (Location)
 import           Cacco.Syntax.Parser      (parseTopLevel)
-import           Cacco.Val                (pretty)
+import           Cacco.Val                (Val, pretty)
+
+prelude :: Env (Val Location)
+prelude = Env.initEnv { symbols = builtin }
 
 process :: String -> IO ()
 process line = do
@@ -16,7 +22,7 @@ process line = do
   case res of
     Left err -> print err
     Right ex -> (`mapM_` ex) $ \e ->
-      case eval e builtin of
+      case eval prelude e of
         Left err  -> print err
         Right val -> putStrLn $ pretty val
 

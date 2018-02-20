@@ -1,24 +1,33 @@
 
 module Cacco.Eval where
 
-import           Control.Monad        (sequence)
-import qualified Data.Map             as Map
+import           Control.Monad          (sequence)
+import           Control.Monad.Except
+import           Control.Monad.Identity
+import           Control.Monad.Reader
 
-import           Cacco.Ann            (unAnnF)
-import           Cacco.Core           (Env)
-import           Cacco.Error          (Error (..))
-import qualified Cacco.Error          as Error
-import           Cacco.Fix            (cata)
-import           Cacco.Syntax.Expr    (AstF (..), Expr)
-import qualified Cacco.Syntax.Literal as Lit
-import           Cacco.Val            (Val (..))
-import qualified Cacco.Val            as Val
+import           Cacco.Ann              (unAnnF)
+import           Cacco.Core             ()
+import           Cacco.Env              (Env)
+import qualified Cacco.Env              as Env
+import           Cacco.Error            (Error (..))
+import qualified Cacco.Error            as Error
+import           Cacco.Fix              (cata)
+import           Cacco.Syntax.Expr      (AstF (..), Expr)
+import qualified Cacco.Syntax.Literal   as Lit
+import           Cacco.Val              (Val (..))
+import qualified Cacco.Val              as Val
 
-type EvalF i = Env i -> Either (Error i) (Val i)
+type Eval i a = ReaderT (Env a) (ExceptT (Error i) Identity) a
+
+runEval :: Eval i a -> Env a -> Either (Error i) a
+runEval ev env = runIdentity $ runExceptT $ runReaderT ev env
+
+type EvalF i = Eval i (Val i)
 
 evalAcc :: (i, AstF (EvalF i)) -> EvalF i
-evalAcc (i, LitF l) = const $ case l of
-  Lit.Undef     -> Left $ Message "undefined" (Just i)
+evalAcc (i, LitF l) = case l of
+  Lit.Undef     -> throwError $ Message "undefined" (Just i)
   Lit.Unit      -> return $ Unit      $ Just i
   Lit.Bool    x -> return $ Bool    x $ Just i
   Lit.Int8    x -> return $ Int8    x $ Just i
@@ -36,24 +45,20 @@ evalAcc (i, LitF l) = const $ case l of
   Lit.Flonum  x -> return $ Flonum  x $ Just i
   Lit.Text    x -> return $ Text    x $ Just i
 
-evalAcc (i, SymF s) = \env -> case Map.lookup s env of
-  Just sym -> Right sym
-  Nothing  -> Left $ UnknownSymbol s $ Just i
+evalAcc (_, SymF s) = Env.get s
 
-evalAcc (i, AppF fn args) = \env -> do
-    res <- fn env
-    case res of
-      Builtin f _ -> do
-        vs <- sequence $ ($ env) <$> args
-        setLocation $ f vs
-  where
-    setLocation result = case result of
-      err@(Left e)
-        | Error.hasInfo e -> err
-        | otherwise -> Left $ Error.setInfo (Just i) e
-      Right _ -> Val.setInfo (Just i) <$> result
+evalAcc (i, AppF fn args) = do
+  res <- fn
+  case res of
+    Builtin f _ -> do
+      vs <- sequence args
+      case f vs of
+        Left err
+          | Error.hasInfo err -> throwError err
+          | otherwise -> throwError $ Error.setInfo (Just i) err
+        Right result -> return $ Val.setInfo (Just i) result
 
-evalAcc (i, _) = const $ Left $ InvalidForm $ Just i
+evalAcc (i, _) = throwError $ InvalidForm $ Just i
 
-eval :: Expr i -> Env i -> Either (Error i) (Val i)
-eval = cata (evalAcc . unAnnF)
+eval :: Env (Val i) -> Expr i -> Either (Error i) (Val i)
+eval env expr = runEval (cata (evalAcc . unAnnF) expr) env

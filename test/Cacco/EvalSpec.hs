@@ -5,6 +5,7 @@ import qualified Data.Text             as Text
 import           Test.Tasty.Hspec
 
 import           Cacco.Core            (builtin)
+import           Cacco.Env
 import           Cacco.Error
 import           Cacco.Eval            (eval)
 import           Cacco.Syntax.Location (Location)
@@ -14,10 +15,13 @@ import qualified Cacco.Val             as Val
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
+prelude :: Env (Val Location)
+prelude = initEnv { symbols = builtin }
+
 evalTest :: String -> Either (Error Location) (Val Location)
 evalTest str = case parseExpr "EvalTest" (Text.pack str) of
   Left e -> Left $ Message ("parse error" ++ show e) Nothing
-  Right expr -> case eval expr builtin of
+  Right expr -> case eval prelude expr of
     Left err     -> Left err
     Right result -> Right result
 
