@@ -21,12 +21,12 @@ process env line = case parseTopLevel [] $ T.pack line of
     Left  err   -> print err >> return env
     Right exprs -> go env exprs
   where
-    go env [] = return env
-    go env (e:es) = do
-      let (result, env') = eval env e
+    go env' [] = return env'
+    go env' (expr:rest) = do
+      let (result, resultEnv) = eval env' expr
       case result of
-        Left err  -> print err >> return env'
-        Right val -> putStrLn (pretty val) >> go env' es
+        Left err  -> print err >> return resultEnv
+        Right val -> putStrLn (pretty val) >> go resultEnv rest
 
 replLoop :: IO ()
 replLoop = runInputT defaultSettings $ loop prelude

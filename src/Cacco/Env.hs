@@ -11,7 +11,6 @@ module Cacco.Env
   ) where
 
 import           Control.Monad.Except (MonadError, throwError)
-import           Control.Monad.Reader
 import           Data.Map             (Map, (!?))
 import qualified Data.Map             as Map
 

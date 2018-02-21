@@ -1,5 +1,7 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes        #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE RankNTypes          #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Cacco.Syntax.Parser
   ( Parser
   , ParseError
@@ -13,13 +15,6 @@ module Cacco.Syntax.Parser
   , parseTest
   ) where
 
-import           Control.Applicative          ((*>), (<*))
-import           Data.Functor                 (Functor)
-import           Data.Text                    (Text)
-import           Text.Megaparsec              (ParsecT, choice, eof, many,
-                                               parse, parseTest, sepEndBy,
-                                               sepEndBy1, try, (<?>), (<|>))
-
 import           Cacco.Ann                    (AnnF (AnnF))
 import qualified Cacco.Ann                    as Ann
 import           Cacco.Fix                    (Fix (..))
@@ -30,6 +25,13 @@ import           Cacco.Syntax.Parser.Internal (ParseError, Parser)
 import           Cacco.Syntax.Parser.Lexer
 import qualified Cacco.Syntax.Parser.Lexer    as Lexer
 import           Cacco.Syntax.Parser.Numeric
+import           Control.Applicative          ((*>), (<*))
+import           Data.Functor                 (Functor)
+import           Data.Text                    (Text)
+import           Text.Megaparsec              (ParsecT, choice, eof, many,
+                                               parse, parseTest, sepEndBy,
+                                               sepEndBy1, try, (<?>), (<|>))
+import           Text.Megaparsec.Char         (char, space1)
 
 contents :: Parser a -> Parser a
 contents parser = spaceConsumer *> parser <* eof
@@ -54,25 +56,29 @@ text = Text <$> Lexer.stringLiteral
 literal :: Parser Literal
 literal = undef <|> Lexer.bool <|> text <|> numeric
 
-astF :: Parser a -> Parser (AstF a)
+fuctorF :: forall a. Parser a -> Parser (AstF a)
+fuctorF p = try defConstForm <|> applyForm
+  where
+    defConstForm = do
+      _ <- Lexer.lexeme (char '=' >> space1)
+      n <- Lexer.identifier
+      v <- p
+      return $ ConF n v
+
+    applyForm = do
+      (f:args) <- p `sepEndBy1` spaceConsumer
+      return $ AppF f args
+
+astF :: forall a. Parser a -> Parser (AstF a)
 astF p = lexeme $ choice
     [ LitF <$> try literal
     , SymF <$> Lexer.identifier
-    , form
-    , VecF <$> brackets (elements p)
+    , parens (fuctorF p)
+    , VecF <$> brackets elements
     ]
   where
-    form = parens (try defForm <|> fnApply)
-    defForm = do
-        _ <- Lexer.lexeme $ Lexer.symbol "="
-        n <- Lexer.lexeme Lexer.identifier
-        e <- p
-        return $ ConF n e
-    fnApply = do
-      (f:args) <- p `sepEndBy1` spaceConsumer
-      return $ AppF f args
-    elements :: Parser a -> Parser [a]
-    elements = (`sepEndBy` spaceConsumer)
+    elements :: Parser [a]
+    elements = p `sepEndBy` spaceConsumer
 
 expr :: Parser (Expr Location)
 expr = fixParser $ addLocation . astF

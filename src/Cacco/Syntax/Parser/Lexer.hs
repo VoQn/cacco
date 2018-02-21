@@ -101,7 +101,7 @@ symbolChar :: Parser Char
 symbolChar = oneOf ("!@#$%^&*_+-=|:<>?/" :: String)
 
 identifier :: Parser String
-identifier = (:) <$> identInitial <*> many identTrail
+identifier = lexeme $ (:) <$> identInitial <*> many identTrail
 
 identInitial :: Parser Char
 identInitial = letterChar <|> symbolChar

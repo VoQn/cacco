@@ -69,12 +69,9 @@ parseExprSpec = describe "Cacco.Parser.parseExpr" $ do
         , Symbol "Integer"
         ])
   --
-  it "can parse \"(val x 100)\"" $
-    testParse "(val x 100)" `shouldBe` Right
-      (App (Symbol "val")
-        [ Symbol "x"
-        , Literal $ Integer 100
-        ])
+  it "can parse \"(= x 100)\"" $
+    testParse "(= x 100)" `shouldBe` Right
+      (Con "x" $ Literal $ Integer 100)
   --
   it "can parse \"(var x 100)\"" $
     testParse "(var x 100)" `shouldBe` Right
@@ -112,6 +109,13 @@ parseExprSpec = describe "Cacco.Parser.parseExpr" $ do
       (App (Symbol "+")
         [ Literal $ Integer 1
         , Literal $ Integer (-2)
+        ])
+  --
+  it "can parse \"(== 1 1)\"" $
+    testParse "(== 1 1)" `shouldBe` Right
+      (App (Symbol "==")
+        [ Literal $ Integer 1
+        , Literal $ Integer 1
         ])
   --
   it "can parse expression with ignoreing line comments" $

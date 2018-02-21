@@ -20,10 +20,10 @@ prelude = initEnv { symbols = builtin }
 
 evalTest :: String -> Either (Error Location) (Val Location)
 evalTest str = case parseExpr "EvalTest" (Text.pack str) of
-  Left e -> Left $ Message ("parse error" ++ show e) Nothing
+  Left e     -> Left $ Message ("parse error" ++ show e) Nothing
   Right expr -> case eval prelude expr of
-    Left err     -> Left err
-    Right result -> Right result
+    (Left err, _)     -> Left err
+    (Right result, _) -> Right result
 
 spec_boolean :: Spec
 spec_boolean = do

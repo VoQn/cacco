@@ -16,7 +16,7 @@ import qualified Cacco.Error            as Error
 import           Cacco.Fix              (cata)
 import           Cacco.Syntax.Expr      (AstF (..), Expr)
 import qualified Cacco.Syntax.Literal   as Lit
-import           Cacco.Val              (Val (..))
+import           Cacco.Val              (Val (..), pretty)
 import qualified Cacco.Val              as Val
 
 type Eval i a = ReaderT (Env a) (ExceptT (Error i) (StateT (Env a) Identity)) a
@@ -71,6 +71,7 @@ evalAcc (i, AppF fn args) = do
           | Error.hasInfo err -> throwError err
           | otherwise -> throwError $ Error.setInfo (Just i) err
         Right result -> return $ Val.setInfo (Just i) result
+    _ -> throwError $ Message ("Not Function '" ++ pretty res ++ "'") $ Just i
 
 evalAcc (i, _) = throwError $ InvalidForm $ Just i
 
