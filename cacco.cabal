@@ -85,7 +85,6 @@ test-suite test
     , tasty-hspec
     , tasty-quickcheck
     , tasty-smallcheck
-    , megaparsec
     , scientific
     , lens
     , cacco

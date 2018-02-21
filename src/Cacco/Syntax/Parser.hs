@@ -73,12 +73,9 @@ astF :: forall a. Parser a -> Parser (AstF a)
 astF p = lexeme $ choice
     [ LitF <$> try literal
     , SymF <$> Lexer.identifier
+    , VecF <$> brackets (p `sepEndBy` spaceConsumer)
     , parens (fuctorF p)
-    , VecF <$> brackets elements
     ]
-  where
-    elements :: Parser [a]
-    elements = p `sepEndBy` spaceConsumer
 
 expr :: Parser (Expr Location)
 expr = fixParser $ addLocation . astF
