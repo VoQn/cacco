@@ -6,15 +6,14 @@ import           Control.Monad.Trans
 import           System.Console.Haskeline
 
 import           Cacco.Core               (builtin)
-import           Cacco.Env                (Env (..))
-import qualified Cacco.Env                as Env
+import           Cacco.Env                (Env, initAmb, localScope)
 import           Cacco.Eval               (eval)
 import           Cacco.Syntax.Location    (Location)
 import           Cacco.Syntax.Parser      (parseTopLevel)
 import           Cacco.Val                (Val, pretty)
 
 prelude :: Env (Val Location)
-prelude = Env.initEnv { symbols = builtin }
+prelude = initAmb { localScope = builtin }
 
 process :: Env (Val Location) -> String -> IO (Env (Val Location))
 process env line = case parseTopLevel [] $ T.pack line of

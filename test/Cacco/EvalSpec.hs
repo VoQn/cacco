@@ -16,7 +16,7 @@ import qualified Cacco.Val             as Val
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
 prelude :: Env (Val Location)
-prelude = initEnv { symbols = builtin }
+prelude = initAmb { localScope = builtin }
 
 evalTest :: String -> Either (Error Location) (Val Location)
 evalTest str = case parseExpr "EvalTest" (Text.pack str) of

@@ -2,50 +2,60 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Cacco.Env
-  ( Env(..)
-  , initEnv
-  , newEnv
-  , findFrame
-  , get
-  , push
+  ( Ambient(..)
+  , Env
+  , initAmb
+  , newAmb
+  , find
+  , hasKeyHere
+  , hasKeySomeWhere
+  , lookup
+  , register
   ) where
 
-import           Control.Monad.Except (MonadError, throwError)
-import           Data.Map             (Map, (!?))
-import qualified Data.Map             as Map
+import           Data.Map.Lazy (Map)
+import qualified Data.Map.Lazy as Map
+import           Data.Maybe    (isJust)
+import           Prelude       hiding (lookup)
 
-import           Cacco.Error          (Error (..))
+data Ambient k a = Ambient
+  { outerAmbient :: Maybe (Ambient k a)
+  , localScope   :: Map k a
+  } deriving (Eq, Show)
 
-data Env a = Env
-  { outer   :: Maybe (Env a)
-  , symbols :: Map String a
-  } deriving (Eq)
+instance Functor (Ambient k) where
+  fmap f amb = Ambient
+      { outerAmbient = fmap f <$> outerAmbient amb
+      , localScope = f <$> localScope amb
+      }
 
-newEnv :: Maybe (Env a) -> Env a
-newEnv outerEnv = Env { outer = outerEnv, symbols = Map.empty }
+type Env = Ambient String
 
-initEnv :: Env a
-initEnv = newEnv Nothing
+initAmb :: Ambient k a
+initAmb = Ambient { outerAmbient = Nothing, localScope = Map.empty }
 
-findFrame :: Env a -> String -> Maybe (Env a)
-findFrame env key = case Map.lookup key (symbols env) of
-  Just _ -> Just env
-  Nothing -> case outer env of
-    Nothing -> Nothing
-    Just o  -> findFrame o key
+newAmb :: Ambient k a -> Ambient k a
+newAmb amb = initAmb { outerAmbient = Just amb }
 
-get :: MonadError (Error i) m => Env a -> String -> m a
-get env key = case findFrame env key of
-    Nothing -> throwError $ Message ("'" ++ key ++ "' not found.") Nothing
-    Just scope -> case Map.lookup key (symbols scope) of
-      Nothing  -> throwError $ Message ("'" ++ key ++ "' not found") Nothing
-      Just val -> return val
+find :: Ord k => k -> Ambient k a -> Maybe (a, Ambient k a)
+find key ambient = case Map.lookup key (localScope ambient) of
+  Just entry -> Just (entry, ambient)
+  Nothing    -> case outerAmbient ambient of
+    Nothing    -> Nothing
+    Just outer -> find key outer
 
-push :: (MonadError (Error i) m) => Env a -> String -> a -> m (Env a)
-push env k v = do
-  let currentTable = symbols env
-  case currentTable !? k of
-    Just _ -> throwError $ Message ("Symbol '" ++ k ++ "' was already bound") Nothing
-    Nothing -> do
-      let tbl' = Map.insert k v $ symbols env
-      return $ env { symbols = tbl' }
+hasKeySomeWhere :: Ord k => k -> Ambient k a -> Bool
+hasKeySomeWhere key = isJust . find key
+
+hasKeyHere :: Ord k => k -> Ambient k a -> Bool
+hasKeyHere key = Map.member key . localScope
+
+lookup :: Ord k => k -> Ambient k a -> Maybe a
+lookup key = fmap fst . find key
+
+register :: Ord k => k -> a -> Ambient k a -> Ambient k a
+register key value ambient =
+  let
+    registered = Map.insert key value $ localScope ambient
+  in
+    ambient { localScope = registered }
