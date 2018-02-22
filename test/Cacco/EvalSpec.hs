@@ -21,7 +21,7 @@ prelude = initAmb { localScope = builtin }
 evalTest :: String -> Either (Error Location) (Val Location)
 evalTest str = case parseExpr "EvalTest" (Text.pack str) of
   Left e     -> Left $ Message ("parse error" ++ show e) Nothing
-  Right expr -> case eval prelude expr of
+  Right expr -> case eval expr prelude of
     (Left err, _)     -> Left err
     (Right result, _) -> Right result
 
