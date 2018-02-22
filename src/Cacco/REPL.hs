@@ -8,6 +8,7 @@ import           System.Console.Haskeline
 import           Cacco.Core               (builtin)
 import           Cacco.Env                (Env, initAmb, localScope)
 import           Cacco.Eval               (eval)
+import           Cacco.Syntax.Expr        (Expr)
 import           Cacco.Syntax.Location    (Location)
 import           Cacco.Syntax.Parser      (parseTopLevel)
 import           Cacco.Val                (Val, pretty)
@@ -15,23 +16,25 @@ import           Cacco.Val                (Val, pretty)
 prelude :: Env (Val Location)
 prelude = initAmb { localScope = builtin }
 
-process :: Env (Val Location) -> String -> IO (Env (Val Location))
-process env line = case parseTopLevel [] $ T.pack line of
+evalPrint :: Env (Val Location) -> [Expr Location] -> IO (Env (Val Location))
+evalPrint env [] = return env
+evalPrint env (expr:rest) = do
+    let (result, env') = eval expr env
+    case result of
+      Left err  -> print err >> return env'
+      Right val -> putStrLn (pretty val) >> evalPrint env' rest
+
+process :: String -> Env (Val Location) -> IO (Env (Val Location))
+process line env = case parseTopLevel [] $ T.pack line of
     Left  err   -> print err >> return env
-    Right exprs -> go env exprs
-  where
-    go env' [] = return env'
-    go env' (expr:rest) = do
-      let (result, resultEnv) = eval env' expr
-      case result of
-        Left err  -> print err >> return resultEnv
-        Right val -> putStrLn (pretty val) >> go resultEnv rest
+    Right exprs -> evalPrint env exprs
+
+loop :: MonadException m => Env (Val Location) -> InputT m ()
+loop env = do
+    minput <- getInputLine "('-')> "
+    case minput of
+      Nothing    -> outputStrLn "Bye."
+      Just input -> liftIO (process input env) >>= loop
 
 replLoop :: IO ()
 replLoop = runInputT defaultSettings $ loop prelude
-  where
-    loop env = do
-      minput <- getInputLine "cacco> "
-      case minput of
-        Nothing    -> outputStrLn "Bye."
-        Just input -> liftIO (process env input) >>= loop

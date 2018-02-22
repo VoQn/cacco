@@ -158,7 +158,7 @@ flonum = float <?> "floating point number"
   where
     float :: Parser Literal
     float = do
-      _       <- lookAhead $ try digitFloatFormat
+      lookAhead $ try digitFloatFormat
       number  <- snd <$> withSign L.scientific
       wrapper <- option Flonum suffix
       return $ wrapper number

@@ -66,11 +66,11 @@ withLocation :: Parser a -> Parser (Location, a)
 -- (test:1,1-1,3,Integer 10)
 --
 withLocation parser = do
-  begin <- getPosition
-  value <- parser
-  end   <- getPosition
-  let location = Location.fromSourcePos begin end
-  return (location, value)
+    begin <- getPosition
+    value <- parser
+    end   <- getPosition
+    let location = Location.fromSourcePos begin end
+    return (location, value)
 --
 
 -- | reserved keyword
@@ -84,15 +84,18 @@ symChar :: Parser Char
 symChar = oneOf ("!@#$%^&*_+-=|:<>?/" :: String)
 
 identifier :: Parser String
-identifier = (lexeme . try) (p >>= check)
+identifier = lexeme . try $ identifier' >>= check
   where
-    p :: Parser String
-    p = lexeme $ (:) <$> identInitial <*> many identTrail
-    {-# INLINE p #-}
+    identifier' :: Parser String
+    identifier' = lexeme $ (:) <$> identInitial <*> many identTrail
+    {-# INLINE identifier' #-}
 
+    check :: String -> Parser String
     check x
-      | x `elem` keywords = fail $ "keyword " <> show x <> " cannot be an identifier"
+      | x `elem` keywords = conflictWithReserved x
       | otherwise = return x
+
+    conflictWithReserved x = fail $ "keyword " <> show x <> " cannot be an identifier"
 
     identInitial :: Parser Char
     identInitial = letterChar <|> symChar

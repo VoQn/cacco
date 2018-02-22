@@ -68,7 +68,7 @@ evalAcc (info, ConF name exprE) = do
       then throwError $ CanNotRedefine name $ Just info
       else do
         _ <- State.put (Env.register name val env)
-        return $ Unit $ Just info
+        return . Unit $ Just info
 
 evalAcc (info, AppF funcE argEs) = do
     val <- funcE
@@ -76,9 +76,9 @@ evalAcc (info, AppF funcE argEs) = do
     evalAsFunc val args
   where
     evalAsFunc (Builtin func _) = supplyInfo info . func
-    evalAsFunc v = const $ throwError $ CanNotCallAsFunction (pretty v) $ Just info
+    evalAsFunc v = const . throwError $ CanNotCallAsFunction (pretty v) $ Just info
 
-evalAcc (i, _) = throwError $ InvalidForm $ Just i
+evalAcc (i, _) = throwError . InvalidForm $ Just i
 
-eval :: Env (Val i) -> Expr i -> EvalResult i
-eval env expr = runEval (cata (evalAcc . unAnnF) expr) env
+eval :: Expr i-> Env (Val i) -> EvalResult i
+eval expr = runEval $ cata (evalAcc . unAnnF) expr
