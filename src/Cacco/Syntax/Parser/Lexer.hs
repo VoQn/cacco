@@ -1,10 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Cacco.Syntax.Parser.Lexer
-  ( spaceConsumer
+  ( sc
   , lexeme
   , withLocation
   , symbol
+  , reserved
   , parens, braces, angles, brackets
   , bool
   , stringLiteral
@@ -13,12 +14,11 @@ module Cacco.Syntax.Parser.Lexer
 
 import           Control.Applicative          ((<*>))
 import           Data.Functor                 (($>))
+import           Data.Semigroup               ((<>))
 import           Data.Text                    (Text)
-import qualified Data.Text.Lazy               as TL
-import           Text.Megaparsec              (between, getPosition, many,
-                                               manyTill, (<?>), (<|>))
-import           Text.Megaparsec.Char         (char, digitChar, letterChar,
-                                               oneOf, space1)
+import qualified Data.Text                    as T
+import           Text.Megaparsec
+import           Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer   as L
 
 import           Cacco.Syntax.Literal         (Literal)
@@ -28,24 +28,24 @@ import qualified Cacco.Syntax.Location        as Location
 import           Cacco.Syntax.Parser.Internal (Parser)
 
 -- | Skipping space characters and comments.
-spaceConsumer :: Parser ()
-spaceConsumer = L.space space1 lineComment blockComment
+sc :: Parser ()
+sc = L.space space1 lineComment blockComment
+  where
+    -- | Ignore single line comment.
+    lineComment :: Parser ()
+    lineComment = L.skipLineComment ";;"
 
--- | Ignore single line comment.
-lineComment :: Parser ()
-lineComment = L.skipLineComment ";;"
-
--- | Ignore nested block comment.
-blockComment :: Parser ()
-blockComment = L.skipBlockCommentNested "(;" ";)"
+    -- | Ignore nested block comment.
+    blockComment :: Parser ()
+    blockComment = L.skipBlockCommentNested "(;" ";)"
 
 -- | Make parser to ignore any space and comment expressions
 lexeme :: Parser a -> Parser a
-lexeme = L.lexeme spaceConsumer
+lexeme = L.lexeme sc
 
 -- | Make specified string to token parser
 symbol :: Text -> Parser Text
-symbol = L.symbol spaceConsumer
+symbol = L.symbol sc
 
 parens :: Parser a -> Parser a
 parens = symbol "(" `between` symbol ")"
@@ -73,11 +73,40 @@ withLocation parser = do
   return (location, value)
 --
 
+-- | reserved keyword
+reserved :: Text -> Parser ()
+reserved w = lexeme $ string w *> notFollowedBy alphaNumChar
+
+keywords :: [String]
+keywords = ["if", "def", {- "dec", "val", "var", "set!", -} "undefined", "true", "false", "=", ":"]
+
+symChar :: Parser Char
+symChar = oneOf ("!@#$%^&*_+-=|:<>?/" :: String)
+
+identifier :: Parser String
+identifier = (lexeme . try) (p >>= check)
+  where
+    p :: Parser String
+    p = lexeme $ (:) <$> identInitial <*> many identTrail
+    {-# INLINE p #-}
+
+    check x
+      | x `elem` keywords = fail $ "keyword " <> show x <> " cannot be an identifier"
+      | otherwise = return x
+
+    identInitial :: Parser Char
+    identInitial = letterChar <|> symChar
+    {-# INLINE identInitial #-}
+
+    identTrail :: Parser Char
+    identTrail = letterChar <|> digitChar <|> symChar
+    {-# INLINE identTrail #-}
+
 true :: Parser Bool
-true = symbol "true" $> True
+true = reserved "true" $> True
 
 false :: Parser Bool
-false = symbol "false" $> False
+false = reserved "false" $> False
 
 bool :: Parser Literal
 -- ^ Parse a boolean literal
@@ -94,19 +123,5 @@ str :: Parser String
 str = char '"' >> L.charLiteral `manyTill` char '"'
 
 -- | Parse a Unicode text.
-stringLiteral :: Parser TL.Text
-stringLiteral = TL.pack <$> str <?> "string literal"
-
-symbolChar :: Parser Char
-symbolChar = oneOf ("!@#$%^&*_+-=|:<>?/" :: String)
-
-identifier :: Parser String
-identifier = lexeme $ (:) <$> identInitial <*> many identTrail
-
-identInitial :: Parser Char
-identInitial = letterChar <|> symbolChar
-{-# INLINE identInitial #-}
-
-identTrail :: Parser Char
-identTrail = letterChar <|> digitChar <|> symbolChar
-{-# INLINE identTrail #-}
+stringLiteral :: Parser Text
+stringLiteral = T.pack <$> str <?> "string literal"

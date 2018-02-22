@@ -8,7 +8,7 @@ module Cacco.Syntax.Literal
 
 import           Data.Int        (Int16, Int32, Int64, Int8)
 import           Data.Scientific (Scientific)
-import           Data.Text.Lazy  (Text)
+import           Data.Text       (Text)
 import           Data.Typeable   (Typeable)
 import           Data.Word       (Word16, Word32, Word64, Word8)
 import           GHC.Generics    (Generic)
