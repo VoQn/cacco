@@ -7,13 +7,8 @@ import           Cacco.Syntax.Position
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
-spec_Cacco_Position :: Spec
-spec_Cacco_Position = do
-  asInstanceOfShow
-  asInstanceOfOrd
-
-asInstanceOfShow :: Spec
-asInstanceOfShow = describe "an instance of Show" $ do
+spec_as_instance_of_Show :: Spec
+spec_as_instance_of_Show = do
   context "when x = Location{_sourceName = \"\", _line = 1, _column = 2}" $ do
     let x = initPosition & column .~ 2
     it "show x returns \"(unknown):1,2\"" $ show x `shouldBe` "((unknown):1,2)"
@@ -21,8 +16,8 @@ asInstanceOfShow = describe "an instance of Show" $ do
     let x = initPosition & sourceName .~ "test" & column .~ 2
     it "show x returns \"test:1,2\"" $ show x `shouldBe` "(test:1,2)"
 
-asInstanceOfOrd :: Spec
-asInstanceOfOrd = describe "as instances of Ord" $ do
+spec_as_instance_of_Ord :: Spec
+spec_as_instance_of_Ord = do
   context "when a^.sourceName /= b^.sourceName" $ do
     let a = initPosition & sourceName .~ "a"
     let b = initPosition & sourceName .~ "b"
