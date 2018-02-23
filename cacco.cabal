@@ -32,6 +32,7 @@ library
     , Cacco.Syntax.Expr
     , Cacco.Syntax.Parser.Lexer
     , Cacco.Syntax.Parser.Numeric
+    , Cacco.Syntax.Parser.Literal
     , Cacco.Syntax.Parser
     , Cacco.Val
     , Cacco.Error.IsError
@@ -91,7 +92,8 @@ test-suite test
   other-modules:
       Cacco.PositionSpec
     , Cacco.LiteralSpec
-    , Cacco.LexerSpec
+    , Cacco.Parser.LexerSpec
+    , Cacco.Parser.NumericSpec
     , Cacco.ParserSpec
     , Cacco.EvalSpec
   ghc-options:

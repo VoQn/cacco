@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Cacco.LexerSpec where
+module Cacco.Parser.LexerSpec where
 
 import           Data.Int             ()
 import           Data.Monoid          ((<>))

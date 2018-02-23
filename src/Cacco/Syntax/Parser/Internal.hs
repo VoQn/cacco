@@ -1,6 +1,5 @@
 module Cacco.Syntax.Parser.Internal
-  (
-    Parser
+  ( Parser
   , ParseError
   ) where
 
