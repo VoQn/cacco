@@ -8,8 +8,8 @@ module Cacco.Syntax.Parser
   , parseTopLevel
   , parseExpr
   , parseAst
-  , numeric
   , module Cacco.Syntax.Parser.Lexer
+  , module Cacco.Syntax.Parser.Literal
   , module Cacco.Syntax.Parser.Numeric
   , parse
   , parseTest
@@ -19,17 +19,17 @@ import           Data.Functor                 (Functor)
 import           Data.Text                    (Text)
 import           Text.Megaparsec              (ParsecT, between, choice, eof,
                                                many, parse, parseTest, some,
-                                               try, (<?>), (<|>))
+                                               try, (<|>))
 
 import           Cacco.Ann                    (AnnF (AnnF))
 import qualified Cacco.Ann                    as Ann
 import           Cacco.Fix                    (Fix (..))
 import           Cacco.Syntax.Expr            (Ast, AstF (..), Expr)
-import           Cacco.Syntax.Literal         (Literal (..))
 import           Cacco.Syntax.Location        (Location)
 import           Cacco.Syntax.Parser.Internal (ParseError, Parser)
 import           Cacco.Syntax.Parser.Lexer
 import qualified Cacco.Syntax.Parser.Lexer    as Lexer
+import           Cacco.Syntax.Parser.Literal
 import           Cacco.Syntax.Parser.Numeric
 
 contents :: Parser a -> Parser a
@@ -42,18 +42,6 @@ fixParser f = Fix <$> f (fixParser f)
 
 addLocation :: Parser (f a) -> Parser (AnnF Location f a)
 addLocation p = AnnF <$> withLocation p
-
-undef :: Parser Literal
-undef = reserved "undefined" >> return Undef <?> "undefined"
-
-numeric :: Parser Literal
-numeric = try flonum <|> integer
-
-text :: Parser Literal
-text = Text <$> Lexer.stringLiteral
-
-literal :: Parser Literal
-literal = undef <|> Lexer.bool <|> text <|> numeric
 
 defForm :: Parser a -> Parser (AstF a)
 defForm p = do

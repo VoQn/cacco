@@ -7,7 +7,7 @@ module Cacco.Syntax.Parser.Lexer
   , symbol
   , reserved
   , parens, braces, angles, brackets
-  , bool
+  , true, false
   , stringLiteral
   , identifier
   ) where
@@ -21,8 +21,6 @@ import           Text.Megaparsec
 import           Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer   as L
 
-import           Cacco.Syntax.Literal         (Literal)
-import qualified Cacco.Syntax.Literal         as Lit
 import           Cacco.Syntax.Location        (Location (..))
 import qualified Cacco.Syntax.Location        as Location
 import           Cacco.Syntax.Parser.Internal (Parser)
@@ -110,17 +108,6 @@ true = reserved "true" $> True
 
 false :: Parser Bool
 false = reserved "false" $> False
-
-bool :: Parser Literal
--- ^ Parse a boolean literal
---
--- >>> parseTest bool "true"
--- Bool True
---
--- >>> parseTest bool "false"
--- Bool False
---
-bool = Lit.Bool <$> (true <|> false) <?> "boolean literal: true or false"
 
 str :: Parser String
 str = char '"' >> L.charLiteral `manyTill` char '"'

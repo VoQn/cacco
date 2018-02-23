@@ -12,27 +12,7 @@ import           Cacco.Syntax.Parser
 
 spec_Cacco_Parser :: Spec
 spec_Cacco_Parser = do
-  parseNumeric
   parseExprSpec
-
-parseNumeric :: Spec
-parseNumeric = describe "Cacco.Parser.numeric" $ do
-  let testParse = parse numeric "<test>"
-  it "can parse \"0\"" $
-    testParse "0" `shouldBe` Right (Integer 0)
-  --
-  it "can parse \"-5\"" $
-    testParse "-5" `shouldBe` Right (Integer (-5))
-  --
-  it "can parse \"20.5\"" $
-    testParse "20.5" `shouldBe` Right (Flonum 20.5)
-  --
-  it "can parse \"0.0\"" $
-    testParse "0.0" `shouldBe` Right (Flonum 0.0)
-  --
-  it "can parse \"-2.5\"" $
-    testParse "-2.5" `shouldBe` Right (Flonum (-2.5))
-  --
 
 parseExprSpec:: Spec
 parseExprSpec = describe "Cacco.Parser.parseExpr" $ do

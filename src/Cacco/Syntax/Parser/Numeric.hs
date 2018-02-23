@@ -6,11 +6,12 @@ module Cacco.Syntax.Parser.Numeric
   ) where
 
 import           Data.Bits                    (shiftL)
+import           Data.Char
 import           Data.Functor                 (($>))
 import           Data.List                    (foldl')
 import           Data.Scientific              (Scientific, toRealFloat)
-import           Text.Megaparsec              (choice, lookAhead, option, some,
-                                               try, (<?>), (<|>))
+import           Text.Megaparsec              (choice, lookAhead, many, option,
+                                               some, try, (<?>), (<|>))
 import           Text.Megaparsec.Char         (char, digitChar)
 import qualified Text.Megaparsec.Char.Lexer   as L
 
@@ -39,16 +40,28 @@ zero = char '0' $> False
 one :: Parser Bool
 one = char '1' $> True
 
+digitSep :: Parser a -> Parser [a]
+digitSep p = (:) <$> p <*> many (p <|> (char '\'' *> p))
+
 -- | Parse a binary integer with prefix 'b' (e.g. 101010)
 binary' :: Parser Integer
-binary' = foldl' acc 0 <$> some (zero <|> one)
+binary' = foldl' acc 0 <$> (digitSep bit)
   where
+    bit = zero <|> one <?> "0 or 1"
     -- | Accumulate boolean as bit-shift
     acc :: Integer -> Bool -> Integer
     acc 0 False = 0
     acc 0 True  = 1
     acc v False = v `shiftL` 1
     acc v True  = v `shiftL` 1 + 1
+--
+decimal :: Parser Integer
+decimal = foldl' acc 0 <$> (digitSep digit)
+  where
+    digit = digitToInt <$> digitChar
+    acc :: Integer -> Int -> Integer
+    acc 0 i = fromIntegral i
+    acc v i = v * 10 + (fromIntegral i)
 
 -- | Parse a integer with prefix for positional notation.
 positional :: Parser Integer
@@ -103,7 +116,7 @@ integer = integer' <?> "integer literal"
 
 integer' :: Parser Literal
 integer' = do
-    (isSigned, number) <- try notated <|> withSign L.decimal
+    (isSigned, number) <- try notated <|> withSign decimal
     wrapper            <- option Integer $ suffix isSigned
     return $ wrapper number
   where
