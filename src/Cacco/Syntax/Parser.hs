@@ -33,7 +33,7 @@ import           Cacco.Syntax.Parser.Literal
 import           Cacco.Syntax.Parser.Numeric
 
 contents :: Parser a -> Parser a
-contents parser = between sc eof parser
+contents = between sc eof
 
 fixParser :: Functor f
           => (forall a. ParsecT e s m a -> ParsecT e s m (f a))
@@ -45,9 +45,8 @@ addLocation p = AnnF <$> withLocation p
 
 defForm :: Parser a -> Parser (AstF a)
 defForm p = do
-    (reserved "=" <|> reserved "def")
-    form <- constForm
-    return form
+    reserved "=" <|> reserved "def"
+    constForm
   where
     constForm = do
       n <- Lexer.identifier

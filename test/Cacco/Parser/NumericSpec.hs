@@ -18,6 +18,21 @@ spec_numeric = do
   it "can parse \"-5\"" $
     testParse "-5" `shouldBe` Right (Integer (-5))
   --
+  it "can parse \"1'234'567\"" $
+    testParse "1'234'567" `shouldBe` Right (Integer 1234567)
+  --
+  it "can parse \"1'2'3'4'5\"" $
+    testParse "1'2'3'4'5" `shouldBe` Right (Integer 12345)
+  --
+  it "can parse \"0b11'00\"" $
+    testParse "0b11'00" `shouldBe` Right (Integer 12)
+  --
+  it "can parse \"0o123'456\"" $
+    testParse "0o123'456" `shouldBe` Right (Integer 0o123456)
+  --
+  it "can parse \"0xfe'dc'ab'98'76\"" $
+    testParse "0xfedcab9876" `shouldBe` Right (Integer 0xfedcab9876)
+  --
   it "can parse \"20.5\"" $
     testParse "20.5" `shouldBe` Right (Flonum 20.5)
   --
