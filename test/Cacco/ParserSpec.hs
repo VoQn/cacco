@@ -10,12 +10,8 @@ import           Cacco.Syntax.Parser
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
-spec_Cacco_Parser :: Spec
-spec_Cacco_Parser = do
-  parseExprSpec
-
-parseExprSpec:: Spec
-parseExprSpec = describe "Cacco.Parser.parseExpr" $ do
+spec_parseAst :: Spec
+spec_parseAst =  do
   let testParse = parseAst "test"
   --
   it "can parse \"0xff\"" $

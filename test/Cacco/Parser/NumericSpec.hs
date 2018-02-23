@@ -2,17 +2,15 @@
 
 module Cacco.Parser.NumericSpec where
 
-import           Test.Tasty.Hspec            (Spec, context, describe, it,
-                                              shouldBe)
+import           Test.Tasty.Hspec     (Spec, it, shouldBe)
 
 import           Cacco.Syntax.Literal
-import           Cacco.Syntax.Parser         hiding (parseTest)
-import           Cacco.Syntax.Parser.Literal
+import           Cacco.Syntax.Parser  hiding (parseTest)
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
-spec_lexer_numeric :: Spec
-spec_lexer_numeric = describe "Cacco.Parser.Numeric" $ do
+spec_numeric :: Spec
+spec_numeric = do
   let testParse = parse numeric "<test>"
   it "can parse \"0\"" $
     testParse "0" `shouldBe` Right (Integer 0)
