@@ -32,18 +32,22 @@ sc = L.space space1 lineComment blockComment
     -- | Ignore single line comment.
     lineComment :: Parser ()
     lineComment = L.skipLineComment ";;"
-
+    {-# INLINE lineComment #-}
     -- | Ignore nested block comment.
     blockComment :: Parser ()
     blockComment = L.skipBlockCommentNested "(;" ";)"
+    {-# INLINE blockComment #-}
+{-# INLINEABLE sc #-}
 
 -- | Make parser to ignore any space and comment expressions
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme sc
+{-# INLINE lexeme #-}
 
 -- | Make specified string to token parser
 symbol :: Text -> Parser Text
 symbol = L.symbol sc
+{-# INLINE symbol #-}
 
 parens :: Parser a -> Parser a
 parens = symbol "(" `between` symbol ")"
@@ -69,17 +73,21 @@ withLocation parser = do
     end   <- getPosition
     let location = Location.fromSourcePos begin end
     return (location, value)
+{-# INLINEABLE withLocation #-}
 --
 
 -- | reserved keyword
 reserved :: Text -> Parser ()
 reserved w = lexeme $ string w *> notFollowedBy alphaNumChar
+{-# INLINEABLE reserved #-}
 
 keywords :: [String]
 keywords = ["if", "def", {- "dec", "val", "var", "set!", -} "undefined", "true", "false", "=", ":"]
+{-# INLINE keywords #-}
 
 symChar :: Parser Char
 symChar = oneOf ("!@#$%^&*_+-=|:<>?/" :: String)
+{-# INLINE symChar #-}
 
 identifier :: Parser String
 identifier = lexeme . try $ identifier' >>= check
@@ -92,8 +100,10 @@ identifier = lexeme . try $ identifier' >>= check
     check x
       | x `elem` keywords = conflictWithReserved x
       | otherwise = return x
+    {-# INLINE check #-}
 
     conflictWithReserved x = fail $ "keyword " <> show x <> " cannot be an identifier"
+    {-# INLINE conflictWithReserved #-}
 
     identInitial :: Parser Char
     identInitial = letterChar <|> symChar
@@ -105,13 +115,17 @@ identifier = lexeme . try $ identifier' >>= check
 
 true :: Parser Bool
 true = reserved "true" $> True
+{-# INLINE true #-}
 
 false :: Parser Bool
 false = reserved "false" $> False
+{-# INLINE false #-}
 
 str :: Parser String
 str = char '"' >> L.charLiteral `manyTill` char '"'
+{-# INLINE str #-}
 
 -- | Parse a Unicode text.
 stringLiteral :: Parser Text
 stringLiteral = T.pack <$> str <?> "string literal"
+{-# INLINEABLE stringLiteral #-}

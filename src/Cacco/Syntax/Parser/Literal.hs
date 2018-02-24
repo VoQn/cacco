@@ -28,9 +28,6 @@ bool = Bool <$> (true <|> false) <?> "boolean literal: true or false"
 undef :: Parser Literal
 undef = reserved "undefined" >> return Undef <?> "undefined"
 
-numeric :: Parser Literal
-numeric = try flonum <|> integer
-
 text :: Parser Literal
 text = Text <$> stringLiteral
 

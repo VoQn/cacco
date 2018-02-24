@@ -2,50 +2,36 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Cacco.Syntax.Parser.Numeric
-  ( integer
-  , flonum
+  ( numeric
   ) where
 
 import           Data.Bits                    (shiftL)
 import           Data.Char
-import           Data.Functor                 (($>))
+import           Data.Functor                 (void, ($>))
 import           Data.List                    (foldl')
-import           Data.Scientific              (Scientific, toRealFloat)
-import           Text.Megaparsec              (choice, lookAhead, many, option,
-                                               some, try, (<?>), (<|>))
+import           Data.Scientific              (Scientific, scientific,
+                                               toRealFloat)
+import           Text.Megaparsec              (choice, many, option, try, (<?>),
+                                               (<|>))
 import           Text.Megaparsec.Char         (char, digitChar, hexDigitChar,
-                                               octDigitChar, string)
-import qualified Text.Megaparsec.Char.Lexer   as L
+                                               octDigitChar)
 
 import           Cacco.Syntax.Literal
 import           Cacco.Syntax.Parser.Internal (Parser)
 import           Cacco.Syntax.Parser.Lexer
 
-minus :: Num a => Parser (Bool, a -> a)
-minus = char '-' $> (True, negate)
-{-# INLINE minus #-}
+import           Prelude                      hiding (exponent)
 
-plus :: Num a => Parser (Bool, a -> a)
-plus = char '+' $> (True, id)
-{-# INLINE plus #-}
-
--- | Parse a number with optional sign
-withSign :: Num a => Parser a -> Parser (Bool, a)
-withSign parser = do
-    (isSigned, fn) <- option (False, id) $ minus <|> plus
-    number         <- parser
-    return (isSigned, fn number)
-{-# INLINEABLE withSign #-}
-
--- | Parse '0' as a boolean
-zero :: Parser Bool
-zero = char '0' $> False
-{-# INLINE zero #-}
-
--- | Parse '1' as a boolean
-one :: Parser Bool
-one = char '1' $> True
-{-# INLINE one #-}
+signed :: Num a => Parser (Bool, a -> a)
+signed = option (False, id) $ minus <|> plus
+  where
+    minus :: Num a => Parser (Bool, a -> a)
+    minus = char '-' $> (True, negate)
+    {-# INLINE minus #-}
+    plus :: Num a => Parser (Bool, a -> a)
+    plus = char '+' $> (True, id)
+    {-# INLINE plus #-}
+{-# INLINEABLE signed #-}
 
 withDigitSep :: Parser a -> Parser [a]
 withDigitSep p = (:) <$> p <*> many (p <|> (char '\'' >> p))
@@ -53,9 +39,18 @@ withDigitSep p = (:) <$> p <*> many (p <|> (char '\'' >> p))
 
 -- | Parse a binary integer with prefix 'b' (e.g. 101010)
 binary :: Parser Integer
-binary = foldl' acc 0 <$> withDigitSep bit
+binary = char 'b' >> foldl' acc 0 <$> withDigitSep bit
   where
+    bit :: Parser Bool
     bit = zero <|> one <?> "0 or 1"
+    -- | Parse '0' as a boolean
+    zero :: Parser Bool
+    zero = char '0' $> False
+    {-# INLINE zero #-}
+    -- | Parse '1' as a boolean
+    one :: Parser Bool
+    one = char '1' $> True
+    {-# INLINE one #-}
     -- | Accumulate boolean as bit-shift
     acc :: Integer -> Bool -> Integer
     acc 0 False  = 0
@@ -65,47 +60,104 @@ binary = foldl' acc 0 <$> withDigitSep bit
 {-# INLINEABLE binary #-}
 
 decimal :: Parser Integer
-decimal = foldl' acc 0 <$> withDigitSep digit
+decimal = do
+    ds <- withDigitSep digitChar
+    return $ foldl' acc 0 ds
   where
-    digit = fromIntegral . digitToInt <$> digitChar
-    acc :: Integer -> Integer -> Integer
-    acc !v i = v * 10 + fromIntegral i
+    acc :: Integer -> Char -> Integer
+    acc !v c = v * 10 + (fromIntegral $ digitToInt c)
+    {-# INLINE acc #-}
 {-# INLINEABLE decimal #-}
 
 octal :: Parser Integer
-octal = foldl' acc 0 <$> withDigitSep oct
+octal = do
+    void $ char 'o'
+    ds <- withDigitSep octDigitChar
+    return $ foldl' acc 0 ds
   where
-    oct = fromIntegral . digitToInt <$> octDigitChar
-    acc !v i = v * 8 + i
+    acc :: Integer -> Char -> Integer
+    acc !v c = v * 8 + (fromIntegral $ digitToInt c)
+    {-# INLINE acc #-}
 {-# INLINEABLE octal #-}
 
 hexadecimal :: Parser Integer
-hexadecimal = foldl' acc 0 <$> withDigitSep hex
+hexadecimal = do
+    void $ char 'x'
+    ds <- withDigitSep hexDigitChar
+    return $ foldl' acc 0 ds
   where
-    hex = fromIntegral . digitToInt <$> hexDigitChar
-    acc !v i = v * 16 + i
+    acc :: Integer -> Char -> Integer
+    acc !v c = v * 16 + (fromIntegral $ digitToInt c)
+    {-# INLINE acc #-}
 {-# INLINEABLE hexadecimal #-}
 
--- | Parse a integer with prefix for positional notation.
-positional :: Parser Integer
-positional = char '0' >> choice [hexadecimal', octal', binary']
-  where
-    -- | Parse a hexadecimal integer with prefix 'x' (e.g. xFA901)
-    hexadecimal' :: Parser Integer
-    hexadecimal' = char 'x' >> hexadecimal
-    {-# INLINE hexadecimal' #-}
-    -- | Parse a octal integer with prefix 'o' (e.g. o080)
-    octal' :: Parser Integer
-    octal' = char 'o' >> octal
-    {-# INLINE octal' #-}
-    -- | Parse a binary integer with prefix 'b' (e.g. b101010)
-    binary' :: Parser Integer
-    binary' = char 'b' >> binary
-    {-# INLINE binary' #-}
-{-# INLINEABLE positional #-}
+data SP = SP !Integer {-# UNPACK #-} !Int
 
-integer :: Parser Literal
--- ^ Parse a integer number literal.
+decimalPoint :: Integer -> Parser SP
+decimalPoint c' = do
+    void $ char '.'
+    ds <- withDigitSep digitChar
+    return $ foldl' acc (SP c' 0) ds
+  where
+    acc :: SP -> Char -> SP
+    acc (SP a e') c =
+      let a' = a * 10 + fromIntegral (digitToInt c)
+      in SP a' $ e' - 1
+    {-# INLINE acc #-}
+{-# INLINEABLE decimalPoint #-}
+
+exponent :: Int -> Parser Int
+exponent e' = do
+    void $ char 'e'
+    (_, f) <- signed
+    e <- decimal
+    return $ fromInteger (f e) + e'
+{-# INLINEABLE exponent #-}
+--
+
+decimalLiteral :: Parser Literal
+decimalLiteral = do
+    (s, f) <- signed
+    n <- decimal
+    option (Integer $ f n) $ trail s f n
+  where
+    trail s f n
+      = decimalPoint' f n
+      <|> expo f n
+      <|> (($ f n) <$> suffixI s)
+    {-# INLINE trail #-}
+
+    decimalPoint' f n = do
+      SP c e' <- decimalPoint n
+      e       <- option e' $ exponent e'
+      w       <- option Flonum suffixF
+      return . w $ scientific (f c) e
+    {-# INLINEABLE decimalPoint' #-}
+
+    expo f n = do
+      e <- exponent 0
+      w <- option Flonum suffixF
+      return . w $ scientific (f n) e
+    {-# INLINE expo #-}
+
+    suffixF = char '_' >> float
+    {-# INLINE suffixF #-}
+
+    suffixI True  = char '_' >> signedInt <|> float'
+    suffixI False = char '_' >> unsignedInt <|> signedInt <|> float'
+    {-# INLINE suffixI #-}
+{-# INLINEABLE decimalLiteral #-}
+
+hexLiteral :: Parser Literal
+hexLiteral = do
+    n <- hexadecimal
+    w <- option Integer $ char '_' >> unsignedInt <|> signedInt
+    -- TODO :: hexadecimal floating point syntax
+    return $ w n
+{-# INLINEABLE hexLiteral #-}
+
+numeric :: Parser Literal
+-- ^ Parse a number literal.
 -- Integer literals:
 --
 -- [@unsigned-decimals@] @0@, @1@, @10@, ...
@@ -125,37 +177,30 @@ integer :: Parser Literal
 -- [@_i64@] 64bit integer
 -- [@_u64@] 64bit unsigned-integer
 --
--- >>> parseTest integer "1"
+-- >>> parseTest numeric "1"
 -- Integer 1
 --
--- >>> parseTest integer "0xFF"
+-- >>> parseTest numeric "0xFF"
 -- Integer 256
 --
--- >>> parseTest integer "1_i8"
+-- >>> parseTest numeric "1_i8"
 -- Int8 1
 --
--- >>> parseTest integer "1_u32"
+-- >>> parseTest numeric "1_u32"
 -- Uint32 1
 --
-integer = integer' <?> "integer literal"
-
-integer' :: Parser Literal
-integer' = do
-    (isSigned, number) <- try notated <|> withSign decimal
-    wrapper            <- option Integer $ suffix isSigned
-    return $ wrapper number
+numeric = try positional <|> decimalLiteral
   where
-    -- | parse positional notated integer
-    notated :: Parser (Bool, Integer)
-    notated = (,) False <$> positional
-    {-# INLINE notated #-}
-    -- | parse strict integer-type suffix
-    suffix :: Bool -- ^ prefix was exist
-           -> Parser (Integer -> Literal)
-    suffix True  = char '_' >> signedInt
-    suffix False = char '_' >> signedInt <|> unsignedInt
-    {-# INLINE suffix #-}
-{-# INLINE integer' #-}
+    positional = do
+      void $ char '0'
+      octalOrBinary <|> hexLiteral
+    {-# INLINE positional #-}
+
+    octalOrBinary = do
+      n <- octal <|> binary
+      w <- option Integer $ char '_' >> unsignedInt <|> signedInt
+      return $ w n
+    {-# INLINE octalOrBinary #-}
 
 -- | parse signed-integer-type suffix
 signedInt :: Parser (Integer -> Literal)
@@ -166,6 +211,14 @@ signedInt = char 'i' >> choice [i8, i16, i32, i64]
 unsignedInt :: Parser (Integer -> Literal)
 unsignedInt = char 'u' >> choice [u8, u16, u32, u64]
 {-# INLINEABLE unsignedInt #-}
+
+float :: Parser (Scientific -> Literal)
+float = char 'f' >> choice [f16, f32, f64]
+{-# INLINEABLE float #-}
+
+float' :: Parser (Integer -> Literal)
+float' = (. fromInteger) <$> float
+{-# INLINEABLE float' #-}
 
 i8 :: Parser (Integer -> Literal)
 i8  = symbol "8" $> Int8 . fromInteger
@@ -198,33 +251,6 @@ u32 = symbol "32" $> Uint32 . fromInteger
 u64 :: Parser (Integer -> Literal)
 u64 = symbol "64" $> Uint64 . fromInteger
 {-# INLINE u64 #-}
-
--- | Parse a floating point number.
-flonum :: Parser Literal
-flonum = float <?> "floating point number"
-  where
-    float :: Parser Literal
-    float = do
-      _ <- lookAhead $ try digitFloatFormat
-      number  <- snd <$> withSign L.scientific
-      wrapper <- option Flonum suffix
-      return $ wrapper number
-    {-# INLINE float #-}
-    suffix :: Parser (Scientific -> Literal)
-    suffix = string "_f" >> choice [f16, f32, f64]
-    {-# INLINE suffix #-}
-
-digitFloatFormat :: Parser Bool
-digitFloatFormat = do
-    sign
-    _ <- some digitChar
-    _ <- char '.' <|> char 'e'
-    return True
-  where
-    sign :: Parser ()
-    sign = option () $ (char '-' <|> char '+') $> ()
-    {-# INLINE sign #-}
-{-# INLINE digitFloatFormat #-}
 
 f16 :: Parser (Scientific -> Literal)
 f16 = symbol "16" $> Float16 . toRealFloat
