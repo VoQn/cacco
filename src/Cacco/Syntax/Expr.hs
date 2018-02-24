@@ -24,19 +24,28 @@ import           Cacco.Syntax.Literal (Literal)
 -- | Abstruct syntax tree of Cacco language
 data AstF a
   -- Atomic
-  = HolF         -- ^ Hole @_@
-  | LitF Literal -- ^ 'Literal'
-  | SymF String  -- ^ Symbol
+  -- | Hole @_@
+  = HolF
+  -- | 'Literal'
+  | LitF Literal
+  -- | Symbol
+  | SymF String
 
   -- Collections
-  | LisF [a] -- ^ Linked list
-  | VecF [a] -- ^ Fixed size vector
-  | StrF (Map String a) -- ^ Struct
+  -- | Linked list
+  | LisF [a]
+  -- | Fixed size vector
+  | VecF [a]
+  -- | Struct
+  | StrF (Map String a)
 
   -- Fuctors
-  | AppF  a [a] -- ^ Apply function
-  | LamF [a] a  -- ^ Lambda (anonymous) function
-  | ConF String a -- ^ Declare a constant value
+  -- | Apply function
+  | AppF  a [a]
+  -- | Lambda (anonymous) function
+  | LamF [a] a
+  -- | Declare a constant value
+  | ConF String a
   deriving (Eq, Ord, Show, Typeable, Generic, Functor, Foldable)
 
 instance Traversable AstF where
