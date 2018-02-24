@@ -47,7 +47,7 @@ spec_parseAst =  do
   --
   it "can parse \"(= x 100)\"" $
     testParse "(= x 100)" `shouldBe` Right
-      (Con "x" $ Literal $ Integer 100)
+      (Con (Symbol "x") $ Literal $ Integer 100)
   --
   it "can parse \"(var x 100)\"" $
     testParse "(var x 100)" `shouldBe` Right

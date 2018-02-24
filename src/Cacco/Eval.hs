@@ -12,7 +12,7 @@ import           Control.Monad.State    (StateT, runStateT)
 import qualified Control.Monad.State    as State
 
 import           Cacco.Ann              (unAnnF)
-import           Cacco.Env              (Env, hasKeyHere)
+import           Cacco.Env              (Env)
 import qualified Cacco.Env              as Env
 import           Cacco.Error            (Error (..))
 import qualified Cacco.Error            as Err
@@ -58,17 +58,18 @@ evalAcc (info, LitF literal) = supplyInfo info $ case literal of
 evalAcc (info, SymF name) = do
     env <- State.get
     supplyInfo info $ case Env.lookup name env of
-      Nothing  -> throwError $ Err.unknownSymbol name
+      Nothing  -> return $ Symbol name Nothing
       Just val -> return val
 
-evalAcc (info, ConF name exprE) = do
-    val <- exprE
-    env <- State.get
-    if hasKeyHere name env
-      then throwError $ CanNotRedefine name $ Just info
-      else do
+evalAcc (info, ConF symE exprE) = do
+    sym <- symE
+    case sym of
+      Symbol name _ -> do
+        val <- exprE
+        env <- State.get
         _ <- State.put (Env.register name val env)
         return . Unit $ Just info
+      _ -> throwError $ CanNotRedefine "" $ Just info
 
 evalAcc (info, AppF funcE argEs) = do
     val <- funcE

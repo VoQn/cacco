@@ -49,7 +49,7 @@ defForm p = do
     constForm
   where
     constForm = do
-      n <- Lexer.identifier
+      n <- p
       v <- p
       return $ ConF n v
 

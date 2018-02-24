@@ -45,7 +45,7 @@ data AstF a
   -- | Lambda (anonymous) function
   | LamF [a] a
   -- | Declare a constant value
-  | ConF String a
+  | ConF a a
   deriving (Eq, Ord, Show, Typeable, Generic, Functor, Foldable)
 
 instance Traversable AstF where
@@ -57,7 +57,7 @@ instance Traversable AstF where
   traverse f (StrF xs)   = StrF <$> traverse f xs
   traverse f (AppF x xs) = AppF <$> f x <*> traverse f xs
   traverse f (LamF xs x) = LamF <$> traverse f xs <*> f x
-  traverse f (ConF n  x) = ConF <$> pure n <*> f x
+  traverse f (ConF n  x) = ConF <$> f n <*> f x
 
 -- | 'Fix'ed version 'AstF'
 type Ast = Fix AstF
@@ -86,7 +86,7 @@ pattern App fn args = Fix (AppF fn args)
 pattern Lam :: [Ast] -> Ast -> Ast
 pattern Lam params body = Fix (LamF params body)
 
-pattern Con :: String -> Ast -> Ast
+pattern Con :: Ast -> Ast -> Ast
 pattern Con name expr = Fix (ConF name expr)
 
 -- | 'Expr' is some annotated Fixed 'AstF'
