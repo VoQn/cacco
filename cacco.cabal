@@ -24,8 +24,9 @@ library
     -Wall
   exposed-modules:
       Lib
-    , Cacco.Fix
-    , Cacco.Ann
+    , Data.Fix
+    , Data.IxFix
+    , Data.Ann
     , Cacco.Syntax.Position
     , Cacco.Syntax.Location
     , Cacco.Syntax.Literal

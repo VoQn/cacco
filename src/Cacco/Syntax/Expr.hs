@@ -17,8 +17,9 @@ import           Data.Map.Lazy        (Map)
 import           Data.Typeable        (Typeable)
 import           GHC.Generics         (Generic)
 
-import           Cacco.Ann
-import           Cacco.Fix
+import           Data.Ann
+import           Data.Fix
+
 import           Cacco.Syntax.Literal (Literal)
 
 -- | Abstruct syntax tree of Cacco language

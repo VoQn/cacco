@@ -2,7 +2,7 @@
 {-# LANGUAGE StandaloneDeriving   #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Cacco.Fix where
+module Data.Fix where
 
 import           Control.Monad
 

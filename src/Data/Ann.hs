@@ -2,12 +2,12 @@
 {-# LANGUAGE DeriveFunctor  #-}
 {-# LANGUAGE DeriveGeneric  #-}
 
-module Cacco.Ann where
+module Data.Ann where
 
 import           Data.Typeable (Typeable)
 import           GHC.Generics  (Generic)
 
-import           Cacco.Fix     (Fix (..), cata)
+import           Data.Fix      (Fix (..), cata)
 
 -- | Annotated Functor
 newtype AnnF i f a = AnnF { unAnnF :: (i, f a) }

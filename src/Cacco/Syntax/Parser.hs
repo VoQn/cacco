@@ -20,9 +20,10 @@ import           Data.Text                    (Text)
 import           Text.Megaparsec              (between, choice, eof, many,
                                                parse, parseTest, try, (<|>))
 
-import           Cacco.Ann                    (AnnF (..))
-import qualified Cacco.Ann                    as Ann
-import           Cacco.Fix                    (Fix (..))
+import           Data.Ann                     (AnnF (..))
+import qualified Data.Ann                     as Ann
+import           Data.Fix                     (Fix (..))
+
 import           Cacco.Syntax.Expr            (Ast, AstF (..), Expr)
 import           Cacco.Syntax.Location        (Location)
 import           Cacco.Syntax.Parser.Internal (ParseError, Parser)

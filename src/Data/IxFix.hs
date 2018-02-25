@@ -11,7 +11,7 @@
 {-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Cacco.IxFix where
+module Data.IxFix where
 
 import           Control.Monad
 

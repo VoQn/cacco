@@ -11,12 +11,13 @@ import           Control.Monad.Identity (Identity, runIdentity)
 import           Control.Monad.State    (StateT, runStateT)
 import qualified Control.Monad.State    as State
 
-import           Cacco.Ann              (unAnnF)
+import           Data.Ann               (unAnnF)
+import           Data.Fix               (cata)
+
 import           Cacco.Env              (Env)
 import qualified Cacco.Env              as Env
 import           Cacco.Error            (Error (..))
 import qualified Cacco.Error            as Err
-import           Cacco.Fix              (cata)
 import           Cacco.Syntax.Expr      (AstF (..), Expr)
 import qualified Cacco.Syntax.Literal   as Lit
 import           Cacco.Val              (Val (..), pretty)

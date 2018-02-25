@@ -11,9 +11,9 @@
 
 module Cacco.Ast where
 
-import           Cacco.IxFix          (IxFix (..), IxFunctor (..),
-                                       IxTraversable (..), cata, imapDefault)
 import           Cacco.Syntax.Literal (Literal)
+import           Data.IxFix           (IxFix (..), IxFunctor (..),
+                                       IxTraversable (..), cata, imapDefault)
 
 data Var
   = VarId String
