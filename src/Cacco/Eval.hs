@@ -81,5 +81,5 @@ evalAcc (info, AppF funcE argEs) = do
 
 evalAcc (i, _) = throwError . InvalidForm $ Just i
 
-eval :: Expr i-> Env (Val i) -> EvalResult i
+eval :: Expr i -> Env (Val i) -> EvalResult i
 eval expr = runEval $ cata (evalAcc . unAnnF) expr

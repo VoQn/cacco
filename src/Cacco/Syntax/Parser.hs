@@ -43,7 +43,7 @@ fixParser f = Fix <$> f (fixParser f)
 addLocation :: Parser (f a) -> Parser (AnnF Location f a)
 addLocation p = AnnF <$> withLocation p
 
-defForm :: Parser a -> Parser (AstF a)
+defForm :: forall f. Parser f -> Parser (AstF f)
 defForm p = do
     reserved "=" <|> reserved "def"
     constForm
@@ -53,14 +53,14 @@ defForm p = do
       v <- p
       return $ ConF n v
 
-fuctorF :: forall a. Parser a -> Parser (AstF a)
+fuctorF :: forall f. Parser f -> Parser (AstF f)
 fuctorF p = try (defForm p) <|> applyForm
   where
     applyForm = do
       (f:args) <- some p
       return $ AppF f args
 
-astF :: forall a. Parser a -> Parser (AstF a)
+astF :: forall f. Parser f -> Parser (AstF f)
 astF p = lexeme $ choice
     [ parens (fuctorF p)
     , VecF <$> brackets (many p)

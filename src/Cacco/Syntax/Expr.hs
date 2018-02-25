@@ -22,30 +22,30 @@ import           Cacco.Fix
 import           Cacco.Syntax.Literal (Literal)
 
 -- | Abstruct syntax tree of Cacco language
-data AstF a
+data AstF f where
   -- Atomic
   -- | Hole @_@
-  = HolF
+  HolF :: AstF f
   -- | 'Literal'
-  | LitF Literal
+  LitF :: Literal -> AstF f
   -- | Symbol
-  | SymF String
+  SymF :: String -> AstF f
 
   -- Collections
   -- | Linked list
-  | LisF [a]
+  LisF :: [f] -> AstF f
   -- | Fixed size vector
-  | VecF [a]
+  VecF :: [f] -> AstF f
   -- | Struct
-  | StrF (Map String a)
+  StrF :: (Map String f) -> AstF f
 
   -- Fuctors
   -- | Apply function
-  | AppF  a [a]
+  AppF :: f -> [f] -> AstF f
   -- | Lambda (anonymous) function
-  | LamF [a] a
+  LamF :: [f] -> f -> AstF f
   -- | Declare a constant value
-  | ConF a a
+  ConF :: f -> f -> AstF f
   deriving (Eq, Ord, Show, Typeable, Generic, Functor, Foldable)
 
 instance Traversable AstF where
