@@ -17,18 +17,16 @@ module Cacco.Syntax.Parser
 
 import           Data.Functor                 (Functor)
 import           Data.Text                    (Text)
-import           Text.Megaparsec              (ParsecT, between, choice, eof,
-                                               many, parse, parseTest, some,
-                                               try, (<|>))
+import           Text.Megaparsec              (between, choice, eof, many,
+                                               parse, parseTest, try, (<|>))
 
-import           Cacco.Ann                    (AnnF (AnnF))
+import           Cacco.Ann                    (AnnF (..))
 import qualified Cacco.Ann                    as Ann
 import           Cacco.Fix                    (Fix (..))
 import           Cacco.Syntax.Expr            (Ast, AstF (..), Expr)
 import           Cacco.Syntax.Location        (Location)
 import           Cacco.Syntax.Parser.Internal (ParseError, Parser)
 import           Cacco.Syntax.Parser.Lexer
-import qualified Cacco.Syntax.Parser.Lexer    as Lexer
 import           Cacco.Syntax.Parser.Literal
 import           Cacco.Syntax.Parser.Numeric
 
@@ -36,8 +34,8 @@ contents :: Parser a -> Parser a
 contents = between sc eof
 
 fixParser :: Functor f
-          => (forall a. ParsecT e s m a -> ParsecT e s m (f a))
-          -> ParsecT e s m (Fix f)
+          => (forall a. Parser a -> Parser (f a))
+          -> Parser (Fix f)
 fixParser f = Fix <$> f (fixParser f)
 
 addLocation :: Parser (f a) -> Parser (AnnF Location f a)
@@ -45,31 +43,34 @@ addLocation p = AnnF <$> withLocation p
 
 defForm :: forall f. Parser f -> Parser (AstF f)
 defForm p = do
-    reserved "=" <|> reserved "def"
-    constForm
-  where
-    constForm = do
-      n <- p
-      v <- p
-      return $ ConF n v
+  reserved "=" <|> reserved "def"
+  ConF <$> p <*> p
 
-fuctorF :: forall f. Parser f -> Parser (AstF f)
-fuctorF p = try (defForm p) <|> applyForm
-  where
-    applyForm = do
-      (f:args) <- some p
-      return $ AppF f args
+applyForm :: Parser f -> Parser (AstF f)
+applyForm p = AppF <$> p <*> many p
 
-astF :: forall f. Parser f -> Parser (AstF f)
-astF p = lexeme $ choice
-    [ parens (fuctorF p)
-    , VecF <$> brackets (many p)
-    , LitF <$> try literal
-    , SymF <$> Lexer.identifier
-    ]
+fuctor :: forall f. Parser f -> Parser (AstF f)
+fuctor p = try (defForm p) <|> applyForm p
+
+lit :: Parser (AstF f)
+lit = LitF <$> try literal
+
+sym :: Parser (AstF f)
+sym = SymF <$> identifier
+
+vec :: Parser f -> Parser (AstF f)
+vec p = VecF <$> many p
+
+ast :: forall f. Parser f -> Parser (AstF f)
+ast p = lexeme $ choice
+  [ try lit
+  , sym
+  , parens $ fuctor p
+  , brackets $ vec p
+  ]
 
 expr :: Parser (Expr Location)
-expr = fixParser $ addLocation . astF
+expr = fixParser $ addLocation . ast
 
 topLevel :: Parser [Expr Location]
 topLevel = many expr
