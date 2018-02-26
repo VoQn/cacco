@@ -10,7 +10,7 @@ import           Text.Megaparsec
 
 import           Data.IxFix                   ()
 
-import           Cacco.Syntax.Ast
+import           Cacco.Syntax.AST
 import           Cacco.Syntax.Parser.Internal
 import           Cacco.Syntax.Parser.Lexer
 import           Cacco.Syntax.Parser.Literal

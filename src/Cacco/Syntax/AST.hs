@@ -11,7 +11,7 @@
 {-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Cacco.Syntax.Ast where
+module Cacco.Syntax.AST where
 --
 import           Data.Typeable        (Typeable)
 import           GHC.Generics         (Generic)
