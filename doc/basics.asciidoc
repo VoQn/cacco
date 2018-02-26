@@ -67,6 +67,7 @@ v0.1.0, 2018-02-12
 
 === Conditional branch
 
+[[If_Expression]]
 ==== if (simple)
 
 `if <prod> <then> <else>` is a special form.
@@ -90,6 +91,7 @@ v0.1.0, 2018-02-12
     (error! "this would be evaluated")) ;; error
 ----
 
+[[Multiway_If]]
 ==== if (multiway)
 
 other version `if` is `if [<prod> <then>] ... [else <else>]`
@@ -108,6 +110,29 @@ other version `if` is `if [<prod> <then>] ... [else <else>]`
 (fizz-buzz 3) ;; "Fizz"
 (fizz-buzz 10) ;; "Buzz"
 (fizz-buzz 30) ;; "FizzBuzz"
+----
+
+[[Lambda]]
+== λ Expression
+
+----
+;; 1. usually lambda expression
+((|x y| (- x y)) 10 20) ;; -10
+
+;; 2. placeholder expression
+((|- <> <>|) 10 20) ;; -10
+
+((|list 1 <> 3 <...>|) 2 4 5 6 7 8 9) ;; [1 2 3 4 5 6 7 8 9]
+
+;; 3. indexed placeholder expression
+((|- <2> <1>|) 10 20) ;; 10
+
+;; 4. with hole pattern
+(= const (|x _| x))
+(const 1 2) ;; 1
+
+(= seq (|_ y| y))
+(seq 1 2) ;; 2
 ----
 
 [[Literals]]
@@ -173,12 +198,13 @@ For safe using, recommend to write type annotation and use converter.
 
 (: y Float32)
 (= y
-  (val x' (from-integer x))
+  (= x' (from-integer x))
   (/. x' 2))
 
 (odd? x) ;; (^_^) OK
 ----
 
+[[Strict_Types]]
 === Strict type literals
 
 Of cause, cacco has strict type literals
@@ -196,8 +222,8 @@ Of cause, cacco has strict type literals
 |`0_u16`|`Uint16`|16bit unsigned integer
 |`0_u32`|`Uint32`|32bit unsigned integer
 |`0_u64`|`Uint64`|64bit unsigned integer
-|`0.0_f16`|`Float16`|16bit floating point number (IEEE 754-2008 binary16)
-|`0.0_f32`|`Float32`|32bit floating point number (IEEE 754-2008 binary32)
-|`0.0_f64`|`Float64`|64bit floating point number (IEEE 754-2008 binary64)
+|`0_f16`|`Float16`|16bit floating point number (IEEE 754-2008 binary16)
+|`0_f32`|`Float32`|32bit floating point number (IEEE 754-2008 binary32)
+|`0_f64`|`Float64`|64bit floating point number (IEEE 754-2008 binary64)
 
 |===
