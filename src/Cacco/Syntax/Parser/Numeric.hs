@@ -65,7 +65,7 @@ decimal = do
     return $ foldl' acc 0 ds
   where
     acc :: Integer -> Char -> Integer
-    acc !v c = v * 10 + (fromIntegral $ digitToInt c)
+    acc !v c = v * 10 + fromIntegral (digitToInt c)
     {-# INLINE acc #-}
 {-# INLINEABLE decimal #-}
 
@@ -76,7 +76,7 @@ octal = do
     return $ foldl' acc 0 ds
   where
     acc :: Integer -> Char -> Integer
-    acc !v c = v * 8 + (fromIntegral $ digitToInt c)
+    acc !v c = v * 8 + fromIntegral (digitToInt c)
     {-# INLINE acc #-}
 {-# INLINEABLE octal #-}
 
@@ -87,7 +87,7 @@ hexadecimal = do
     return $ foldl' acc 0 ds
   where
     acc :: Integer -> Char -> Integer
-    acc !v c = v * 16 + (fromIntegral $ digitToInt c)
+    acc !v c = v * 16 + fromIntegral (digitToInt c)
     {-# INLINE acc #-}
 {-# INLINEABLE hexadecimal #-}
 

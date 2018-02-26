@@ -38,7 +38,7 @@ data AstF f where
   -- | Fixed size vector
   VecF :: [f] -> AstF f
   -- | Struct
-  StrF :: (Map String f) -> AstF f
+  StrF :: Map String f -> AstF f
 
   -- Fuctors
   -- | Apply function
