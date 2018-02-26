@@ -16,6 +16,7 @@ module Cacco.Syntax.Ast where
 import           Data.Typeable        (Typeable)
 import           GHC.Generics         (Generic)
 --
+import           Data.IxAnn
 import           Data.IxFix
 --
 import           Cacco.Syntax.Literal (Literal)
@@ -67,7 +68,7 @@ data AstF (f :: AstIx -> *) (i :: AstIx) where
   -- | if
   IfF :: f AstExpr -> f AstExpr -> f AstExpr -> AstF f AstExpr
   -- | multyway if
-  MifF :: [(f AstExpr, f AstExpr)] -> (f AstExpr) -> AstF f AstExpr
+  MifF :: [(f AstExpr, f AstExpr)] -> f AstExpr -> AstF f AstExpr
   -- | Apply function
   AppF :: f i -> [f i] -> AstF f i
   -- | Lambda (anonymous) function
@@ -148,28 +149,4 @@ pattern Lam pt body = In (LamF pt body)
 pattern Hole :: forall (i :: AstIx).() => i ~ AstPatt => Ast i
 pattern Hole = In HolF
 
---
-newtype IxAnnF a t f i = IxAnnF { unIxAnnF :: (a, t f i) }
-  deriving (Eq, Ord, Show, Typeable)
-
-instance IxTraversable t => IxFunctor (IxAnnF a t) where
-  imap = imapDefault
-
-instance IxTraversable t => IxFoldable (IxAnnF a t) where
-  iFoldMap = iFoldMapDefault
-
-instance IxTraversable t => IxTraversable (IxAnnF a t) where
-  itraverse f (IxAnnF (i, t)) = IxAnnF . (,) i <$> itraverse f t
-
-type IxAnn a t i = IxFix (IxAnnF a t) i
-
 type AnnAst a i = IxAnn a AstF i
-
-addAnn:: a -> Ast i -> AnnAst a i
-addAnn ann = cata $ In . IxAnnF . (,) ann
-
-getAnn :: AnnAst a i -> a
-getAnn = cata' $ fst . unIxAnnF
-
-rmAnn :: AnnAst a i -> Ast i
-rmAnn = cata $ In . snd . unIxAnnF
