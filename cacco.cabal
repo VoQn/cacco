@@ -90,6 +90,7 @@ test-suite test
     , tasty-quickcheck
     , tasty-smallcheck
     , scientific
+    , megaparsec >= 6 && < 7
     , lens
     , cacco
   other-modules:
@@ -97,6 +98,7 @@ test-suite test
     , Cacco.LiteralSpec
     , Cacco.Parser.LexerSpec
     , Cacco.Parser.NumericSpec
+    , Cacco.Parser.ASTSpec
     , Cacco.ParserSpec
     , Cacco.EvalSpec
   ghc-options:

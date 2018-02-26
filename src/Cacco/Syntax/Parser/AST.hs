@@ -117,6 +117,7 @@ pattAstF _ _ p _ = lexeme $ choice
   , try $ lit PattProxy
   , sym PattProxy
   , lis p
+  , parens $ app p
   ]
 
 -- | Parse Typing AST
