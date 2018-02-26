@@ -54,9 +54,9 @@ deriving instance Typeable (AstIxProxy i)
 data AstF (f :: AstIx -> *) (i :: AstIx) where
   -- Atomic (Leaf Node of AST)
   -- | Hole @_@
-  HolF :: AstF f AstPatt
+  HoleF :: AstF f AstPatt
   -- | 3 Dots @...@
-  DotF :: AstF f AstPatt
+  DotsF :: AstF f AstPatt
   -- | 'Literal'
   LitF :: Literal -> AstIxProxy i -> AstF f i
   -- | Variable
@@ -122,8 +122,8 @@ instance IxFoldable AstF where
 
 instance IxTraversable AstF where
   itraverse f ast = case ast of
-      HolF         -> pure HolF
-      DotF         -> pure DotF
+      HoleF        -> pure HoleF
+      DotsF        -> pure DotsF
       VarF v i     -> VarF <$> pure v <*> pure i
       LitF v i     -> LitF <$> pure v <*> pure i
       LisF vs      -> LisF <$> mapList f vs
@@ -137,11 +137,11 @@ instance IxTraversable AstF where
 --
 type Ast = IxFix AstF
 
-pattern Hol :: forall (i :: AstIx).() => i ~ AstPatt => Ast i
-pattern Hol = In HolF
+pattern Hole :: forall (i :: AstIx).() => i ~ AstPatt => Ast i
+pattern Hole = In HoleF
 
 pattern Dots :: forall (i :: AstIx).() => i ~ AstPatt => Ast i
-pattern Dots = In DotF
+pattern Dots = In DotsF
 
 pattern Var :: forall (i :: AstIx).() => Var -> AstIxProxy i -> Ast i
 pattern Var v i = In (VarF v i)
