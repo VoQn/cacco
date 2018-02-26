@@ -30,6 +30,7 @@ library
     , Cacco.Syntax.Position
     , Cacco.Syntax.Location
     , Cacco.Syntax.Literal
+    , Cacco.Syntax.Ast
     , Cacco.Syntax.Expr
     , Cacco.Syntax.Parser.Lexer
     , Cacco.Syntax.Parser.Numeric
