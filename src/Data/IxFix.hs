@@ -58,7 +58,7 @@ class IxFunctor t => IxTraversable t where
 
 -- | Indexed foldable
 class IxFoldable t where
-  iFoldMap :: Monoid m
+  ifoldMap :: Monoid m
            => (a ~>. m)
            -> (t a ~>. m)
 
@@ -67,10 +67,10 @@ imapDefault :: IxTraversable t
             -> (t a ~> t b)
 imapDefault f = unI . itraverse (I . f)
 
-iFoldMapDefault :: (IxTraversable t, Monoid m)
+ifoldMapDefault :: (IxTraversable t, Monoid m)
                 => (a ~>. m)
                 -> (t a ~>. m)
-iFoldMapDefault f = unK . itraverse (K . f)
+ifoldMapDefault f = unK . itraverse (K . f)
 
 -- | Indexed fix-point
 newtype IxFix f i = In { out :: f (IxFix f) i }

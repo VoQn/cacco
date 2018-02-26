@@ -14,7 +14,7 @@ instance IxTraversable t => IxFunctor (IxAnnF a t) where
   imap = imapDefault
 
 instance IxTraversable t => IxFoldable (IxAnnF a t) where
-  iFoldMap = iFoldMapDefault
+  ifoldMap = ifoldMapDefault
 
 instance IxTraversable t => IxTraversable (IxAnnF a t) where
   itraverse f (IxAnnF (i, t)) = IxAnnF . (,) i <$> itraverse f t

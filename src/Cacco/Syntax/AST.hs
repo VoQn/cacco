@@ -118,7 +118,7 @@ instance IxFunctor AstF where
   imap = imapDefault
 
 instance IxFoldable AstF where
-  iFoldMap = iFoldMapDefault
+  ifoldMap = ifoldMapDefault
 
 instance IxTraversable AstF where
   itraverse f ast = case ast of
