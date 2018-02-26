@@ -27,11 +27,13 @@ library
     , Data.Fix
     , Data.IxFix
     , Data.Ann
+    , Data.IxAnn
     , Cacco.Syntax.Position
     , Cacco.Syntax.Location
     , Cacco.Syntax.Literal
     , Cacco.Syntax.Ast
     , Cacco.Syntax.Expr
+    , Cacco.Syntax.Parser.Internal
     , Cacco.Syntax.Parser.Lexer
     , Cacco.Syntax.Parser.Numeric
     , Cacco.Syntax.Parser.Literal
@@ -47,8 +49,6 @@ library
     , Cacco.REPL
     , Cacco.Type
     , Cacco.Inferencer
-  other-modules:
-      Cacco.Syntax.Parser.Internal
   build-depends:
       base >= 4.7 && < 5
     , vector

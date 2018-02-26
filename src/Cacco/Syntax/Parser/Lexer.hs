@@ -82,7 +82,7 @@ reserved w = lexeme $ string w *> notFollowedBy alphaNumChar
 {-# INLINEABLE reserved #-}
 
 keywords :: [String]
-keywords = ["if", "def", {- "dec", "val", "var", "set!", -} "undefined", "true", "false", "=", ":"]
+keywords = ["if", "def", {- "dec", "val", "var", "set!", -} "undefined", "true", "false", "=", ":", "_", "..."]
 {-# INLINE keywords #-}
 
 symChar :: Parser Char

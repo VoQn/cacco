@@ -55,6 +55,8 @@ data AstF (f :: AstIx -> *) (i :: AstIx) where
   -- Atomic (Leaf Node of AST)
   -- | Hole @_@
   HolF :: AstF f AstPatt
+  -- | 3 Dots @...@
+  DotF :: AstF f AstPatt
   -- | 'Literal'
   LitF :: Literal -> AstIxProxy i -> AstF f i
   -- | Variable
@@ -76,7 +78,7 @@ data AstF (f :: AstIx -> *) (i :: AstIx) where
 
   -- Declarations
   -- | Declare type bind
-  DecF :: f AstPatt -> f AstType -> AstF f AstDecl
+  DecF :: Var -> [f AstType] -> AstF f AstDecl
   -- | Define function or constants
   DefF :: f AstPatt -> f AstExpr -> AstF f AstDecl
 --
@@ -121,6 +123,7 @@ instance IxFoldable AstF where
 instance IxTraversable AstF where
   itraverse f ast = case ast of
       HolF         -> pure HolF
+      DotF         -> pure DotF
       VarF v i     -> VarF <$> pure v <*> pure i
       LitF v i     -> LitF <$> pure v <*> pure i
       LisF elems   -> LisF <$> mapList f elems
@@ -131,14 +134,20 @@ instance IxTraversable AstF where
 --
 type Ast = IxFix AstF
 
+pattern Hol :: forall (i :: AstIx).() => i ~ AstPatt => Ast i
+pattern Hol = In HolF
+
+pattern Dots :: forall (i :: AstIx).() => i ~ AstPatt => Ast i
+pattern Dots = In DotF
+
 pattern Var :: forall (i :: AstIx).() => Var -> AstIxProxy i -> Ast i
 pattern Var v i = In (VarF v i)
 
 pattern Lit :: forall (i :: AstIx).() => Literal -> AstIxProxy i -> Ast i
-pattern Lit l i = In (LitF l i)
+pattern Lit v i = In (LitF v i)
 
 pattern Lis :: forall (i :: AstIx).() => [Ast i] -> Ast i
-pattern Lis elements = In (LisF elements)
+pattern Lis vs = In (LisF vs)
 
 pattern App :: forall (i :: AstIx).() => Ast i -> [Ast i] -> Ast i
 pattern App fn args = In (AppF fn args)
@@ -146,7 +155,13 @@ pattern App fn args = In (AppF fn args)
 pattern Lam :: forall (i :: AstIx).() => i ~ AstExpr => [Ast AstPatt] -> Ast AstExpr -> Ast i
 pattern Lam pt body = In (LamF pt body)
 
-pattern Hole :: forall (i :: AstIx).() => i ~ AstPatt => Ast i
-pattern Hole = In HolF
+pattern Def :: forall (i :: AstIx).() => i ~ AstDecl => Ast AstPatt -> Ast AstExpr -> Ast i
+pattern Def n v = In (DefF n v)
+
+pattern Dec :: forall (i :: AstIx).() => i ~ AstDecl => Var -> [Ast AstType] -> Ast i
+pattern Dec n t = In (DecF n t)
+
+pattern If :: forall (i :: AstIx).() => i ~ AstExpr => Ast AstExpr -> Ast AstExpr -> Ast AstExpr -> Ast i
+pattern If c t e = In (IfF c t e)
 
 type AnnAst a i = IxAnn a AstF i
