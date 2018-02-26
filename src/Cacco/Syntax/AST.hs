@@ -68,7 +68,7 @@ data AstF (f :: AstIx -> *) (i :: AstIx) where
 
   -- Fuctors
   -- | if
-  IfF :: f AstExpr -> f AstExpr -> f AstExpr -> AstF f AstExpr
+  IfF  :: f AstExpr -> f AstExpr -> f AstExpr -> AstF f AstExpr
   -- | multyway if
   MifF :: [(f AstExpr, f AstExpr)] -> f AstExpr -> AstF f AstExpr
   -- | Apply function
@@ -126,9 +126,12 @@ instance IxTraversable AstF where
       DotF         -> pure DotF
       VarF v i     -> VarF <$> pure v <*> pure i
       LitF v i     -> LitF <$> pure v <*> pure i
-      LisF elems   -> LisF <$> mapList f elems
+      LisF vs      -> LisF <$> mapList f vs
+      IfF  c t e   -> IfF  <$> f c  <*> f t <*> f e
       AppF fn args -> AppF <$> f fn <*> mapList f args
       LamF ps expr -> LamF <$> mapList f ps <*> f expr
+      DecF v ts    -> DecF <$> pure v <*> mapList f ts
+      DefF n v     -> DefF <$> f n <*> f v
     where
       mapList fn xs = sequenceA $ fn <$> xs
 --
