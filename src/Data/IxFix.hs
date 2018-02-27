@@ -1,7 +1,5 @@
 {-# LANGUAGE DataKinds            #-}
-{-# LANGUAGE DeriveFoldable       #-}
 {-# LANGUAGE DeriveFunctor        #-}
-{-# LANGUAGE DeriveTraversable    #-}
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE GADTs                #-}
 {-# LANGUAGE PatternSynonyms      #-}
@@ -15,6 +13,8 @@
 module Data.IxFix where
 
 import           Control.Monad
+import           Data.Functor.Const
+import           Data.Functor.Identity
 
 -- | Natural transformation
 type f ~> g = forall i. f i -> g i
@@ -28,28 +28,12 @@ infixr 5 .~>
 type f ~>. g = forall i. f i -> g
 infixr 5 ~>.
 
--- | synonym type 'K'onst functor
-newtype K a b = K { unK :: a }
-  deriving (Eq, Show, Functor, Foldable, Traversable)
-
--- | synonym type 'I'dentity functor
-newtype I a = I { unI :: a }
-  deriving (Eq, Show, Functor, Foldable, Traversable)
-
-instance Applicative I where
-  pure = I
-  I f <*> I a = I (f a)
-
-instance Monoid a => Applicative (K a) where
-  pure _ = K mempty
-  K a <*> K a' = K (mappend a a')
-
 type Lim (f :: i -> *) = forall (x :: i). f x
 
 -- | Indexed functor
 class IxFunctor f where
   -- | map with taking over each index
-  imap :: (a ~> b) -> f a ~> f b
+  imap :: a ~> b -> f a ~> f b
 
   (/$/) :: (a ~> b) -> f a ~> f b
   (/$/) = imap
@@ -62,7 +46,7 @@ class IxFunctor t => IxTraversable t where
   -- | traverse with taking over each index
   itraverse :: Applicative f
             => (forall i. a i -> f (b i))     -- ^ lifting functor
-            -> (forall i. t a i -> f (t b i))
+            -> (forall j. t a j -> f (t b j))
 
 -- | Indexed foldable
 class IxFoldable (f :: (x -> *) -> y -> *) where
@@ -76,15 +60,11 @@ instance IxFunctor f => IxFunctor (IxFree f) where
   imap f (Pure a) = Pure (f a)
   imap f (Free w) = Free (imap (imap f) w)
 
-imapDefault :: IxTraversable t
-            => (a ~> b)
-            -> (t a ~> t b)
-imapDefault f = unI . itraverse (I . f)
+imapDefault :: IxTraversable t  => (a ~> b) -> (t a ~> t b)
+imapDefault f = runIdentity . itraverse (Identity . f)
 
-ifoldMapDefault :: (IxTraversable t, Monoid m)
-                => (a ~>. m)
-                -> (t a ~>. m)
-ifoldMapDefault f = unK . itraverse (K . f)
+ifoldMapDefault :: (IxTraversable t, Monoid m) => (a ~>. m) -> (t a ~>. m)
+ifoldMapDefault f = getConst . itraverse (Const . f)
 
 -- | Indexed fix-point
 newtype IxFix f i = In { out :: f (IxFix f) i }
@@ -92,28 +72,21 @@ newtype IxFix f i = In { out :: f (IxFix f) i }
 deriving instance Show (f (IxFix f) t) => Show (IxFix f t)
 deriving instance Eq (f (IxFix f) t) => Eq (IxFix f t)
 deriving instance Ord (f (IxFix f) t) => Ord (IxFix f t)
+deriving instance Functor (f (IxFix f)) => Functor (IxFix f)
 
 -- | folding returning indexed type.
-cata :: IxFunctor f
-     => (f a ~> a)
-     -> (IxFix f ~> a)
+cata :: IxFunctor f => (f a ~> a) -> (IxFix f ~> a)
 cata phi = phi . imap (cata phi) . out
 
 -- | monadic folding returning indexed type.
-cataM :: (Monad m, IxTraversable t)
-      => (forall i. t a i -> m (a i))
-      -> (forall i. IxFix t i -> m (a i))
+cataM :: (Monad m, IxTraversable t) => (forall i. t a i -> m (a i)) -> (forall j. IxFix t j -> m (a j))
 cataM phi = phi <=< itraverse (cataM phi) . out
 
 -- | folding returning constant type.
-cata' :: IxFunctor f
-      => (f (K a) ~>. a)
-      -> (IxFix f ~>. a)
-cata' phi = unK . cata (K . phi)
+cata' :: IxFunctor f => (f (Const a) ~>. a) -> (IxFix f ~>. a)
+cata' phi = getConst . cata (Const . phi)
 
 -- | monadic folding returning constant type.
-cataM' :: (Monad m, IxTraversable t)
-       => (t (K a) ~>. m a)
-       -> (IxFix t ~>. m a)
-cataM' phi = phi <=< itraverse (fmap K . cataM' phi) . out
+cataM' :: (Monad m, IxTraversable t) => (t (Const a) ~>. m a) -> (IxFix t ~>. m a)
+cataM' phi = phi <=< itraverse (fmap Const . cataM' phi) . out
 
