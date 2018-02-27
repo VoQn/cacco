@@ -41,10 +41,10 @@ type AstPatt = 'AstPatt
 type AstType = 'AstType
 
 data AstIxProxy (i :: AstIx) where
-  DeclProxy :: AstIxProxy 'AstDecl
-  ExprProxy :: AstIxProxy 'AstExpr
-  PattProxy :: AstIxProxy 'AstPatt
-  TypeProxy :: AstIxProxy 'AstType
+  DeclProxy :: AstIxProxy AstDecl
+  ExprProxy :: AstIxProxy AstExpr
+  PattProxy :: AstIxProxy AstPatt
+  TypeProxy :: AstIxProxy AstType
 
 deriving instance Show (AstIxProxy i)
 deriving instance Eq (AstIxProxy i)

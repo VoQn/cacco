@@ -3,6 +3,7 @@
 {-# LANGUAGE DeriveFunctor        #-}
 {-# LANGUAGE DeriveTraversable    #-}
 {-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE GADTs                #-}
 {-# LANGUAGE PatternSynonyms      #-}
 {-# LANGUAGE PolyKinds            #-}
 {-# LANGUAGE RankNTypes           #-}
@@ -28,7 +29,7 @@ type f ~>. g = forall i. f i -> g
 infixr 5 ~>.
 
 -- | synonym type 'K'onst functor
-newtype K a b = K { unK:: a }
+newtype K a b = K { unK :: a }
   deriving (Eq, Show, Functor, Foldable, Traversable)
 
 -- | synonym type 'I'dentity functor
@@ -43,11 +44,18 @@ instance Monoid a => Applicative (K a) where
   pure _ = K mempty
   K a <*> K a' = K (mappend a a')
 
+type Lim (f :: i -> *) = forall (x :: i). f x
+
 -- | Indexed functor
-class IxFunctor (f :: (k -> *) -> (k -> *)) where
+class IxFunctor f where
   -- | map with taking over each index
-  imap :: (a ~> b)     -- ^ convert function switch functor wrap
-       -> (f a ~> f b)
+  imap :: (a ~> b) -> f a ~> f b
+
+  (/$/) :: (a ~> b) -> f a ~> f b
+  (/$/) = imap
+
+  (/$) :: Lim b -> f a ~> f b
+  b /$ f = imap (const b) f
 
 -- | Indexed traversable
 class IxFunctor t => IxTraversable t where
@@ -57,10 +65,16 @@ class IxFunctor t => IxTraversable t where
             -> (forall i. t a i -> f (t b i))
 
 -- | Indexed foldable
-class IxFoldable t where
-  ifoldMap :: Monoid m
-           => (a ~>. m)
-           -> (t a ~>. m)
+class IxFoldable (f :: (x -> *) -> y -> *) where
+  ifoldMap :: forall (a :: x -> *) (m :: *). Monoid m => a ~>. m -> f a ~>. m
+
+data IxFree f a i where
+  Pure :: a i -> IxFree f a i
+  Free :: f (IxFree f a) i -> IxFree f a i
+
+instance IxFunctor f => IxFunctor (IxFree f) where
+  imap f (Pure a) = Pure (f a)
+  imap f (Free w) = Free (imap (imap f) w)
 
 imapDefault :: IxTraversable t
             => (a ~> b)
