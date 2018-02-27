@@ -1,8 +1,10 @@
-{-# LANGUAGE DataKinds         #-}
-{-# LANGUAGE KindSignatures    #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes        #-}
-{-# LANGUAGE TypeOperators     #-}
+{-# LANGUAGE DataKinds           #-}
+{-# LANGUAGE GADTs               #-}
+{-# LANGUAGE KindSignatures      #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE RankNTypes          #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators       #-}
 
 module Cacco.Syntax.Parser.AST where
 
@@ -17,7 +19,6 @@ import           Cacco.Syntax.Parser.Internal
 import           Cacco.Syntax.Parser.Lexer
 import           Cacco.Syntax.Parser.Literal
 
-{-# ANN module ("HLint: ignore Reduce duplication" :: String) #-}
 
 -- | Indexed Functor Parser for AST_Index
 type AstIxParser t f (i :: AstIx)
@@ -128,74 +129,45 @@ typeAstF _ _ _ _ = lexeme $ choice
   ]
 --
 
-declFix :: forall t. IxFunctor t => AstIxFixParser t AstDecl
-declFix d e p t = In <$> d d' e' p' t'
+astFix :: forall t (i :: AstIx). IxFunctor t => AstIxProxy i -> AstIxFixParser t i
+astFix proxy d e p t = case proxy of
+    DeclProxy -> d'
+    ExprProxy -> e'
+    PattProxy -> p'
+    TypeProxy -> t'
   where
-    d' = declFix d e p t
+    astFix' :: (forall f. AstIxParser t f j) -> Parser (IxFix t j)
+    astFix' f = In <$> f d' e' p' t'
+    {-# INLINE astFix' #-}
+    d' = astFix' d
     {-# INLINE d' #-}
-    e' = exprFix d e p t
+    e' = astFix' e
     {-# INLINE e' #-}
-    p' = pattFix d e p t
-    {-# INLINE p' #-}
-    t' = typeFix d e p t
+    p' = astFix' p
     {-# INLINE t' #-}
-{-# INLINEABLE declFix #-}
-
-exprFix :: forall t. IxFunctor t => AstIxFixParser t AstExpr
-exprFix d e p t = In <$> e d' e' p' t'
-  where
-    d' = declFix d e p t
-    {-# INLINE d' #-}
-    e' = exprFix d e p t
-    {-# INLINE e' #-}
-    p' = pattFix d e p t
-    {-# INLINE p' #-}
-    t' = typeFix d e p t
-    {-# INLINE t' #-}
-{-# INLINEABLE exprFix #-}
-
-pattFix :: forall t. IxFunctor t => AstIxFixParser t AstPatt
-pattFix d e p t = In <$> p d' e' p' t'
-  where
-    d' = declFix d e p t
-    {-# INLINE d' #-}
-    e' = exprFix d e p t
-    {-# INLINE e' #-}
-    p' = pattFix d e p t
-    {-# INLINE p' #-}
-    t' = typeFix d e p t
-    {-# INLINE t' #-}
-{-# INLINEABLE pattFix #-}
-
-typeFix :: forall t. IxFunctor t => AstIxFixParser t AstType
-typeFix d e p t = In <$> t d' e' p' t'
-  where
-    d' = declFix d e p t
-    {-# INLINE d' #-}
-    e' = exprFix d e p t
-    {-# INLINE e' #-}
-    p' = pattFix d e p t
-    {-# INLINE p' #-}
-    t' = typeFix d e p t
-    {-# INLINE t' #-}
-{-# INLINEABLE typeFix #-}
+    t' = astFix' t
+{-# INLINEABLE astFix #-}
 
 located :: forall f (i :: AstIx). AstIxParser AstF f i -> AstIxParser (IxAnnF Location AstF) f i
 located f d e p t = IxAnnF <$> withLocation (f d e p t)
 {-# INLINE located #-}
 
+astParser :: AstIxProxy i -> Parser (IxAnn Location AstF i)
+astParser proxy = astFix proxy (located declAstF) (located exprAstF) (located pattAstF) (located typeAstF)
+{-# INLINEABLE astParser #-}
+
 declAst :: Parser (IxAnn Location AstF AstDecl)
-declAst = declFix (located declAstF) (located exprAstF) (located pattAstF) (located typeAstF)
+declAst = astParser DeclProxy
 {-# INLINEABLE declAst #-}
 
 exprAst :: Parser (IxAnn Location AstF AstExpr)
-exprAst = exprFix (located declAstF) (located exprAstF) (located pattAstF) (located typeAstF)
+exprAst = astParser ExprProxy
 {-# INLINEABLE exprAst #-}
 
 pattAst :: Parser (IxAnn Location AstF AstPatt)
-pattAst = pattFix (located declAstF) (located exprAstF) (located pattAstF) (located typeAstF)
+pattAst = astParser PattProxy
 {-# INLINEABLE pattAst #-}
 
 typeAst :: Parser (IxAnn Location AstF AstType)
-typeAst = typeFix (located declAstF) (located exprAstF) (located pattAstF) (located typeAstF)
+typeAst = astParser TypeProxy
 {-# INLINEABLE typeAst #-}
