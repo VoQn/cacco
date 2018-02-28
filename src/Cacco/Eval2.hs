@@ -87,6 +87,36 @@ evalLit lit = case lit of
   Literal.Bool    x -> Bool x
   _                 -> Bool False
 
+astExpr' :: ((f AstExpr) -> Eval) -> AstF f AstExpr -> Eval
+astExpr' ee (IfF c t e) = do
+  value <- ee c
+  case value of
+    Bool flag
+      | flag      -> ee t
+      | otherwise -> ee e
+    _         -> throwError "Non-boolean value evaluated as condition in if-expression"
+
+astDecl :: (Ast AstExpr -> Eval) -> Ast AstDecl -> Eval
+astDecl ee (Def p e) = case p of
+  -- constant
+  Var (VarSym name) _ -> do
+    env <- get
+    if hasSymbol name env
+      then throwError $ "Can not redefine symbol '" ++ name ++ "'."
+      else do
+        value <- ee e
+        put $ registerSymbol name value env
+        return Unit
+  -- function
+  App (Var (VarSym name) _) args -> do
+    env <- get
+    if hasSymbol name env
+      then throwError $ "Can not redefine symbol '" ++ name ++ "'."
+      else do
+        let fn = Fun { funcName = Just name, localEnv = env, funcArgs = args, funcBody = e }
+        put $ registerFunc name fn env
+        return Unit
+
 evalAST :: forall (i :: AstIx). Ast i -> Eval
 evalAST (Lit l _)  = return $ evalLit l
 
@@ -99,31 +129,3 @@ evalAST (Var (VarSym name) proxy) = case proxy of
     case findSymbol name env of
       Nothing -> throwError $ "Undefined symbol '" ++ name ++ "' referenced."
       Just  v -> return v
-
-evalAST (If c t e) = do
-  value <- evalAST c
-  case value of
-    Bool flag
-      | flag      -> evalAST t
-      | otherwise -> evalAST e
-    _         -> throwError "Non-boolean value evaluated as condition in if-expression"
-
-evalAST (Def p e) = case p of
-  -- constant
-  Var (VarSym name) _ -> do
-    env <- get
-    if hasSymbol name env
-      then throwError $ "Can not redefine symbol '" ++ name ++ "'."
-      else do
-        value <- evalAST e
-        put $ registerSymbol name value env
-        return Unit
-  -- function
-  App (Var (VarSym name) _) args -> do
-    env <- get
-    if hasSymbol name env
-      then throwError $ "Can not redefine symbol '" ++ name ++ "'."
-      else do
-        let fn = Fun { funcName = Just name, localEnv = env, funcArgs = args, funcBody = e }
-        put $ registerFunc name fn env
-        return Unit
