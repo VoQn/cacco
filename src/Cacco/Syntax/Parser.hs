@@ -59,15 +59,15 @@ lit = LitF <$> try literal
 sym :: Parser (AstF f)
 sym = SymF <$> identifier
 
-vec :: Parser f -> Parser (AstF f)
-vec p = VecF <$> many p
+lis :: Parser f -> Parser (AstF f)
+lis p = LisF <$> many p
 
 ast :: forall f. Parser f -> Parser (AstF f)
 ast p = lexeme $ choice
   [ try lit
   , sym
   , parens $ fuctor p
-  , brackets $ vec p
+  , brackets $ lis p
   ]
 
 expr :: Parser (Expr Location)
