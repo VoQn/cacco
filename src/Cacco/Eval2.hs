@@ -87,14 +87,21 @@ evalLit lit = case lit of
   Literal.Bool    x -> Bool x
   _                 -> Bool False
 
-astExpr' :: ((f AstExpr) -> Eval) -> AstF f AstExpr -> Eval
-astExpr' ee (IfF c t e) = do
-  value <- ee c
-  case value of
-    Bool flag
-      | flag      -> ee t
-      | otherwise -> ee e
-    _         -> throwError "Non-boolean value evaluated as condition in if-expression"
+astExpr' :: (f AstExpr -> Eval) -> AstF f AstExpr -> Eval
+astExpr' ee = ev where
+  ev (LitF l _)  = return $ evalLit l
+  ev (VarF (VarSym name) _) = do
+    env <- get
+    case findSymbol name env of
+      Nothing -> throwError $ "Undefined symbol '" ++ name ++ "' referenced."
+      Just  v -> return v
+  ev (IfF c t e) = do
+    value <- ee c
+    case value of
+      Bool flag
+        | flag      -> ee t
+        | otherwise -> ee e
+      _         -> throwError "Non-boolean value evaluated as condition in if-expression"
 
 astDecl :: (Ast AstExpr -> Eval) -> Ast AstDecl -> Eval
 astDecl ee (Def p e) = case p of
