@@ -6,6 +6,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes            #-}
 {-# LANGUAGE RecordWildCards       #-}
+{-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TypeOperators         #-}
 
 module Cacco.Eval2 where
@@ -91,7 +92,7 @@ evalAST (Lit l _)  = return $ evalLit l
 
 evalAST (Var (VarSym name) proxy) = case proxy of
   DeclProxy -> return $ Symbol name
-  PattProxy -> Symbol <$> pure name
+  PattProxy -> return $ Symbol name
   TypeProxy -> return $ Symbol name
   ExprProxy -> do
     env <- get

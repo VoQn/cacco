@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveFoldable       #-}
 {-# LANGUAGE DeriveFunctor        #-}
 {-# LANGUAGE DeriveGeneric        #-}
+{-# LANGUAGE DeriveTraversable    #-}
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE GADTs                #-}
 {-# LANGUAGE PatternSynonyms      #-}
@@ -47,18 +48,7 @@ data AstF f where
   LamF :: [f] -> f -> AstF f
   -- | Declare a constant value
   ConF :: f -> f -> AstF f
-  deriving (Eq, Ord, Show, Typeable, Generic, Functor, Foldable)
-
-instance Traversable AstF where
-  traverse _ HolF        = pure HolF
-  traverse _ (SymF x)    = SymF <$> pure x
-  traverse _ (LitF x)    = LitF <$> pure x
-  traverse f (LisF xs)   = LisF <$> traverse f xs
-  traverse f (VecF xs)   = VecF <$> traverse f xs
-  traverse f (StrF xs)   = StrF <$> traverse f xs
-  traverse f (AppF x xs) = AppF <$> f x <*> traverse f xs
-  traverse f (LamF xs x) = LamF <$> traverse f xs <*> f x
-  traverse f (ConF n  x) = ConF <$> f n <*> f x
+  deriving (Eq, Ord, Show, Typeable, Generic, Functor, Foldable, Traversable)
 
 -- | 'Fix'ed version 'AstF'
 type Ast = Fix AstF

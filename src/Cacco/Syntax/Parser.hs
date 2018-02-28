@@ -22,7 +22,7 @@ import           Text.Megaparsec              (between, choice, eof, many,
 
 import           Data.Ann                     (AnnF (..))
 import qualified Data.Ann                     as Ann
-import           Data.Fix                     (Fix (..))
+import           Data.Fix
 
 import           Cacco.Syntax.Expr            (Ast, AstF (..), Expr)
 import           Cacco.Syntax.Location        (Location)
@@ -37,7 +37,7 @@ contents = between sc eof
 fixParser :: Functor f
           => (forall a. Parser a -> Parser (f a))
           -> Parser (Fix f)
-fixParser f = Fix <$> f (fixParser f)
+fixParser f = fmap Fix $ f $ fixParser f
 
 addLocation :: Parser (f a) -> Parser (AnnF Location f a)
 addLocation p = AnnF <$> withLocation p
