@@ -2,10 +2,12 @@
 
 module Cacco.Parser.LexerSpec where
 
-import           Test.Tasty.Hspec     (Spec, context, it, shouldBe)
+import           Control.Lens
+import           Test.Tasty.Hspec      (Spec, context, it, shouldBe)
 
 import           Cacco.Syntax.Literal
-import           Cacco.Syntax.Parser  hiding (parseTest)
+import           Cacco.Syntax.Location (endColumn, initLocation, sourceName)
+import           Cacco.Syntax.Parser   hiding (parseTest)
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
@@ -13,12 +15,20 @@ spec_Lexer_bool :: Spec
 spec_Lexer_bool = do
   let parseTest = parse bool "test"
   --
-  it "can parse true" $
+  it "true" $
     parseTest "true" `shouldBe` Right (Bool True)
   --
-  it "can parse false" $
+  it "false" $
     parseTest "false" `shouldBe` Right (Bool False)
 --
+
+spec_withLocation :: Spec
+spec_withLocation = do
+  let parseTest = parse (withLocation bool) "test"
+
+  it "true ()" $ do
+    let location = initLocation & sourceName .~ "test" & endColumn .~ 5
+    parseTest "true" `shouldBe` Right (location, Bool True)
 
 spec_Lexer_integer :: Spec
 spec_Lexer_integer = do

@@ -1,0 +1,52 @@
+name: cacco
+version: '0.1.0.0'
+category: Language
+author: Kazuhiro Mizushima
+maintainer: voqn.tyrant@gmail.com
+copyright: 2017 Kazuhiro Mizushima
+license: BSD3
+github: VoQn/cacco
+extra-source-files:
+- README.asciidoc
+dependencies:
+  - base >=4.7 && <5
+  - text >=1.2 && <2
+  - half >=0.2 && <1
+  - scientific >=0.3 && <0.4
+  - megaparsec >=6 && <7
+  - lens >=4.15 && <4.16
+library:
+  source-dirs: src
+  ghc-options: -Wall -Wcompat
+  dependencies:
+  - vector
+  - deepseq >=1.4 && <2
+  - mtl >=2.2 && <3
+  - containers >=0.5 && <0.6
+  - haskeline >=0.7 && <0.8
+executables:
+  cacco:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - base
+    - cacco
+tests:
+  test:
+    main: Tasty.hs
+    source-dirs: test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - tasty >=1.0 && <2.0
+    - tasty-discover >=4.0 && <5.0
+    - tasty-hspec
+    - tasty-quickcheck
+    - tasty-smallcheck
+    - cacco

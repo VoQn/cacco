@@ -74,12 +74,17 @@ deriving instance Eq (f (IxFix f) t) => Eq (IxFix f t)
 deriving instance Ord (f (IxFix f) t) => Ord (IxFix f t)
 deriving instance Functor (f (IxFix f)) => Functor (IxFix f)
 
+type IxAlgebra f a = f a ~> a
+type IxCoalgebra f a = a ~> f a
+
 -- | folding returning indexed type.
-cata :: IxFunctor f => (f a ~> a) -> (IxFix f ~> a)
+cata :: IxFunctor f => IxAlgebra f a -> IxFix f ~> a
 cata phi = phi . imap (cata phi) . out
 
 -- | monadic folding returning indexed type.
-cataM :: (Monad m, IxTraversable t) => (forall i. t a i -> m (a i)) -> (forall j. IxFix t j -> m (a j))
+cataM :: (Monad m, IxTraversable t)
+      => (forall i. t a i -> m (a i))
+      -> (forall j. IxFix t j -> m (a j))
 cataM phi = phi <=< itraverse (cataM phi) . out
 
 -- | folding returning constant type.
@@ -87,6 +92,18 @@ cata' :: IxFunctor f => (f (Const a) ~>. a) -> (IxFix f ~>. a)
 cata' phi = getConst . cata (Const . phi)
 
 -- | monadic folding returning constant type.
-cataM' :: (Monad m, IxTraversable t) => (t (Const a) ~>. m a) -> (IxFix t ~>. m a)
+cataM' :: (Monad m, IxTraversable t)
+       => (t (Const a) ~>. m a)
+       -> (IxFix t ~>. m a)
 cataM' phi = phi <=< itraverse (fmap Const . cataM' phi) . out
 
+ana :: IxFunctor f => IxCoalgebra f a -> a ~> IxFix f
+ana psi = In . imap (ana psi) . psi
+
+anaM :: (Monad m, IxTraversable t)
+     => (forall i. a i -> m (t a i))
+     -> (forall j. a j -> m (IxFix t j))
+anaM psi = fmap In . (itraverse (anaM psi) <=< psi)
+
+hylo :: IxFunctor f => IxAlgebra f b -> IxCoalgebra f a -> a ~> b
+hylo f g = cata f . ana g

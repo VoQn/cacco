@@ -36,8 +36,8 @@ supplyInfo info result = case result of
     Left  err -> throwError $ Err.supplyInfo info err
     Right val -> return $ Val.setInfo (Just info) val
 
-evalAcc :: forall i. (i, AstF (EvalF i)) -> EvalF i
-evalAcc (info, LitF literal) = supplyInfo info $ case literal of
+evalLit :: MonadError (Error i) m => Lit.Literal -> m (Val i)
+evalLit l = case l of
     Lit.Undef     -> throwError $ Err.message "undefined"
     Lit.Unit      -> return Val.unit
     Lit.Bool    x -> return $ Val.bool    x
@@ -55,6 +55,9 @@ evalAcc (info, LitF literal) = supplyInfo info $ case literal of
     Lit.Float64 x -> return $ Val.float64 x
     Lit.Flonum  x -> return $ Val.flonum  x
     Lit.Text    x -> return $ Val.text    x
+
+evalAcc :: forall i. (i, AstF (EvalF i)) -> EvalF i
+evalAcc (info, LitF l) = supplyInfo info $ evalLit l
 
 evalAcc (info, SymF name) = do
     env <- State.get

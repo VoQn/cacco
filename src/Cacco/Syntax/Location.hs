@@ -3,14 +3,13 @@
 {-# LANGUAGE TemplateHaskell    #-}
 
 module Cacco.Syntax.Location
-  ( Location(..)
+  ( Location
   , sourceName
   , startLine
   , startColumn
   , endLine
   , endColumn
   , initLocation
-  , fromSourcePos
   , toPostions
   ) where
 
@@ -19,7 +18,6 @@ import           Control.Lens          (makeLenses, (&), (.~), (^.))
 import           Data.Monoid           ((<>))
 import           Data.Typeable         (Typeable)
 import           GHC.Generics
-import           Text.Megaparsec.Pos   (SourcePos)
 
 import           Cacco.Syntax.Position (Position)
 import qualified Cacco.Syntax.Position as P
@@ -52,24 +50,6 @@ initLocation =
     _endLine = 1,
     _endColumn = 1
   }
-
--- | Convert from two @SourcePos@ to @Location@.
-fromSourcePos
-  :: SourcePos -- ^ start position
-  -> SourcePos -- ^ end position
-  -> Location
-fromSourcePos s e =
-  let
-    s' = P.fromSourcePos s
-    e' = P.fromSourcePos e
-  in
-    Location {
-      _sourceName = s' ^. P.sourceName,
-      _startLine = s' ^. P.line,
-      _startColumn = s' ^. P.column,
-      _endLine = e' ^. P.line,
-      _endColumn = e' ^. P.column
-    }
 
 toPostions :: Location -> (Position, Position)
 toPostions l =

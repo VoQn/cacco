@@ -21,9 +21,8 @@ import           Text.Megaparsec
 import           Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer   as L
 
-import           Cacco.Syntax.Location        (Location (..))
-import qualified Cacco.Syntax.Location        as Location
-import           Cacco.Syntax.Parser.Internal (Parser)
+import           Cacco.Syntax.Location        (Location)
+import           Cacco.Syntax.Parser.Internal (Parser, locationFromSourcePos)
 
 -- | Skipping space characters and comments.
 sc :: Parser ()
@@ -71,7 +70,7 @@ withLocation parser = do
     begin <- getPosition
     value <- parser
     end   <- getPosition
-    let location = Location.fromSourcePos begin end
+    let location = locationFromSourcePos begin end
     return (location, value)
 {-# INLINEABLE withLocation #-}
 --
