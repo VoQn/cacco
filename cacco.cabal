@@ -1,107 +1,121 @@
-name:                cacco
-version:             0.1.0.0
--- synopsis:
--- description:
-homepage:            https://github.com/VoQn/cacco#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Kazuhiro Mizushima
-maintainer:          voqn.tyrant@gmail.com
-copyright:           2017 Kazuhiro Mizushima
-category:            Language
-build-type:          Simple
-extra-source-files:  README.asciidoc
-cabal-version:       >=1.10
+-- This file has been generated from package.yaml by hpack version 0.20.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 9552e6dbcfc6ed483c8a3c78048fb0926d1c0db016db796901a6ec6d77f548f7
+
+name:           cacco
+version:        0.1.0.0
+category:       Language
+homepage:       https://github.com/VoQn/cacco#readme
+bug-reports:    https://github.com/VoQn/cacco/issues
+author:         Kazuhiro Mizushima
+maintainer:     voqn.tyrant@gmail.com
+copyright:      2017 Kazuhiro Mizushima
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    README.asciidoc
 
 source-repository head
-  type:     git
+  type: git
   location: https://github.com/VoQn/cacco
 
 library
-  default-language:  Haskell2010
-  hs-source-dirs:    src
-  ghc-options:
-    -Wall
-  exposed-modules:
-      Lib
-    , Data.Fix
-    , Data.IxFix
-    , Data.Ann
-    , Data.IxAnn
-    , Cacco.Syntax.Position
-    , Cacco.Syntax.Location
-    , Cacco.Syntax.Literal
-    , Cacco.Syntax.AST
-    , Cacco.Syntax.Expr
-    , Cacco.Syntax.Parser.Internal
-    , Cacco.Syntax.Parser.Lexer
-    , Cacco.Syntax.Parser.Numeric
-    , Cacco.Syntax.Parser.Literal
-    , Cacco.Syntax.Parser.AST
-    , Cacco.Syntax.Parser
-    , Cacco.Val
-    , Cacco.Error.IsError
-    , Cacco.Error.ArityMismatch
-    , Cacco.Error.TypeMismatch
-    , Cacco.Error
-    , Cacco.Env
-    , Cacco.Core
-    , Cacco.Eval
-    , Cacco.REPL
-    , Cacco.Type
-    , Cacco.Inferencer
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat
   build-depends:
-      base >= 4.7 && < 5
+      base >=4.7 && <5
+    , containers >=0.5 && <0.6
+    , deepseq >=1.4 && <2
+    , half >=0.2 && <1
+    , haskeline >=0.7 && <0.8
+    , lens >=4.15 && <4.16
+    , megaparsec >=6 && <7
+    , mtl >=2.2 && <3
+    , scientific >=0.3 && <0.4
+    , text >=1.2 && <2
     , vector
-    , deepseq >= 1.4 && < 2
-    , mtl  >= 2.2 && < 3
-    , containers >= 0.5 && < 0.6
-    , text >= 1.2 && < 2
-    , half >= 0.2 && < 1
-    , scientific >= 0.3 && < 0.4
-    , megaparsec >= 6 && < 7
-    , lens >= 4.15 && < 4.16
-    , haskeline >= 0.7 && < 0.8
+  exposed-modules:
+      Cacco.Core
+      Cacco.Env
+      Cacco.Error
+      Cacco.Error.ArityMismatch
+      Cacco.Error.IsError
+      Cacco.Error.TypeMismatch
+      Cacco.Eval
+      Cacco.Eval2
+      Cacco.Inferencer
+      Cacco.REPL
+      Cacco.Syntax.AST
+      Cacco.Syntax.Expr
+      Cacco.Syntax.Literal
+      Cacco.Syntax.Location
+      Cacco.Syntax.Parser
+      Cacco.Syntax.Parser.AST
+      Cacco.Syntax.Parser.Internal
+      Cacco.Syntax.Parser.Lexer
+      Cacco.Syntax.Parser.Literal
+      Cacco.Syntax.Parser.Numeric
+      Cacco.Syntax.Position
+      Cacco.Type
+      Cacco.Val
+      Data.Ann
+      Data.Fix
+      Data.IxAnn
+      Data.IxFix
+      Lib
+  other-modules:
+      Paths_cacco
+  default-language: Haskell2010
 
 executable cacco
-  default-language:  Haskell2010
-  hs-source-dirs:    app
-  main-is:           Main.hs
-  ghc-options:
-    -threaded
-    -rtsopts
-    -with-rtsopts=-N
+  main-is: Main.hs
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base
     , cacco
+    , half >=0.2 && <1
+    , lens >=4.15 && <4.16
+    , megaparsec >=6 && <7
+    , scientific >=0.3 && <0.4
+    , text >=1.2 && <2
+  other-modules:
+      Paths_cacco
+  default-language: Haskell2010
 
 test-suite test
-  default-language:  Haskell2010
-  type:              exitcode-stdio-1.0
-  hs-source-dirs:    test
-  main-is:           Tasty.hs
+  type: exitcode-stdio-1.0
+  main-is: Tasty.hs
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base
-    , text
-    , half
-    , tasty >= 1.0 && < 2.0
-    , tasty-discover >= 4.0 && < 5.0
+      base >=4.7 && <5
+    , cacco
+    , half >=0.2 && <1
+    , lens >=4.15 && <4.16
+    , megaparsec >=6 && <7
+    , scientific >=0.3 && <0.4
+    , tasty >=1.0 && <2.0
+    , tasty-discover >=4.0 && <5.0
     , tasty-hspec
     , tasty-quickcheck
     , tasty-smallcheck
-    , scientific
-    , megaparsec >= 6 && < 7
-    , lens
-    , cacco
+    , text >=1.2 && <2
   other-modules:
+      Cacco.EvalSpec
+      Cacco.LiteralSpec
+      Cacco.Parser.ASTSpec
+      Cacco.Parser.LexerSpec
+      Cacco.Parser.NumericSpec
+      Cacco.ParserSpec
       Cacco.PositionSpec
-    , Cacco.LiteralSpec
-    , Cacco.Parser.LexerSpec
-    , Cacco.Parser.NumericSpec
-    , Cacco.Parser.ASTSpec
-    , Cacco.ParserSpec
-    , Cacco.EvalSpec
-  ghc-options:
-    -threaded
-    -rtsopts
-    -with-rtsopts=-N
+      Paths_cacco
+  default-language: Haskell2010
