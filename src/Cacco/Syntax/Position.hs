@@ -2,17 +2,20 @@
 {-# LANGUAGE DeriveGeneric      #-}
 {-# LANGUAGE TemplateHaskell    #-}
 
-module Cacco.Syntax.Position where
+module Cacco.Syntax.Position
+( Position
+, sourceName
+, line
+, column
+, initPosition
+) where
 
-import           Control.DeepSeq     (NFData)
-import           Control.Lens        (makeLenses)
-import           Data.Data           (Data)
-import           Data.Monoid         ((<>))
-import           Data.Typeable       (Typeable)
-import           GHC.Generics        (Generic)
-import           Text.Megaparsec.Pos (SourcePos, sourceColumn, sourceLine,
-                                      unPos)
-import qualified Text.Megaparsec.Pos as Pos
+import           Control.DeepSeq (NFData)
+import           Control.Lens    (makeLenses)
+import           Data.Data       (Data)
+import           Data.Monoid     ((<>))
+import           Data.Typeable   (Typeable)
+import           GHC.Generics    (Generic)
 
 -- | The abstract data type @Position@ hints source positions.
 data Position = Position
@@ -30,19 +33,11 @@ makeLenses ''Position
 
 -- | Constant initial position (line 1, column 1)
 initPosition :: Position
-initPosition = Position { _sourceName = "", _line = 1, _column = 1 }
-
--- | Convert from two @SourcePos@ to @Position@.
-fromSourcePos :: SourcePos -> Position
-fromSourcePos p =
-    Position {
-      _sourceName = Pos.sourceName p,
-      _line = fromInt $ sourceLine p,
-      _column = fromInt $ sourceColumn p
-    }
-  where
-    fromInt = fromIntegral . unPos
-    {-# INLINE fromInt #-}
+initPosition = Position
+  { _sourceName = ""
+  , _line = 1
+  , _column = 1
+  }
 
 instance Show Position where
   show Position { _sourceName = n, _line = l, _column = c }
