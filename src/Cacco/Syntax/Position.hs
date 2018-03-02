@@ -1,5 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE RecordWildCards    #-}
 {-# LANGUAGE TemplateHaskell    #-}
 
 module Cacco.Syntax.Position
@@ -10,12 +12,13 @@ module Cacco.Syntax.Position
 , initPosition
 ) where
 
-import           Control.DeepSeq (NFData)
-import           Control.Lens    (makeLenses)
-import           Data.Data       (Data)
-import           Data.Monoid     ((<>))
-import           Data.Typeable   (Typeable)
-import           GHC.Generics    (Generic)
+import           Control.DeepSeq           (NFData)
+import           Control.Lens              (makeLenses)
+import           Data.Data                 (Data)
+import           Data.Text.Prettyprint.Doc (Doc, Pretty (..), (<>))
+import           Data.Typeable             (Typeable)
+import           GHC.Generics              (Generic)
+
 
 -- | The abstract data type @Position@ hints source positions.
 data Position = Position
@@ -25,7 +28,7 @@ data Position = Position
     _line       :: !Word,
     -- | the column number in the source-file or input.
     _column     :: !Word
-  } deriving (Eq, Ord, Data, Typeable, Generic)
+  } deriving (Eq, Ord, Show, Data, Typeable, Generic)
 
 instance NFData Position
 
@@ -39,9 +42,12 @@ initPosition = Position
   , _column = 1
   }
 
-instance Show Position where
-  show Position { _sourceName = n, _line = l, _column = c }
-    = let
-        name | n == "" = "(unknown)" | otherwise = n
-      in
-        "(" <> name <> ":" <> show l <> "," <> show c <> ")"
+instance Pretty Position where
+  pretty Position{..} = "(" <> name <> ":" <> lin <> "," <> col <> ")"
+    where
+      name :: Doc ann
+      name
+        | null _sourceName  = "(unknown)"
+        | otherwise         =  pretty _sourceName
+      lin, col :: Doc ann
+      [lin, col] = pretty <$> [_line, _column]

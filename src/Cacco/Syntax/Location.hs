@@ -14,13 +14,14 @@ module Cacco.Syntax.Location
   , endColumn
   , initLocation
   , fromPositions
-  , toPostions
+  , toPositions
   ) where
 
 import           Control.Arrow             ((&&&))
 import           Control.DeepSeq           (NFData)
 import           Control.Lens              (makeLenses, view, (&), (.~), (^.))
-import           Data.Text.Prettyprint.Doc
+import           Data.Data                 (Data)
+import           Data.Text.Prettyprint.Doc (Doc, Pretty (..), (<>))
 import           Data.Typeable             (Typeable)
 import           GHC.Generics              (Generic)
 
@@ -39,7 +40,7 @@ data Location = Location
     _endLine     :: !Word,
     -- | the end column number in the source-file or input.
     _endColumn   :: !Word
-  } deriving (Eq, Ord, Show, Typeable, Generic)
+  } deriving (Eq, Ord, Show, Data, Typeable, Generic)
 
 instance NFData Location
 
@@ -74,8 +75,8 @@ fromPositions a b
       & endColumn .~ end ^.  P.column
     {-# INLINE location #-}
 
-toPostions :: Location -> (Position, Position)
-toPostions l = (start, end)
+toPositions :: Location -> (Position, Position)
+toPositions l = (start, end)
   where
     src :: FilePath
     src = l ^. sourceName
@@ -94,15 +95,19 @@ toPostions l = (start, end)
     {-# INLINE end #-}
 
 instance Pretty Location where
-  pretty Location{..} = parens $ surround colon name $ surround hyphen start end
+  pretty Location{..} = "(" <> name <> ":" <> start <> "-" <> end <> ")"
     where
       name :: Doc ann
       name
-        | _sourceName == "" = "(unknown)"
+        | null _sourceName = "(unknown)"
         | otherwise = pretty _sourceName
+      {-# INLINE name #-}
+      pos :: Pretty p => p -> p -> Doc ann
+      pos l' c' = let [l, c] = pretty <$> [l', c'] in l <> "," <> c
+      {-# INLINE pos #-}
       start :: Doc ann
-      start = surround comma (pretty _startLine) $ pretty _startColumn
+      start = pos _startLine _startColumn
+      {-# INLINE start #-}
       end :: Doc ann
-      end = surround comma (pretty _endLine) $ pretty _endColumn
-      hyphen :: Doc ann
-      hyphen = "-"
+      end = pos _endLine _endColumn
+      {-# INLINE end #-}

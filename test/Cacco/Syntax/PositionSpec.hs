@@ -1,20 +1,23 @@
-module Cacco.PositionSpec where
+{-# LANGUAGE OverloadedStrings #-}
+
+module Cacco.Syntax.PositionSpec where
 
 import           Control.Lens
+import           Data.Text.Prettyprint.Doc (pretty)
 import           Test.Tasty.Hspec
 
 import           Cacco.Syntax.Position
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
-spec_as_instance_of_Show :: Spec
-spec_as_instance_of_Show = do
+spec_as_instance_of_Pretty :: Spec
+spec_as_instance_of_Pretty = do
   context "when x = Location{_sourceName = \"\", _line = 1, _column = 2}" $ do
     let x = initPosition & column .~ 2
-    it "show x returns \"(unknown):1,2\"" $ show x `shouldBe` "((unknown):1,2)"
+    it "\"(unknown):1,2\"" $ (show . pretty) x `shouldBe` "((unknown):1,2)"
   context "when x = Location{_sourceName = \"test\", _line = 1, _column = 1}" $ do
     let x = initPosition & sourceName .~ "test" & column .~ 2
-    it "show x returns \"test:1,2\"" $ show x `shouldBe` "(test:1,2)"
+    it "\"test:1,2\"" $ (show . pretty) x `shouldBe` "(test:1,2)"
 
 spec_as_instance_of_Ord :: Spec
 spec_as_instance_of_Ord = do

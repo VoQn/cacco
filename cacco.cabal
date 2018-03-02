@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: cb86e45565d03d1f65b40cac0f0374c1adc6c87d7cf24aefbf05c95d5afc2108
+-- hash: 015a7702473171a2e450abb2113294ee80dbf9c3dc927747754146b286302a82
 
 name:           cacco
 version:        0.1.0.0
@@ -121,6 +121,7 @@ test-suite test
       Cacco.Parser.LexerSpec
       Cacco.Parser.NumericSpec
       Cacco.ParserSpec
-      Cacco.PositionSpec
+      Cacco.Syntax.LocationSpec
+      Cacco.Syntax.PositionSpec
       Paths_cacco
   default-language: Haskell2010
