@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ce51aabceb6e627c137fd25a7ed09f2dbdf9bf316bb3330ebda54d8e02ed9cfa
+-- hash: cb86e45565d03d1f65b40cac0f0374c1adc6c87d7cf24aefbf05c95d5afc2108
 
 name:           cacco
 version:        0.1.0.0
@@ -37,6 +37,7 @@ library
     , lens >=4.15 && <4.16
     , megaparsec >=6 && <7
     , mtl >=2.2 && <3
+    , prettyprinter >=1.1 && <2.0
     , recursion-schemes >=5.0 && <6
     , scientific >=0.3 && <0.4
     , text >=1.2 && <2
@@ -84,6 +85,7 @@ executable cacco
     , half >=0.2 && <1
     , lens >=4.15 && <4.16
     , megaparsec >=6 && <7
+    , prettyprinter >=1.1 && <2.0
     , recursion-schemes >=5.0 && <6
     , scientific >=0.3 && <0.4
     , text >=1.2 && <2
@@ -103,6 +105,7 @@ test-suite test
     , half >=0.2 && <1
     , lens >=4.15 && <4.16
     , megaparsec >=6 && <7
+    , prettyprinter >=1.1 && <2.0
     , recursion-schemes >=5.0 && <6
     , scientific >=0.3 && <0.4
     , tasty >=1.0 && <2.0

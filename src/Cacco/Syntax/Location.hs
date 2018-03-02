@@ -1,6 +1,9 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE DeriveGeneric      #-}
-{-# LANGUAGE TemplateHaskell    #-}
+{-# LANGUAGE DeriveDataTypeable  #-}
+{-# LANGUAGE DeriveGeneric       #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE RecordWildCards     #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell     #-}
 
 module Cacco.Syntax.Location
   ( Location
@@ -10,17 +13,19 @@ module Cacco.Syntax.Location
   , endLine
   , endColumn
   , initLocation
+  , fromPositions
   , toPostions
   ) where
 
-import           Control.DeepSeq       (NFData)
-import           Control.Lens          (makeLenses, (&), (.~), (^.))
-import           Data.Monoid           ((<>))
-import           Data.Typeable         (Typeable)
-import           GHC.Generics
+import           Control.Arrow             ((&&&))
+import           Control.DeepSeq           (NFData)
+import           Control.Lens              (makeLenses, view, (&), (.~), (^.))
+import           Data.Text.Prettyprint.Doc
+import           Data.Typeable             (Typeable)
+import           GHC.Generics              (Generic)
 
-import           Cacco.Syntax.Position (Position)
-import qualified Cacco.Syntax.Position as P
+import           Cacco.Syntax.Position     (Position)
+import qualified Cacco.Syntax.Position     as P
 
 -- | The abstract data type @Location@ hints source positions.
 data Location = Location
@@ -34,7 +39,7 @@ data Location = Location
     _endLine     :: !Word,
     -- | the end column number in the source-file or input.
     _endColumn   :: !Word
-  } deriving (Eq, Ord, Typeable, Generic)
+  } deriving (Eq, Ord, Show, Typeable, Generic)
 
 instance NFData Location
 
@@ -51,35 +56,53 @@ initLocation =
     _endColumn = 1
   }
 
+fromPositions :: Position -> Position -> Location
+fromPositions a b
+    | srcA /= srcB = error "Can not merge two positions from different sources"
+    | otherwise    = location
+  where
+    srcA, srcB :: FilePath
+    [srcA, srcB] = view P.sourceName <$> [a, b]
+    start, end :: Position
+    (start, end) = uncurry min &&& uncurry max $ (a, b)
+    location :: Location
+    location = initLocation
+      & sourceName .~ start ^. P.sourceName
+      & startLine .~ start ^. P.line
+      & startColumn .~ start ^. P.column
+      & endLine .~  end ^. P.line
+      & endColumn .~ end ^.  P.column
+    {-# INLINE location #-}
+
 toPostions :: Location -> (Position, Position)
-toPostions l =
-  let
-    n = l ^. sourceName
-    s = P.initPosition
-        & P.sourceName .~ n
+toPostions l = (start, end)
+  where
+    src :: FilePath
+    src = l ^. sourceName
+    {-# INLINE src #-}
+    start :: Position
+    start = P.initPosition
+        & P.sourceName .~ src
         & P.line .~ l ^. startLine
         & P.column .~ l ^. startColumn
-    e = P.initPosition
-        & P.sourceName .~ n
+    {-# INLINE start #-}
+    end :: Position
+    end = P.initPosition
+        & P.sourceName .~ src
         & P.line .~ l ^. endLine
         & P.column .~ l ^. endColumn
-  in
-    (s, e)
+    {-# INLINE end #-}
 
-instance Show Location where
-  show Location {
-    _sourceName  = n,
-    _startLine   = sl,
-    _startColumn = sc,
-    _endLine     = el,
-    _endColumn   = ec
-  } =
-    let
-      name | n == "" = "(unknown)" | otherwise = n
-    in
-      "("
-      <> name <> ":"
-      <> show sl <> "," <> show sc
-      <> "-"
-      <> show el <> "," <> show ec
-      <> ")"
+instance Pretty Location where
+  pretty Location{..} = parens $ surround colon name $ surround hyphen start end
+    where
+      name :: Doc ann
+      name
+        | _sourceName == "" = "(unknown)"
+        | otherwise = pretty _sourceName
+      start :: Doc ann
+      start = surround comma (pretty _startLine) $ pretty _startColumn
+      end :: Doc ann
+      end = surround comma (pretty _endLine) $ pretty _endColumn
+      hyphen :: Doc ann
+      hyphen = "-"

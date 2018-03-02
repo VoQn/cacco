@@ -4,44 +4,44 @@ module Cacco.Syntax.Parser.Internal
   , locationFromSourcePos
   ) where
 
-import           Control.Lens
+import           Control.Lens          ((&), (.~))
 import           Data.Text             (Text)
 import           Data.Void             (Void)
+import           Text.Megaparsec       (Parsec, SourcePos, Token)
 import qualified Text.Megaparsec       as MP
 import qualified Text.Megaparsec.Pos   as Pos
 
-import           Cacco.Syntax.Location (Location, initLocation)
-import qualified Cacco.Syntax.Location as L
+import           Cacco.Syntax.Location (Location, fromPositions)
 import           Cacco.Syntax.Position (Position, initPosition)
 import qualified Cacco.Syntax.Position as P
 
-type Parser = MP.Parsec Void Text
-type ParseError = MP.ParseError (MP.Token Text) Void
+type Parser = Parsec Void Text
+type ParseError = MP.ParseError (Token Text) Void
 
 -- | Convert from two @SourcePos@ to @Position@.
-positionFromSourcePos :: MP.SourcePos -> Position
-positionFromSourcePos p =
+fromSourcePos :: SourcePos -> Position
+fromSourcePos p =
     initPosition
-      & P.sourceName .~ Pos.sourceName p
-      & P.line .~ fromInt (Pos.sourceLine p)
-      & P.column .~ fromInt (Pos.sourceColumn p)
+      & P.sourceName .~ src
+      & P.line .~ line
+      & P.column .~ column
   where
+    src :: FilePath
+    src = Pos.sourceName p
+    {-# INLINE src #-}
+    line :: Word
+    line = fromInt $ Pos.sourceLine p
+    {-# INLINE line #-}
+    column :: Word
+    column = fromInt $ Pos.sourceColumn p
+    {-# INLINE column #-}
+    fromInt :: Pos.Pos -> Word
     fromInt = fromIntegral . Pos.unPos
     {-# INLINE fromInt #-}
 
 -- | Convert from two @SourcePos@ to @Location@.
-locationFromSourcePos
-  :: MP.SourcePos -- ^ start position
-  -> MP.SourcePos -- ^ end position
-  -> Location
-locationFromSourcePos s e =
-  let
-    s' = positionFromSourcePos s
-    e' = positionFromSourcePos e
-  in
-    initLocation
-      & L.sourceName .~ s' ^. P.sourceName
-      & L.startLine .~ s' ^. P.line
-      & L.startColumn .~ s' ^. P.column
-      & L.endLine .~ e' ^. P.line
-      & L.endColumn .~ e' ^. P.column
+locationFromSourcePos :: SourcePos -> SourcePos -> Location
+locationFromSourcePos p1' p2' = fromPositions p1 p2
+  where
+    p1, p2 :: Position
+    [p1, p2] = fromSourcePos <$> [p1', p2']

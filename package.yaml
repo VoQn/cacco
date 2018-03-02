@@ -11,6 +11,7 @@ extra-source-files:
 dependencies:
   - base >=4.7 && <5
   - text >=1.2 && <2
+  - prettyprinter >=1.1 && <2.0
   - half >=0.2 && <1
   - scientific >=0.3 && <0.4
   - megaparsec >=6 && <7
