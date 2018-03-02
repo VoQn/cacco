@@ -10,9 +10,9 @@ import           Control.Monad.Except   (ExceptT, MonadError, runExceptT,
 import           Control.Monad.Identity (Identity, runIdentity)
 import           Control.Monad.State    (StateT, runStateT)
 import qualified Control.Monad.State    as State
+import           Data.Functor.Foldable
 
 import           Data.Ann               (unAnnF)
-import           Data.Fix               (cata)
 
 import           Cacco.Env              (Env)
 import qualified Cacco.Env              as Env

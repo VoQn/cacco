@@ -16,13 +16,14 @@ module Cacco.Syntax.Parser
   ) where
 
 import           Data.Functor                 (Functor)
+import           Data.Functor.Foldable
 import           Data.Text                    (Text)
 import           Text.Megaparsec              (between, choice, eof, many,
                                                parse, parseTest, try, (<|>))
 
+
 import           Data.Ann                     (AnnF (..))
 import qualified Data.Ann                     as Ann
-import           Data.Fix
 
 import           Cacco.Syntax.Expr            (Ast, AstF (..), Expr)
 import           Cacco.Syntax.Location        (Location)
@@ -60,7 +61,7 @@ sym :: Parser (AstF f)
 sym = SymF <$> identifier
 
 lis :: Parser f -> Parser (AstF f)
-lis p = LisF <$> many p
+lis p = ListF <$> many p
 
 ast :: forall f. Parser f -> Parser (AstF f)
 ast p = lexeme $ choice
@@ -86,7 +87,7 @@ frontend p []   = frontend p "<stdin>"
 frontend p name = parse (contents p) name
 
 parseAst :: FontendParser Ast
-parseAst = frontend $ Ann.remove <$> expr
+parseAst = frontend $ (cata embed) . Ann.remove <$> expr
 
 parseExpr :: FontendParser (Expr Location)
 parseExpr = frontend expr

@@ -4,10 +4,10 @@
 
 module Data.Ann where
 
-import           Data.Typeable (Typeable)
-import           GHC.Generics  (Generic)
+import           Data.Typeable         (Typeable)
+import           GHC.Generics          (Generic)
 
-import           Data.Fix
+import           Data.Functor.Foldable
 
 -- | Annotated Functor
 newtype AnnF i f a = AnnF { unAnnF :: (i, f a) }

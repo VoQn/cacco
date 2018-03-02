@@ -15,6 +15,7 @@ dependencies:
   - scientific >=0.3 && <0.4
   - megaparsec >=6 && <7
   - lens >=4.15 && <4.16
+  - recursion-schemes >=5.0 && <6
 library:
   source-dirs: src
   ghc-options: -Wall -Wcompat
