@@ -61,7 +61,7 @@ instance Pretty Literal where
     Uint16 x   -> pretty x <> "_u16"
     Uint32 x   -> pretty x <> "_u32"
     Uint64 x   -> pretty x <> "_u64"
-    Integer x  -> pretty x
+    Integer x  -> (if x < 0 then "" else "+") <> pretty x
     Numeric x  -> pretty x
     Float16 x  -> pretty (show x) <> "_f16"
     Float32 x  -> pretty (show x) <> "_f32"

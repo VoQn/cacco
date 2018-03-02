@@ -2,9 +2,10 @@
 
 module Cacco.LiteralSpec where
 
+import           Data.Text.Prettyprint.Doc
 import           Test.Tasty.Hspec
 
-import           Cacco.Syntax.Literal (Literal (..))
+import           Cacco.Syntax.Literal      (Literal (..))
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 
@@ -40,3 +41,39 @@ spec_instance_of_Show = do
     show (Flonum 1) `shouldBe` "Flonum 1.0"
   it "\"\"" $
     show (Text "") `shouldBe` "Text \"\""
+
+spec_instance_of_Pretty :: Spec
+spec_instance_of_Pretty = do
+  it "Undef => undefined" $ (show . pretty) Undef `shouldBe` "undefined"
+
+  it "Unit => ()" $ (show . pretty) Unit `shouldBe` "()"
+
+  it "True => true" $ (show . pretty) (Bool True) `shouldBe` "true"
+
+  it "False => false" $ (show . pretty) (Bool False) `shouldBe` "false"
+
+  it "Int8 1 => 1_i8" $ (show . pretty) (Int8 1) `shouldBe` "1_i8"
+
+  it "Int16 1 => 1_i16" $ (show . pretty) (Int16 1) `shouldBe` "1_i16"
+
+  it "Int32 1 => 1_i32" $ (show . pretty) (Int32 1) `shouldBe` "1_i32"
+
+  it "Int64 1 => 1_i64" $ (show . pretty) (Int64 1) `shouldBe` "1_i64"
+
+  it "Uint8 1 => 1_u8" $ (show . pretty) (Uint8 1) `shouldBe` "1_u8"
+
+  it "Uint16 1 => 1_u16" $ (show . pretty) (Uint16 1) `shouldBe` "1_u16"
+
+  it "Uint32 1 => 1_u32" $ (show . pretty) (Uint32 1) `shouldBe` "1_u32"
+
+  it "Uint64 1 => 1_u64" $ (show . pretty) (Uint64 1) `shouldBe` "1_u64"
+
+  it "Integer 1 => +1" $ (show . pretty) (Integer 1) `shouldBe` "+1"
+
+  it "Integer 1 => -1" $ (show . pretty) (Integer (-1)) `shouldBe` "-1"
+
+  it "Numeric 1 => 1" $ (show . pretty) (Numeric 1) `shouldBe` "1"
+
+  it "Float 16 => 1.0_f16" $ (show . pretty) (Float16 1) `shouldBe` "1.0_f16"
+
+  it "Float 32 => 1.0_f32" $ (show . pretty) (Float32 1) `shouldBe` "1.0_f32"
