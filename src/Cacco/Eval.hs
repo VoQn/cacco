@@ -11,6 +11,7 @@ import           Control.Monad.Identity (Identity, runIdentity)
 import           Control.Monad.State    (StateT, runStateT)
 import qualified Control.Monad.State    as State
 import           Data.Functor.Foldable
+import           Data.Scientific        (toRealFloat)
 
 import           Data.Ann               (unAnnF)
 
@@ -41,18 +42,18 @@ evalLit l = case l of
     Lit.Undef     -> throwError $ Err.message "undefined"
     Lit.Unit      -> return Val.unit
     Lit.Bool    x -> return $ Val.bool    x
-    Lit.Int8    x -> return $ Val.int8    x
-    Lit.Int16   x -> return $ Val.int16   x
-    Lit.Int32   x -> return $ Val.int32   x
-    Lit.Int64   x -> return $ Val.int64   x
-    Lit.Uint8   x -> return $ Val.uint8   x
-    Lit.Uint16  x -> return $ Val.uint16  x
-    Lit.Uint32  x -> return $ Val.uint32  x
-    Lit.Uint64  x -> return $ Val.uint64  x
+    Lit.Int8    x -> return $ Val.int8    $ fromInteger x
+    Lit.Int16   x -> return $ Val.int16   $ fromInteger x
+    Lit.Int32   x -> return $ Val.int32   $ fromInteger x
+    Lit.Int64   x -> return $ Val.int64   $ fromInteger x
+    Lit.Uint8   x -> return $ Val.uint8   $ fromIntegral x
+    Lit.Uint16  x -> return $ Val.uint16  $ fromIntegral x
+    Lit.Uint32  x -> return $ Val.uint32  $ fromIntegral x
+    Lit.Uint64  x -> return $ Val.uint64  $ fromIntegral x
     Lit.Integer x -> return $ Val.integer x
-    Lit.Float16 x -> return $ Val.float16 x
-    Lit.Float32 x -> return $ Val.float32 x
-    Lit.Float64 x -> return $ Val.float64 x
+    Lit.Float16 x -> return $ Val.float16 $ toRealFloat x
+    Lit.Float32 x -> return $ Val.float32 $ toRealFloat x
+    Lit.Float64 x -> return $ Val.float64 $ toRealFloat x
     Lit.Flonum  x -> return $ Val.flonum  x
     Lit.Text    x -> return $ Val.text    x
 

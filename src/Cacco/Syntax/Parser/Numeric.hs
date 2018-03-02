@@ -9,8 +9,7 @@ import           Data.Bits                    (shiftL)
 import           Data.Char
 import           Data.Functor                 (void, ($>))
 import           Data.List                    (foldl')
-import           Data.Scientific              (Scientific, scientific,
-                                               toRealFloat)
+import           Data.Scientific              (Scientific, scientific)
 import           Text.Megaparsec              (choice, many, option, try, (<?>),
                                                (<|>))
 import           Text.Megaparsec.Char         (char, digitChar, hexDigitChar,
@@ -223,19 +222,19 @@ float' = (. fromInteger) <$> float
 {-# INLINEABLE float' #-}
 
 i8 :: Parser (Integer -> Literal)
-i8  = symbol "8" $> Int8 . fromInteger
+i8  = symbol "8" $> Int8
 {-# INLINE i8 #-}
 
 i16 :: Parser (Integer -> Literal)
-i16 = symbol "16" $> Int16 . fromInteger
+i16 = symbol "16" $> Int16
 {-# INLINE i16 #-}
 
 i32 :: Parser (Integer -> Literal)
-i32 = symbol "32" $> Int32 . fromInteger
+i32 = symbol "32" $> Int32
 {-# INLINE i32 #-}
 
 i64 :: Parser (Integer -> Literal)
-i64 = symbol "64" $> Int64 . fromInteger
+i64 = symbol "64" $> Int64
 {-# INLINE i64 #-}
 
 u8 :: Parser (Integer -> Literal)
@@ -255,13 +254,13 @@ u64 = symbol "64" $> Uint64 . fromInteger
 {-# INLINE u64 #-}
 
 f16 :: Parser (Scientific -> Literal)
-f16 = symbol "16" $> Float16 . toRealFloat
+f16 = symbol "16" $> Float16
 {-# INLINE f16 #-}
 
 f32 :: Parser (Scientific -> Literal)
-f32 = symbol "32" $> Float32 . toRealFloat
+f32 = symbol "32" $> Float32
 {-# INLINE f32 #-}
 
 f64 :: Parser (Scientific -> Literal)
-f64 = symbol "64" $> Float64 . toRealFloat
+f64 = symbol "64" $> Float64
 {-# INLINE f64 #-}

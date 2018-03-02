@@ -2,6 +2,7 @@
 
 module Cacco.Parser.NumericSpec where
 
+import           Data.Scientific      (fromFloatDigits)
 import           Data.Semigroup       ((<>))
 import qualified Data.Text            as Text
 import           Data.Word
@@ -81,35 +82,35 @@ prop_parse_any_uint8 x =
   let
     expr = Text.pack $ show x <> "_u8"
   in
-    parse numeric "test" expr == Right (Uint8 x)
+    parse numeric "test" expr == Right (Uint8 $ fromIntegral x)
 --
 prop_parse_any_uint16 :: Word16 -> Bool
 prop_parse_any_uint16 x =
   let
     expr = Text.pack $ show x <> "_u16"
   in
-    parse numeric "test" expr == Right (Uint16 x)
+    parse numeric "test" expr == Right (Uint16 $ fromIntegral x)
 --
 prop_parse_any_uint32 :: Word32 -> Bool
 prop_parse_any_uint32 x =
   let
     expr = Text.pack $ show x <> "_u32"
   in
-    parse numeric "test" expr == Right (Uint32 x)
+    parse numeric "test" expr == Right (Uint32 $ fromIntegral x)
 --
 prop_parse_any_uint64 :: Word64 -> Bool
 prop_parse_any_uint64 x =
   let
     expr = Text.pack $ show x <> "_u64"
   in
-    parse numeric "test" expr == Right (Uint64 x)
+    parse numeric "test" expr == Right (Uint64 $ fromIntegral x)
 --
 prop_parse_any_float32 :: Float -> Bool
 prop_parse_any_float32 x =
   let
     expr = Text.pack $ show x <> "_f32"
   in
-    parse numeric "test" expr == Right (Float32 x)
+    parse numeric "test" expr == Right (Float32 $ fromFloatDigits x)
 --
 
 prop_parse_any_float64 :: Double -> Bool
@@ -117,4 +118,4 @@ prop_parse_any_float64 x =
   let
     expr = Text.pack $ show x <> "_f64"
   in
-    parse numeric "test" expr == Right (Float64 x)
+    parse numeric "test" expr == Right (Float64 $ fromFloatDigits x)
