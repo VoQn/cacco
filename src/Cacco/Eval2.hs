@@ -39,16 +39,17 @@ data Fun = Fun {
     funcBody :: Ast AstExpr
   }
 
-
 -- Environment
-
 data Env = Env {
-  symbolTable :: Map.Map String Val,
-  funcTable   :: Map.Map String Fun
-}
+    symbolTable :: Map.Map String Val,
+    funcTable   :: Map.Map String Fun
+  }
 
 initEnv :: Env
-initEnv = Env { symbolTable = Map.empty, funcTable = Map.empty }
+initEnv = Env {
+    symbolTable = Map.empty,
+    funcTable = Map.empty
+  }
 
 findSymbol :: String -> Env -> Maybe Val
 findSymbol key = Map.lookup key . symbolTable
@@ -58,81 +59,96 @@ hasSymbol key = Map.member key . symbolTable
 
 registerSymbol :: String -> Val -> Env -> Env
 registerSymbol key val env@Env{..} =
-  let
-    newTable = Map.insert key val symbolTable
-  in
-    env{ symbolTable = newTable }
+    let
+      newTable = Map.insert key val symbolTable
+    in
+      env { symbolTable = newTable }
 
 registerFunc :: String -> Fun -> Env -> Env
 registerFunc name func env@Env{..} =
-  let
-    newSymbolTable = Map.insert name Unit symbolTable
-    newFuncTable   = Map.insert name func funcTable
-  in
-    env{ symbolTable = newSymbolTable, funcTable = newFuncTable }
-
+    let
+      newSymbolTable = Map.insert name Unit symbolTable
+      newFuncTable   = Map.insert name func funcTable
+    in
+      env { symbolTable = newSymbolTable, funcTable = newFuncTable }
 
 -- Evaluator
-type Eval = ExceptT String (StateT Env Identity) Val
+type EvalT a = ExceptT String (StateT Env Identity) a
 
 builtinEnv :: Env
 builtinEnv = initEnv
 
-runEval :: Eval -> Env -> (Either String Val, Env)
+runEval :: EvalT a -> Env -> (Either String a, Env)
 runEval ev = runIdentity . runStateT (runExceptT ev)
 
-evalLit :: Literal -> Val
+evalExpr :: Ast AstExpr -> EvalT Val
+evalExpr ast = case ast of
+    Lit l _  -> evalLit l
+    Var v p  -> evalVar v p
+    If c t e -> evalIfSyntax c t e
+    _        -> throwError "Have not implemented yet."
+
+
+evalDecl :: Ast AstDecl -> EvalT Val
+evalDecl ast = case ast of
+    Lit l _ -> evalLit l
+    Var v p -> evalVar v p
+    Def p e -> evalDef p e
+    _       -> throwError "Have not implemented yet."
+
+evalLit :: Literal -> EvalT Val
 evalLit lit = case lit of
-  Literal.Integer x -> Integer x
-  Literal.Bool    x -> Bool x
-  _                 -> Bool False
+    Literal.Integer x -> return $ Integer x
+    Literal.Bool    x -> return $ Bool x
+    _                 -> return $ Bool False
 
-astExpr' :: (f AstExpr -> Eval) -> AstF f AstExpr -> Eval
-astExpr' ee = ev where
-  ev (LitF l _)  = return $ evalLit l
-  ev (VarF (VarSym name) _) = do
-    env <- get
-    case findSymbol name env of
-      Nothing -> throwError $ "Undefined symbol '" ++ name ++ "' referenced."
-      Just  v -> return v
-  ev (IfF c t e) = do
-    value <- ee c
-    case value of
-      Bool flag
-        | flag      -> ee t
-        | otherwise -> ee e
-      _         -> throwError "Non-boolean value evaluated as condition in if-expression"
+evalVar :: Var -> AstIxProxy i -> EvalT Val
+evalVar (VarSym name) proxy = case proxy of
+    DeclProxy -> return $ Symbol name
+    PattProxy -> return $ Symbol name
+    TypeProxy -> return $ Symbol name
+    ExprProxy -> do
+      env <- get
+      case findSymbol name env of
+        Nothing -> throwError $ "Undefined symbol '" ++ name ++ "' referenced."
+        Just  v -> return v
 
-astDecl :: (Ast AstExpr -> Eval) -> Ast AstDecl -> Eval
-astDecl ee (Def p e) = case p of
-  -- constant
-  Var (VarSym name) _ -> do
+evalIfSyntax :: Ast AstExpr -> Ast AstExpr -> Ast AstExpr -> EvalT Val
+evalIfSyntax cond thenCase elseCase = do
+    result <- evalExpr cond
+    case result of
+      Bool False -> evalExpr elseCase
+      Bool True  -> evalExpr thenCase
+      _ -> throwError "Non-boolean value evaluated as condition in if-expression"
+
+evalDef :: Ast AstPatt -> Ast AstExpr -> EvalT Val
+evalDef patt expr = case patt of
+    -- constant
+    Var (VarSym name) _            -> evalDefConst name expr
+    -- function
+    App (Var (VarSym name) _) args -> evalDefFunc name args expr
+
+evalDefConst :: String -> Ast AstExpr -> EvalT Val
+evalDefConst name expr = do
     env <- get
     if hasSymbol name env
       then throwError $ "Can not redefine symbol '" ++ name ++ "'."
       else do
-        value <- ee e
+        value <- evalExpr expr
         put $ registerSymbol name value env
         return Unit
-  -- function
-  App (Var (VarSym name) _) args -> do
+
+evalDefFunc :: String -> [Ast AstPatt] -> Ast AstExpr -> EvalT Val
+evalDefFunc name args body = do
     env <- get
     if hasSymbol name env
       then throwError $ "Can not redefine symbol '" ++ name ++ "'."
       else do
-        let fn = Fun { funcName = Just name, localEnv = env, funcArgs = args, funcBody = e }
+        let fn = Fun {
+          funcName = Just name,
+          localEnv = env,
+          funcArgs = args,
+          funcBody = body
+        }
         put $ registerFunc name fn env
         return Unit
-
-evalAST :: forall (i :: AstIx). Ast i -> Eval
-evalAST (Lit l _)  = return $ evalLit l
-
-evalAST (Var (VarSym name) proxy) = case proxy of
-  DeclProxy -> return $ Symbol name
-  PattProxy -> return $ Symbol name
-  TypeProxy -> return $ Symbol name
-  ExprProxy -> do
-    env <- get
-    case findSymbol name env of
-      Nothing -> throwError $ "Undefined symbol '" ++ name ++ "' referenced."
-      Just  v -> return v

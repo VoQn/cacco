@@ -24,28 +24,28 @@ import           Data.Fix
 import           Cacco.Syntax.Literal (Literal)
 
 -- | Abstruct syntax tree of Cacco language
-data AstF f where
+data AstF r where
   -- Atomic
   -- | Hole @_@
-  HolF :: AstF f
+  HolF :: AstF r
   -- | 'Literal'
-  LitF :: Literal -> AstF f
+  LitF :: Literal -> AstF r
   -- | Symbol
-  SymF :: String -> AstF f
+  SymF :: String -> AstF r
 
   -- Collections
   -- | List
-  LisF :: [f] -> AstF f
+  LisF :: [r] -> AstF r
   -- | Struct
-  StrF :: [(String, f)] -> AstF f
+  StrF :: [(String, r)] -> AstF r
 
   -- Fuctors
   -- | Apply function
-  AppF :: f -> [f] -> AstF f
+  AppF :: r -> [r] -> AstF r
   -- | Lambda (anonymous) function
-  LamF :: [f] -> f -> AstF f
+  LamF :: [r] -> r -> AstF r
   -- | Declare a constant value
-  ConF :: f -> f -> AstF f
+  ConF :: r -> r -> AstF r
   deriving (Eq, Show, Typeable, Generic, Functor, Foldable, Traversable)
 
 instance Eq1 AstF where
