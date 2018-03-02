@@ -56,16 +56,16 @@ evalLit l = case l of
     Lit.Flonum  x -> return $ Val.flonum  x
     Lit.Text    x -> return $ Val.text    x
 
-evalAcc :: forall i. (i, AstF (EvalF i)) -> EvalF i
-evalAcc (info, LitF l) = supplyInfo info $ evalLit l
+evalAcc :: forall i. (AstF (EvalF i), i) -> EvalF i
+evalAcc (LitF l, info) = supplyInfo info $ evalLit l
 
-evalAcc (info, SymF name) = do
+evalAcc (SymF name, info) = do
     env <- State.get
     supplyInfo info $ case Env.lookup name env of
       Nothing  -> return $ Symbol name Nothing
       Just val -> return val
 
-evalAcc (info, ConF symE exprE) = do
+evalAcc (ConF symE exprE, info) = do
     sym <- symE
     case sym of
       Symbol name _ -> do
@@ -75,7 +75,7 @@ evalAcc (info, ConF symE exprE) = do
         return . Unit $ Just info
       _ -> throwError $ CanNotRedefine "" $ Just info
 
-evalAcc (info, AppF funcE argEs) = do
+evalAcc (AppF funcE argEs, info) = do
     val <- funcE
     args <- sequence argEs
     evalAsFunc val args
@@ -83,7 +83,7 @@ evalAcc (info, AppF funcE argEs) = do
     evalAsFunc (Builtin func _) = supplyInfo info . func
     evalAsFunc v = const . throwError $ CanNotCallAsFunction (pretty v) $ Just info
 
-evalAcc (i, _) = throwError . InvalidForm $ Just i
+evalAcc (_, i) = throwError . InvalidForm $ Just i
 
 eval :: Expr i -> Env (Val i) -> EvalResult i
 eval expr = runEval $ cata (evalAcc . unAnnF) expr

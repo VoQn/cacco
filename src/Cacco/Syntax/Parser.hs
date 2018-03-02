@@ -41,7 +41,9 @@ fixParser :: Functor f
 fixParser f = fmap Fix $ f $ fixParser f
 
 addLocation :: Parser (f a) -> Parser (AnnF Location f a)
-addLocation p = AnnF <$> withLocation p
+addLocation p = do
+  (l, v) <- withLocation p
+  return $ AnnF (v, l)
 
 defForm :: forall f. Parser f -> Parser (AstF f)
 defForm p = do
