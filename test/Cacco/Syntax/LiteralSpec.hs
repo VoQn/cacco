@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Cacco.LiteralSpec where
+module Cacco.Syntax.LiteralSpec where
 
 import           Data.Text.Prettyprint.Doc
 import           Test.Tasty.Hspec
@@ -77,3 +77,9 @@ spec_instance_of_Pretty = do
   it "Float 16 => 1.0_f16" $ (show . pretty) (Float16 1) `shouldBe` "1.0_f16"
 
   it "Float 32 => 1.0_f32" $ (show . pretty) (Float32 1) `shouldBe` "1.0_f32"
+
+  it "Float 64 => 1.0_f64" $ (show . pretty) (Float64 1) `shouldBe` "1.0_f64"
+
+  it "Flonum => 1.0" $ (show . pretty) (Flonum 1) `shouldBe` "1.0"
+
+  it "Text \"\"" $ (show . pretty) (Text "") `shouldBe` "\"\""

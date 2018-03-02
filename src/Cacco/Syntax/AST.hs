@@ -98,14 +98,6 @@ deriving instance forall (r :: AstIx -> *) (i :: AstIx).
   ) => Eq (AstF r i)
 --
 deriving instance forall (r :: AstIx -> *) (i :: AstIx).
-  ( Ord (r AstExpr)
-  , Ord (r AstPatt)
-  , Ord (r AstDecl)
-  , Ord (r AstType)
-  , Ord (r i)
-  ) => Ord (AstF r i)
---
-deriving instance forall (r :: AstIx -> *) (i :: AstIx).
   ( Typeable (r AstExpr)
   , Typeable (r AstPatt)
   , Typeable (r AstDecl)

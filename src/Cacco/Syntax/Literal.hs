@@ -22,11 +22,11 @@ data Literal
   | Bool Bool
 
   -- Signed integers
-  | Int8     Integer
-  | Int16    Integer
-  | Int32    Integer
-  | Int64    Integer
-  | Integer  Integer
+  | Int8    Integer
+  | Int16   Integer
+  | Int32   Integer
+  | Int64   Integer
+  | Integer Integer
 
   -- Unsigned integers
   | Uint8   Natural
@@ -43,7 +43,7 @@ data Literal
 
   -- Text
   | Text Text
-  deriving (Eq, Ord, Show, Data, Typeable, Generic)
+  deriving (Eq, Show, Data, Typeable, Generic)
 
 instance NFData Literal
 
