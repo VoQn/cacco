@@ -68,4 +68,3 @@ instance Pretty Literal where
     Float64 x  -> pretty (show x) <> "_f64"
     Flonum  x  -> pretty (show x)
     Text    x  -> dquotes $ pretty x
-
