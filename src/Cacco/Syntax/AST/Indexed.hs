@@ -11,13 +11,13 @@
 {-# LANGUAGE TypeOperators      #-}
 
 module Cacco.Syntax.AST.Indexed where
---
+
 import           Data.Typeable        (Typeable)
 import           GHC.Generics         (Generic)
---
+
 import           Data.IxAnn
 import           Data.IxFix
---
+
 import           Cacco.Syntax.Literal (Literal)
 
 data AstIx
@@ -42,7 +42,7 @@ deriving instance Show (AstIxProxy i)
 deriving instance Eq (AstIxProxy i)
 deriving instance Ord (AstIxProxy i)
 deriving instance Typeable (AstIxProxy i)
---
+
 data AstF (r :: AstIx -> *) (i :: AstIx) where
   -- Atomic (Leaf Node of AST)
   -- | Hole @_@
@@ -81,7 +81,7 @@ deriving instance forall (r :: AstIx -> *) (i :: AstIx).
   , Show (r AstType)
   , Show (r i)
   ) => Show (AstF r i)
---
+
 deriving instance forall (r :: AstIx -> *) (i :: AstIx).
   ( Eq (r AstExpr)
   , Eq (r AstPatt)
@@ -89,7 +89,7 @@ deriving instance forall (r :: AstIx -> *) (i :: AstIx).
   , Eq (r AstType)
   , Eq (r i)
   ) => Eq (AstF r i)
---
+
 deriving instance forall (r :: AstIx -> *) (i :: AstIx).
   ( Typeable (r AstExpr)
   , Typeable (r AstPatt)
@@ -97,7 +97,7 @@ deriving instance forall (r :: AstIx -> *) (i :: AstIx).
   , Typeable (r AstType)
   , Typeable (r i)
   ) => Typeable (AstF r i)
---
+
 instance IxFunctor AstF where
   imap = imapDefault
 
@@ -118,7 +118,7 @@ instance IxTraversable AstF where
       DefF n v     -> DefF <$> f n <*> f v
     where
       mapList fn xs = sequenceA $ fn <$> xs
---
+
 type Ast = IxFix AstF
 
 pattern Hole :: forall (i :: AstIx). i ~ AstPatt => Ast i
