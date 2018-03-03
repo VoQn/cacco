@@ -51,7 +51,8 @@ spec_fromPositions = do
             P.sourceName .~ "bar" &
             P.line .~ 2 &
             P.column .~ 80
-    evaluate (L.fromPositions a b) `shouldThrow` errorCall "Can not merge two positions from different sources"
+    evaluate (L.fromPositions a b) `shouldThrow` errorCall
+        "Can not merge two positions from different sources"
 
 spec_toPositions :: Spec
 spec_toPositions = do
