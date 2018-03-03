@@ -20,13 +20,6 @@ import           Data.IxFix
 --
 import           Cacco.Syntax.Literal (Literal)
 
-data Var
-  = VarId String
-  | ConId String
-  | VarSym String
-  | ConSym String
-  deriving (Eq, Ord, Show, Typeable, Generic)
-
 data AstIx
   = AstDecl
   | AstExpr
@@ -59,7 +52,7 @@ data AstF (r :: AstIx -> *) (i :: AstIx) where
   -- | 'Literal'
   LitF :: Literal -> AstIxProxy i -> AstF r i
   -- | Variable
-  VarF :: Var -> AstIxProxy i -> AstF f i
+  VarF :: String -> AstIxProxy i -> AstF r i
 
   -- Collections
   -- | Linked list
@@ -77,10 +70,10 @@ data AstF (r :: AstIx -> *) (i :: AstIx) where
 
   -- Declarations
   -- | Declare type bind
-  DecF :: Var -> [r AstType] -> AstF r AstDecl
+  DecF :: String -> [r AstType] -> AstF r AstDecl
   -- | Define function or constants
   DefF :: r AstPatt -> r AstExpr -> AstF r AstDecl
---
+
 deriving instance forall (r :: AstIx -> *) (i :: AstIx).
   ( Show (r AstExpr)
   , Show (r AstPatt)
@@ -134,7 +127,7 @@ pattern Hole = In HoleF
 pattern Dots :: forall (i :: AstIx). i ~ AstPatt => Ast i
 pattern Dots = In DotsF
 
-pattern Var :: forall (i :: AstIx). Var -> AstIxProxy i -> Ast i
+pattern Var :: forall (i :: AstIx). String -> AstIxProxy i -> Ast i
 pattern Var v i = In (VarF v i)
 
 pattern Lit :: forall (i :: AstIx). Literal -> AstIxProxy i -> Ast i
@@ -152,7 +145,7 @@ pattern Lam pt body = In (LamF pt body)
 pattern Def :: forall (i :: AstIx). i ~ AstDecl => Ast AstPatt -> Ast AstExpr -> Ast i
 pattern Def n v = In (DefF n v)
 
-pattern Dec :: forall (i :: AstIx). i ~ AstDecl => Var -> [Ast AstType] -> Ast i
+pattern Dec :: forall (i :: AstIx). i ~ AstDecl => String -> [Ast AstType] -> Ast i
 pattern Dec n t = In (DecF n t)
 
 pattern If :: forall (i :: AstIx). i ~ AstExpr => Ast i -> Ast i -> Ast i -> Ast i

@@ -19,39 +19,38 @@ spec_declAst = do
   context "Typing declaration" $
     it "(: x Integer)" $
       declParser "(: x Integer)" `shouldBe` Right
-        (Dec
-          (VarSym "x")
-          [Var (VarSym "Integer") TypeProxy])
+        (Dec "x"
+          [Var "Integer" TypeProxy])
 
   context "Definition, Assign" $ do
     it "(= x 10)" $
       declParser "(= x 10)" `shouldBe` Right
         (Def
-          (Var (VarSym "x") PattProxy)
+          (Var "x" PattProxy)
           (Lit (Integer 10) ExprProxy))
 
     it "(= [error result] (requiest url))" $
       declParser "(= [error result] (request url))" `shouldBe` Right
         (Def
-          (Lis [ Var (VarSym "error") PattProxy
-               , Var (VarSym "result") PattProxy
+          (Lis [ Var "error" PattProxy
+               , Var "result" PattProxy
                ])
-          (App (Var (VarSym "request") ExprProxy)
-               [Var (VarSym "url") ExprProxy]))
+          (App (Var "request" ExprProxy)
+               [Var "url" ExprProxy]))
 
     it "(= (const x _) x)" $
       declParser "(= (const x _) x)" `shouldBe` Right
         (Def
-          (App (Var (VarSym "const") PattProxy)
-               [ Var (VarSym "x") PattProxy
+          (App (Var "const" PattProxy)
+               [ Var "x" PattProxy
                , Hole
                ])
-          (Var (VarSym "x") ExprProxy))
+          (Var "x" ExprProxy))
     --
     it "(= (and? false _ ... _) false)" $
       declParser "(= (and? false _ ... _) false)" `shouldBe` Right
         (Def
-          (App (Var (VarSym "and?") PattProxy)
+          (App (Var "and?" PattProxy)
                [ Lit (Bool False) PattProxy
                , Hole
                , Dots
@@ -74,14 +73,14 @@ spec_exprAst = do
     it "(+ x 1)" $
       exprParser "(+ x 1)" `shouldBe` Right
         (App
-          (Var (VarSym "+") ExprProxy)
-          [Var (VarSym "x") ExprProxy,
+          (Var "+" ExprProxy)
+          [Var "x" ExprProxy,
            Lit (Integer 1) ExprProxy
           ])
     it "(null? [1 2 3])" $
       exprParser "(null? [1 2 3])" `shouldBe` Right
         (App
-          (Var (VarSym "null?") ExprProxy)
+          (Var "null?" ExprProxy)
           [Lis [ Lit (Integer 1) ExprProxy
                , Lit (Integer 2) ExprProxy
                , Lit (Integer 3) ExprProxy

@@ -36,8 +36,8 @@ type AstIxFixParser t (i :: AstIx)
   -> (forall f. AstIxParser t f AstType) -- ^ Parser for Typing
   -> Parser (IxFix t i)
 
-var :: Parser Var
-var = VarSym <$> identifier
+var :: Parser String
+var = identifier
 {-# INLINE var #-}
 
 hole :: Parser (AstF f AstPatt)
@@ -91,7 +91,6 @@ lambda :: Parser (f AstExpr)
        -> Parser (AstF f AstExpr)
 lambda e p = LamF <$> many p <*> e
 {-# INLINE lambda #-}
---
 
 -- | parse Declaration AST
 declAstF :: AstIxParser AstF f AstDecl
