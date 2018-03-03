@@ -41,7 +41,7 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
 - tasty-1.0
-- tasty-discover-4.1.5
+- tasty-discover-4.2.0
 
 # Override default flag values for local packages and extra-deps
 flags: {}
