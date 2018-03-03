@@ -51,6 +51,7 @@ evalLit l = case l of
     Lit.Uint32  x -> return $ Val.uint32  $ fromIntegral x
     Lit.Uint64  x -> return $ Val.uint64  $ fromIntegral x
     Lit.Integer x -> return $ Val.integer x
+    Lit.Numeric x -> return $ Val.natural x
     Lit.Float16 x -> return $ Val.float16 $ toRealFloat x
     Lit.Float32 x -> return $ Val.float32 $ toRealFloat x
     Lit.Float64 x -> return $ Val.float64 $ toRealFloat x
@@ -69,22 +70,25 @@ evalAcc (SymF name, info) = do
 evalAcc (ConF symE exprE, info) = do
     sym <- symE
     case sym of
-      Symbol name _ -> do
-        val <- exprE
-        env <- State.get
-        _ <- State.put (Env.register name val env)
-        return . Unit $ Just info
-      _ -> throwError $ CanNotRedefine "" $ Just info
+      Symbol name _ -> defConst name
+      _             -> throwError $ CanNotRedefine "" $ Just info
+  where
+    defConst name = do
+      val <- exprE
+      env <- State.get
+      State.put $ Env.register name val env
+      return . Unit $ Just info
 
 evalAcc (AppF funcE argEs, info) = do
     val <- funcE
     args <- sequence argEs
-    evalAsFunc val args
-  where
-    evalAsFunc (Builtin func _) = supplyInfo info . func
-    evalAsFunc v = const . throwError $ CanNotCallAsFunction (pretty v) $ Just info
+    supplyInfo info $ apply val args
 
 evalAcc (_, i) = throwError . InvalidForm $ Just i
+
+apply :: Val i -> [Val i] -> Either (Error i) (Val i)
+apply (Builtin func _) args = func args
+apply v _ = throwError $ CanNotCallAsFunction (pretty v) Nothing
 
 eval :: Expr i -> Env (Val i) -> EvalResult i
 eval expr = runEval $ cata (evalAcc . unAnnF) expr

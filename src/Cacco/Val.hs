@@ -8,7 +8,7 @@ module Cacco.Val
   , unit, bool
   , int8, int16, int32, int64
   , uint8, uint16, uint32, uint64
-  , integer
+  , integer, natural
   , float16, float32, float64, flonum
   , list
   , text
@@ -29,6 +29,7 @@ import qualified Data.Vector     as Vec
 import           Data.Word       (Word16, Word32, Word64, Word8)
 import           GHC.Generics    (Generic)
 import           Numeric.Half    (Half)
+import           Numeric.Natural (Natural)
 
 import           Cacco.Error     (Error)
 
@@ -46,6 +47,7 @@ data Val i
   | Uint32  !Word32  (Maybe i)
   | Uint64  !Word64  (Maybe i)
   | Integer !Integer (Maybe i)
+  | Natural !Natural (Maybe i)
 
   | Float16 !Half       (Maybe i)
   | Float32 !Float      (Maybe i)
@@ -98,6 +100,9 @@ uint64 x = Uint64 x Nothing
 
 integer :: Integer -> Val i
 integer x = Integer x Nothing
+
+natural :: Natural -> Val i
+natural x = Natural x Nothing
 
 float16 :: Half -> Val i
 float16 x = Float16 x Nothing
