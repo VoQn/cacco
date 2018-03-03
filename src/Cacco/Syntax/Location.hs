@@ -48,13 +48,12 @@ makeLenses ''Location
 
 -- | Constant initial location (startLine 1, startColumn 1, endLine 1, endColumn 1)
 initLocation :: Location
-initLocation =
-  Location {
-    _sourceName = "",
-    _startLine = 1,
-    _startColumn = 1,
-    _endLine = 1,
-    _endColumn = 1
+initLocation = Location
+  { _sourceName  = ""
+  , _startLine   = 1
+  , _startColumn = 1
+  , _endLine     = 1
+  , _endColumn   = 1
   }
 
 fromPositions :: Position -> Position -> Location
@@ -68,11 +67,11 @@ fromPositions a b
     (start, end) = uncurry min &&& uncurry max $ (a, b)
     location :: Location
     location = initLocation
-      & sourceName .~ start ^. P.sourceName
-      & startLine .~ start ^. P.line
-      & startColumn .~ start ^. P.column
-      & endLine .~  end ^. P.line
-      & endColumn .~ end ^.  P.column
+              & sourceName  .~ start ^. P.sourceName
+              & startLine   .~ start ^. P.line
+              & startColumn .~ start ^. P.column
+              & endLine     .~ end   ^. P.line
+              & endColumn   .~ end   ^. P.column
     {-# INLINE location #-}
 
 toPositions :: Location -> (Position, Position)
@@ -83,15 +82,15 @@ toPositions l = (start, end)
     {-# INLINE src #-}
     start :: Position
     start = P.initPosition
-        & P.sourceName .~ src
-        & P.line .~ l ^. startLine
-        & P.column .~ l ^. startColumn
+          & P.sourceName .~ src
+          & P.line       .~ l ^. startLine
+          & P.column     .~ l ^. startColumn
     {-# INLINE start #-}
     end :: Position
     end = P.initPosition
         & P.sourceName .~ src
-        & P.line .~ l ^. endLine
-        & P.column .~ l ^. endColumn
+        & P.line       .~ l ^. endLine
+        & P.column     .~ l ^. endColumn
     {-# INLINE end #-}
 
 instance Pretty Location where
@@ -100,7 +99,7 @@ instance Pretty Location where
       name :: Doc ann
       name
         | null _sourceName = "(unknown)"
-        | otherwise = pretty _sourceName
+        | otherwise        = pretty _sourceName
       {-# INLINE name #-}
       pos :: Pretty p => p -> p -> Doc ann
       pos l' c' = let [l, c] = pretty <$> [l', c'] in l <> "," <> c
