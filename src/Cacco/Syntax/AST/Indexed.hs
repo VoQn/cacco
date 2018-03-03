@@ -10,7 +10,7 @@
 {-# LANGUAGE TypeFamilies       #-}
 {-# LANGUAGE TypeOperators      #-}
 
-module Cacco.Syntax.AST where
+module Cacco.Syntax.AST.Indexed where
 --
 import           Data.Typeable        (Typeable)
 import           GHC.Generics         (Generic)

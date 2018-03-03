@@ -9,19 +9,19 @@
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TypeOperators         #-}
 
-module Cacco.Eval2 where
+module Cacco.Eval.Indexed where
 
 import           Control.Monad.Except
 import           Control.Monad.Identity
 import           Control.Monad.State
-import qualified Data.Map               as Map
-import           Data.Typeable          (Typeable)
+import qualified Data.Map                 as Map
+import           Data.Typeable            (Typeable)
 
-import           Cacco.Syntax.AST
-import           Cacco.Syntax.Literal   (Literal)
-import qualified Cacco.Syntax.Literal   as Literal
-import           Data.IxAnn             ()
-import           Data.IxFix             ()
+import           Cacco.Syntax.AST.Indexed
+import           Cacco.Syntax.Literal     (Literal)
+import qualified Cacco.Syntax.Literal     as Literal
+import           Data.IxAnn               ()
+import           Data.IxFix               ()
 
 
 -- Value

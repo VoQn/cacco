@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Cacco.Parser.ASTSpec where
+module Cacco.Parser.AST.IndexedASTParserSpec where
 
 import           Test.Tasty.Hspec
-import qualified Text.Megaparsec         as MP
+import qualified Text.Megaparsec                 as MP
 
-import qualified Data.IxAnn              as IxAnn
+import qualified Data.IxAnn                      as IxAnn
 
-import           Cacco.Syntax.AST
+import           Cacco.Syntax.AST.Indexed
 import           Cacco.Syntax.Literal
-import           Cacco.Syntax.Parser.AST
+import           Cacco.Syntax.Parser.AST.Indexed
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 

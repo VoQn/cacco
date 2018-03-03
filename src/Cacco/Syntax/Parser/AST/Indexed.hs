@@ -6,14 +6,14 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators       #-}
 
-module Cacco.Syntax.Parser.AST where
+module Cacco.Syntax.Parser.AST.Indexed where
 
 import           Text.Megaparsec
 
 import           Data.IxAnn
 import           Data.IxFix
 
-import           Cacco.Syntax.AST
+import           Cacco.Syntax.AST.Indexed
 import           Cacco.Syntax.Location
 import           Cacco.Syntax.Parser.Internal
 import           Cacco.Syntax.Parser.Lexer
