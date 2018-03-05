@@ -17,6 +17,8 @@ dependencies:
   - megaparsec >=6 && <7
   - lens >=4.15 && <4.16
   - recursion-schemes >=5.0 && <6
+  - QuickCheck
+  - quickcheck-instances
 library:
   source-dirs: src
   ghc-options: -Wall -Wcompat

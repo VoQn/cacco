@@ -44,80 +44,80 @@ deriving instance Ord (AstIxProxy i)
 deriving instance Typeable (AstIxProxy i)
 
 data AstF (r :: AstIx -> *) (i :: AstIx) where
-  -- Atomic (Leaf Node of AST)
-  -- | Hole @_@
-  HoleF :: AstF r AstPatt
-  -- | 3 Dots @...@
-  DotsF :: AstF r AstPatt
-  -- | 'Literal'
-  LitF :: Literal -> AstIxProxy i -> AstF r i
-  -- | Variable
-  VarF :: String -> AstIxProxy i -> AstF r i
+    -- Atomic (Leaf Node of AST)
+    -- | Hole @_@
+    HoleF :: AstF r AstPatt
+    -- | 3 Dots @...@
+    DotsF :: AstF r AstPatt
+    -- | 'Literal'
+    LitF :: Literal -> AstIxProxy i -> AstF r i
+    -- | Variable
+    VarF :: String -> AstIxProxy i -> AstF r i
 
-  -- Collections
-  -- | Linked list
-  LisF :: [r i] -> AstF r i
+    -- Collections
+    -- | Linked list
+    LisF :: [r i] -> AstF r i
 
-  -- Fuctors
-  -- | if
-  IfF  :: r AstExpr -> r AstExpr -> r AstExpr -> AstF r AstExpr
-  -- | multyway if
-  MifF :: [(r AstExpr, r AstExpr)] -> r AstExpr -> AstF r AstExpr
-  -- | Apply function
-  AppF :: r i -> [r i] -> AstF r i
-  -- | Lambda (anonymous) function
-  LamF :: [r AstPatt] -> r AstExpr -> AstF r AstExpr
+    -- Fuctors
+    -- | if
+    IfF  :: r AstExpr -> r AstExpr -> r AstExpr -> AstF r AstExpr
+    -- | multyway if
+    MifF :: [(r AstExpr, r AstExpr)] -> r AstExpr -> AstF r AstExpr
+    -- | Apply function
+    AppF :: r i -> [r i] -> AstF r i
+    -- | Lambda (anonymous) function
+    LamF :: [r AstPatt] -> r AstExpr -> AstF r AstExpr
 
-  -- Declarations
-  -- | Declare type bind
-  DecF :: String -> [r AstType] -> AstF r AstDecl
-  -- | Define function or constants
-  DefF :: r AstPatt -> r AstExpr -> AstF r AstDecl
-
-deriving instance forall (r :: AstIx -> *) (i :: AstIx).
-  ( Show (r AstExpr)
-  , Show (r AstPatt)
-  , Show (r AstDecl)
-  , Show (r AstType)
-  , Show (r i)
-  ) => Show (AstF r i)
+    -- Declarations
+    -- | Declare type bind
+    DecF :: String -> [r AstType] -> AstF r AstDecl
+    -- | Define function or constants
+    DefF :: r AstPatt -> r AstExpr -> AstF r AstDecl
 
 deriving instance forall (r :: AstIx -> *) (i :: AstIx).
-  ( Eq (r AstExpr)
-  , Eq (r AstPatt)
-  , Eq (r AstDecl)
-  , Eq (r AstType)
-  , Eq (r i)
-  ) => Eq (AstF r i)
+    ( Show (r AstExpr)
+    , Show (r AstPatt)
+    , Show (r AstDecl)
+    , Show (r AstType)
+    , Show (r i)
+    ) => Show (AstF r i)
 
 deriving instance forall (r :: AstIx -> *) (i :: AstIx).
-  ( Typeable (r AstExpr)
-  , Typeable (r AstPatt)
-  , Typeable (r AstDecl)
-  , Typeable (r AstType)
-  , Typeable (r i)
-  ) => Typeable (AstF r i)
+    ( Eq (r AstExpr)
+    , Eq (r AstPatt)
+    , Eq (r AstDecl)
+    , Eq (r AstType)
+    , Eq (r i)
+    ) => Eq (AstF r i)
+
+deriving instance forall (r :: AstIx -> *) (i :: AstIx).
+    ( Typeable (r AstExpr)
+    , Typeable (r AstPatt)
+    , Typeable (r AstDecl)
+    , Typeable (r AstType)
+    , Typeable (r i)
+    ) => Typeable (AstF r i)
 
 instance IxFunctor AstF where
-  imap = imapDefault
+    imap = imapDefault
 
 instance IxFoldable AstF where
-  ifoldMap = ifoldMapDefault
+    ifoldMap = ifoldMapDefault
 
 instance IxTraversable AstF where
-  itraverse f ast = case ast of
-      HoleF        -> pure HoleF
-      DotsF        -> pure DotsF
-      VarF v i     -> VarF <$> pure v <*> pure i
-      LitF v i     -> LitF <$> pure v <*> pure i
-      LisF vs      -> LisF <$> mapList f vs
-      IfF  c t e   -> IfF  <$> f c  <*> f t <*> f e
-      AppF fn args -> AppF <$> f fn <*> mapList f args
-      LamF ps expr -> LamF <$> mapList f ps <*> f expr
-      DecF v ts    -> DecF <$> pure v <*> mapList f ts
-      DefF n v     -> DefF <$> f n <*> f v
-    where
-      mapList fn xs = sequenceA $ fn <$> xs
+    itraverse f ast = case ast of
+        HoleF        -> pure HoleF
+        DotsF        -> pure DotsF
+        VarF v i     -> VarF <$> pure v <*> pure i
+        LitF v i     -> LitF <$> pure v <*> pure i
+        LisF vs      -> LisF <$> mapList f vs
+        IfF  c t e   -> IfF  <$> f c  <*> f t <*> f e
+        AppF fn args -> AppF <$> f fn <*> mapList f args
+        LamF ps expr -> LamF <$> mapList f ps <*> f expr
+        DecF v ts    -> DecF <$> pure v <*> mapList f ts
+        DefF n v     -> DefF <$> f n <*> f v
+      where
+        mapList fn xs = sequenceA $ fn <$> xs
 
 type Ast = IxFix AstF
 
