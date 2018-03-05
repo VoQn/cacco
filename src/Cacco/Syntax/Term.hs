@@ -66,12 +66,12 @@ instance Pretty Term where
         Unit       -> "()"
         Bool True  -> "true"
         Bool False -> "false"
-        Symbol  n  -> pretty n
-        Int8 x     -> pretty x <> "_i8"
+        Symbol n   -> pretty n
+        Int8  x    -> pretty x <> "_i8"
         Int16 x    -> pretty x <> "_i16"
         Int32 x    -> pretty x <> "_i32"
         Int64 x    -> pretty x <> "_i64"
-        Uint8 x    -> pretty x <> "_u8"
+        Uint8  x   -> pretty x <> "_u8"
         Uint16 x   -> pretty x <> "_u16"
         Uint32 x   -> pretty x <> "_u32"
         Uint64 x   -> pretty x <> "_u64"
