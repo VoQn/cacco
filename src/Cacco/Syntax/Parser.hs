@@ -22,10 +22,10 @@ import           Text.Megaparsec              (between, choice, eof, many,
                                                parse, parseTest, try, (<|>))
 
 
-import           Data.Ann                     (AnnF (..))
+import           Data.Ann                     (Ann, AnnF (..))
 import qualified Data.Ann                     as Ann
 
-import           Cacco.Syntax.Expr            (Ast, AstF (..), Expr)
+import           Cacco.Syntax.Expr            (Ast, AstF (..))
 import           Cacco.Syntax.Location        (Location)
 import           Cacco.Syntax.Parser.Internal (ParseError, Parser)
 import           Cacco.Syntax.Parser.Lexer
@@ -73,10 +73,10 @@ ast p = lexeme $ choice
   , brackets $ lis p
   ]
 
-expr :: Parser (Expr Location)
+expr :: Parser (Ann Location AstF)
 expr = fixParser $ addLocation . ast
 
-topLevel :: Parser [Expr Location]
+topLevel :: Parser [Ann Location AstF]
 topLevel = many expr
 
 type SourceName = String
@@ -89,10 +89,10 @@ frontend p []   = frontend p "<stdin>"
 frontend p name = parse (contents p) name
 
 parseAst :: FontendParser Ast
-parseAst = frontend $ (cata embed) . Ann.remove <$> expr
+parseAst = frontend $ cata embed . Ann.remove <$> expr
 
-parseExpr :: FontendParser (Expr Location)
+parseExpr :: FontendParser (Ann Location AstF)
 parseExpr = frontend expr
 
-parseTopLevel :: FontendParser [Expr Location]
+parseTopLevel :: FontendParser [Ann Location AstF]
 parseTopLevel = frontend topLevel

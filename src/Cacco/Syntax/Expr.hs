@@ -19,8 +19,6 @@ import           Data.Functor.Foldable.TH
 import           Data.Typeable            (Typeable)
 import           GHC.Generics             (Generic)
 
-import           Data.Ann
-
 import           Cacco.Syntax.Literal     (Literal)
 
 -- | Abstruct syntax tree of Cacco language
@@ -50,4 +48,3 @@ data Ast
 
 makeBaseFunctor ''Ast
 
-type Expr i = Ann i AstF

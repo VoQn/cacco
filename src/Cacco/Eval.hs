@@ -13,13 +13,13 @@ import qualified Control.Monad.State    as State
 import           Data.Functor.Foldable
 import           Data.Scientific        (toRealFloat)
 
-import           Data.Ann               (unAnnF)
+import           Data.Ann               (Ann, unAnnF)
 
 import           Cacco.Env              (Env)
 import qualified Cacco.Env              as Env
 import           Cacco.Error            (Error (..))
 import qualified Cacco.Error            as Err
-import           Cacco.Syntax.Expr      (AstF (..), Expr)
+import           Cacco.Syntax.Expr      (AstF (..))
 import qualified Cacco.Syntax.Literal   as Lit
 import           Cacco.Val              (Val (..), pretty)
 import qualified Cacco.Val              as Val
@@ -90,5 +90,5 @@ apply :: Val i -> [Val i] -> Either (Error i) (Val i)
 apply (Builtin func _) args = func args
 apply v _ = throwError $ CanNotCallAsFunction (pretty v) Nothing
 
-eval :: Expr i -> Env (Val i) -> EvalResult i
+eval :: Ann i AstF -> Env (Val i) -> EvalResult i
 eval expr = runEval $ cata (evalAcc . unAnnF) expr

@@ -8,15 +8,16 @@ import           System.Console.Haskeline
 import           Cacco.Core               (builtin)
 import           Cacco.Env                (Env, initAmb, localScope)
 import           Cacco.Eval               (eval)
-import           Cacco.Syntax.Expr        (Expr)
+import           Cacco.Syntax.Expr        (AstF)
 import           Cacco.Syntax.Location    (Location)
 import           Cacco.Syntax.Parser      (parseTopLevel)
 import           Cacco.Val                (Val, pretty)
+import           Data.Ann                 (Ann)
 
 prelude :: Env (Val Location)
 prelude = initAmb { localScope = builtin }
 
-evalPrint :: Env (Val Location) -> [Expr Location] -> IO (Env (Val Location))
+evalPrint :: Env (Val Location) -> [Ann Location AstF] -> IO (Env (Val Location))
 evalPrint env [] = return env
 evalPrint env (expr:rest) = do
     let (result, env') = eval expr env
