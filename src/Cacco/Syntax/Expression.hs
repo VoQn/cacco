@@ -237,14 +237,16 @@ instance IRecursive Expression where
     iproject (DefineFunction p ss r) = DefineFunctionF p ss r
 
 instance ICorecursive Expression where
-    iembed (TermF t i)        = Term t i
-    iembed (ListF es)         = List es
-    iembed (KeyValueF kv)     = KeyValue kv
-    iembed (ApplyF fn as)     = Apply fn as
-    iembed (LambdaF as ds e)  = Lambda as ds e
-    iembed (IfF c t e)        = If c t e
-    iembed (MultiwayIfF ps o) = MultiwayIf ps o
-    iembed (DeclareF t e)     = Declare t e
+    iembed (TermF t i)              = Term t i
+    iembed (ListF es)               = List es
+    iembed (KeyValueF kv)           = KeyValue kv
+    iembed (ApplyF fn as)           = Apply fn as
+    iembed (LambdaF as ds e)        = Lambda as ds e
+    iembed (IfF c t e)              = If c t e
+    iembed (MultiwayIfF ps o)       = MultiwayIf ps o
+    iembed (DeclareF t e)           = Declare t e
+    iembed (DefineConstantF v e)    = DefineConstant v e
+    iembed (DefineFunctionF p ss r) = DefineFunction p ss r
 
 instance Pretty (Expression i) where
     pretty = icata' alg
@@ -296,7 +298,7 @@ expressionDepth :: Expression i -> Int
 expressionDepth = icata' alg where
     alg :: ExpressionF (Const Int) ~>. Int
     alg (TermF _ _)             = 1
-    alg (ListF xs)              = 1 + maximum $ getConst <$> xs
-    alg (KeyValueF kv)          = 1 + maximum $ (snd >>> getConst) <$> kv
-    alg (ApplyF (Const f) args) = 1 + max f $ maximum $ getConst <$> args
+    alg (ListF xs)              = (1 +) $ maximum $ getConst <$> xs
+    alg (KeyValueF kv)          = (1 +) $ maximum $ (snd >>> getConst) <$> kv
+    alg (ApplyF (Const f) args) = (1 +) $ max f $ maximum $ getConst <$> args
 
