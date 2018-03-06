@@ -244,6 +244,7 @@ instance ICorecursive Expression where
     iembed (LambdaF as ds e)  = Lambda as ds e
     iembed (IfF c t e)        = If c t e
     iembed (MultiwayIfF ps o) = MultiwayIf ps o
+    iembed (DeclareF t e)     = Declare t e
 
 instance Pretty (Expression i) where
     pretty = icata' alg
@@ -251,36 +252,36 @@ instance Pretty (Expression i) where
         alg :: ExpressionF (Const (Doc ann)) ~>. Doc ann
         alg (TermF t _) = pretty t
 
-        alg (ListF es) = fuctor brackets $ sep $ getConst <$> es
+        alg (ListF es) = nestable brackets $ sep $ getConst <$> es
 
-        alg (KeyValueF kv) = fuctor braces $ sep $ prettyPair <$> kv
+        alg (KeyValueF kv) = nestable braces $ sep $ prettyPair <$> kv
 
-        alg (ApplyF (Const fn) args) = fuctor parens $
+        alg (ApplyF (Const fn) args) = nestable parens $
             (fn <+>) $ sep $ getConst <$> args
 
-        alg (LambdaF args decls (Const ret)) = fuctor parens $
+        alg (LambdaF args decls (Const ret)) = nestable parens $
             "|" <> sep (getConst <$> args) <> "|" <+> sep (getConst <$> decls) <+> ret
 
-        alg (IfF (Const c) (Const t) (Const e)) = fuctor parens $
+        alg (IfF (Const c) (Const t) (Const e)) = nestable parens $
             "if" <+> sep [c, t, e]
 
-        alg (MultiwayIfF cs (Const o)) = fuctor parens $
+        alg (MultiwayIfF cs (Const o)) = nestable parens $
             ("if" <+>) $ sep $ (casePair <$> cs) ++ [prettyOtherWise o]
 
-        alg (CaseF (Const t) ps (Const o)) = fuctor parens $
+        alg (CaseF (Const t) ps (Const o)) = nestable parens $
             ("case" <+> t <+>) $ sep $ (casePair <$> ps) ++ [prettyOtherWise o]
 
-        alg (DeclareF (Const f) (Const t)) = fuctor parens $
+        alg (DeclareF (Const f) (Const t)) = nestable parens $
             ":" <+> f <+> t
 
-        alg (DefineConstantF (Const c) (Const e)) = fuctor parens $
+        alg (DefineConstantF (Const c) (Const e)) = nestable parens $
             "=" <+> c <+> e
 
-        alg (DefineFunctionF (Const p) decls (Const body)) = fuctor parens $
+        alg (DefineFunctionF (Const p) decls (Const body)) = nestable parens $
             ("=" <+> p <+>) $ sep $ (getConst <$> decls) ++ [body]
 
-        fuctor :: (Doc ann -> Doc ann) -> Doc ann -> Doc ann
-        fuctor closing f = nesting $ \l -> indent l $ closing $ indent 4 f
+        nestable :: (Doc ann -> Doc ann) -> Doc ann -> Doc ann
+        nestable closing f = nesting $ \l -> indent l $ closing $ indent 4 f
 
         prettyPair :: forall ann j. (String, Const (Doc ann) j) -> Doc ann
         prettyPair (key, value) = ":" <> pretty key <+> getConst value
@@ -294,7 +295,8 @@ instance Pretty (Expression i) where
 expressionDepth :: Expression i -> Int
 expressionDepth = icata' alg where
     alg :: ExpressionF (Const Int) ~>. Int
-    alg (TermF _ _)    = 1
-    alg (ListF xs)     = maximum (getConst <$> xs) + 1
-    alg (KeyValueF kv) = maximum ((snd >>> getConst) <$> kv) + 1
+    alg (TermF _ _)             = 1
+    alg (ListF xs)              = 1 + maximum $ getConst <$> xs
+    alg (KeyValueF kv)          = 1 + maximum $ (snd >>> getConst) <$> kv
+    alg (ApplyF (Const f) args) = 1 + max f $ maximum $ getConst <$> args
 
