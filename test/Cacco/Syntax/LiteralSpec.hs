@@ -73,7 +73,7 @@ spec_instance_of_Pretty = do
   it "Integer 1 => -1" $
     (show . pretty) (Integer (-1)) `shouldBe` "-1"
   it "Numeric 1 => 1" $
-    (show . pretty) (Numeric 1) `shouldBe` "1"
+    (show . pretty) (Natural 1) `shouldBe` "1"
   it "Float 16 => 1.0_f16" $
     (show . pretty) (Float16 1) `shouldBe` "1.0_f16"
   it "Float 32 => 1.0_f32" $

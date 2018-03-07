@@ -70,18 +70,18 @@ spec_minus_operator = describe "operator (-)" $ do
     evalTest "(- 1)" `shouldBe` Right (Val.integer (-1))
 
   it "eval (- 1 1) => 0" $
-    evalTest "(- 1 1)" `shouldBe` Right (Val.integer 0)
+    evalTest "(- 1 1)" `shouldBe` Right (Val.natural 0)
 
 spec_plus_operator :: Spec
 spec_plus_operator = describe "operator (+)" $ do
   it "eval (+ 1) => 1" $
-    evalTest "(+ 1)" `shouldBe` Right (Val.integer 1)
+    evalTest "(+ 1)" `shouldBe` Right (Val.natural 1)
 
   it "eval (+ 1 2) => 3" $
-    evalTest "(+ 1 2)" `shouldBe` Right (Val.integer 3)
+    evalTest "(+ 1 2)" `shouldBe` Right (Val.natural 3)
 
   it "eval (+ 1 2 3 4 5) => 15" $
-    evalTest "(+ 1 2 3)" `shouldBe` Right (Val.integer 6)
+    evalTest "(+ 1 2 3)" `shouldBe` Right (Val.natural 6)
 
   it "eval (+ 0.1 0.2 0.3 0.4) => 1.0" $
     evalTest "(+ 0.1 0.2 0.3 0.4)" `shouldBe` Right (Val.flonum 1)
@@ -107,7 +107,7 @@ spec_plus_operator = describe "operator (+)" $ do
 spec_multiply_operator :: Spec
 spec_multiply_operator = describe "operator (*)" $ do
   it "eval (* 1 2 3 4 5) => 120" $
-    evalTest "(* 1 2 3 4 5)" `shouldBe` Right (Val.integer 120)
+    evalTest "(* 1 2 3 4 5)" `shouldBe` Right (Val.natural 120)
 
   it "eval (* 2.0_f16 0.5_f16) => 1.0_f16" $
     evalTest "(* 2.0_f16 0.5_f16)" `shouldBe` Right (Val.float16 1)

@@ -121,8 +121,11 @@ decimalLiteral :: Parser Literal
 decimalLiteral = do
     (s, f) <- signed
     n      <- decimal
-    option (Integer $ f n) $ trail s f n
+    option (defaultWrapper s f n) $ trail s f n
   where
+    defaultWrapper True f = Integer . f
+    defaultWrapper ____ _ = Natural . fromInteger
+    {-# INLINE defaultWrapper #-}
     trail s f n
       = decimalPoint' f n
       <|> expo f n
@@ -145,15 +148,15 @@ decimalLiteral = do
     suffixF = char '_' >> float
     {-# INLINE suffixF #-}
 
-    suffixI True  = char '_' >> signedInt <|> float'
-    suffixI False = char '_' >> unsignedInt <|> signedInt <|> float'
+    suffixI True = char '_' >> signedInt <|> float'
+    suffixI ____ = char '_' >> unsignedInt <|> signedInt <|> float'
     {-# INLINE suffixI #-}
 {-# INLINEABLE decimalLiteral #-}
 
 hexLiteral :: Parser Literal
 hexLiteral = do
     n <- hexadecimal
-    w <- option Integer $ char '_' >> unsignedInt <|> signedInt
+    w <- option (Natural . fromInteger) $ char '_' >> unsignedInt <|> signedInt
     return $ w n
 {-# INLINEABLE hexLiteral #-}
 
@@ -193,74 +196,44 @@ numeric :: Parser Literal
 numeric = try positional <|> decimalLiteral
   where
     positional = do
-      void $ char '0'
-      octalOrBinary <|> hexLiteral
+        void $ char '0'
+        octalOrBinary <|> hexLiteral
     {-# INLINE positional #-}
 
     octalOrBinary = do
-      n <- octal <|> binary
-      w <- option Integer $ char '_' >> unsignedInt <|> signedInt
-      return $ w n
+        n <- octal <|> binary
+        w <- option (Natural . fromInteger) $ char '_' >> unsignedInt <|> signedInt
+        return $ w n
     {-# INLINE octalOrBinary #-}
 
 -- | parse signed-integer-type suffix
 signedInt :: Parser (Integer -> Literal)
-signedInt = char 'i' >> choice [i8, i16, i32, i64]
+signedInt = char 'i' >> choice
+    [ symbol "8"  $> Int8
+    , symbol "16" $> Int16
+    , symbol "32" $> Int32
+    , symbol "64" $> Int64
+    ]
 {-# INLINEABLE signedInt #-}
 
 -- | parse unsigned-integer-type suffix
 unsignedInt :: Parser (Integer -> Literal)
-unsignedInt = char 'u' >> choice [u8, u16, u32, u64]
+unsignedInt = char 'u' >> choice
+    [ symbol "8"  $> Uint8  . fromInteger
+    , symbol "16" $> Uint16 . fromInteger
+    , symbol "32" $> Uint32 . fromInteger
+    , symbol "64" $> Uint64 . fromInteger
+    ]
 {-# INLINEABLE unsignedInt #-}
 
 float :: Parser (Scientific -> Literal)
-float = char 'f' >> choice [f16, f32, f64]
+float = char 'f' >> choice
+    [ symbol "16" $> Float16
+    , symbol "32" $> Float32
+    , symbol "64" $> Float64
+    ]
 {-# INLINEABLE float #-}
 
 float' :: Parser (Integer -> Literal)
 float' = (. fromInteger) <$> float
 {-# INLINEABLE float' #-}
-
-i8 :: Parser (Integer -> Literal)
-i8  = symbol "8" $> Int8
-{-# INLINE i8 #-}
-
-i16 :: Parser (Integer -> Literal)
-i16 = symbol "16" $> Int16
-{-# INLINE i16 #-}
-
-i32 :: Parser (Integer -> Literal)
-i32 = symbol "32" $> Int32
-{-# INLINE i32 #-}
-
-i64 :: Parser (Integer -> Literal)
-i64 = symbol "64" $> Int64
-{-# INLINE i64 #-}
-
-u8 :: Parser (Integer -> Literal)
-u8  = symbol "8" $> Uint8 . fromInteger
-{-# INLINE u8 #-}
-
-u16 :: Parser (Integer -> Literal)
-u16 = symbol "16" $> Uint16 . fromInteger
-{-# INLINE u16 #-}
-
-u32 :: Parser (Integer -> Literal)
-u32 = symbol "32" $> Uint32 . fromInteger
-{-# INLINE u32 #-}
-
-u64 :: Parser (Integer -> Literal)
-u64 = symbol "64" $> Uint64 . fromInteger
-{-# INLINE u64 #-}
-
-f16 :: Parser (Scientific -> Literal)
-f16 = symbol "16" $> Float16
-{-# INLINE f16 #-}
-
-f32 :: Parser (Scientific -> Literal)
-f32 = symbol "32" $> Float32
-{-# INLINE f32 #-}
-
-f64 :: Parser (Scientific -> Literal)
-f64 = symbol "64" $> Float64
-{-# INLINE f64 #-}

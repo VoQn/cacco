@@ -27,7 +27,7 @@ spec_declAst = do
       declParser "(= x 10)" `shouldBe` Right
         (Def
           (Var "x" PattProxy)
-          (Lit (Integer 10) ExprProxy))
+          (Lit (Natural 10) ExprProxy))
 
     it "(= [error result] (requiest url))" $
       declParser "(= [error result] (request url))" `shouldBe` Right
@@ -66,8 +66,8 @@ spec_exprAst = do
     it "(if true 0 1)" $
       exprParser "(if true 0 1)" `shouldBe` Right
         (If (Lit (Bool True) ExprProxy)
-            (Lit (Integer 0) ExprProxy)
-            (Lit (Integer 1) ExprProxy))
+            (Lit (Natural 0) ExprProxy)
+            (Lit (Natural 1) ExprProxy))
   --
   context "apply function" $ do
     it "(+ x 1)" $
@@ -75,15 +75,15 @@ spec_exprAst = do
         (App
           (Var "+" ExprProxy)
           [Var "x" ExprProxy,
-           Lit (Integer 1) ExprProxy
+           Lit (Natural 1) ExprProxy
           ])
     it "(null? [1 2 3])" $
       exprParser "(null? [1 2 3])" `shouldBe` Right
         (App
           (Var "null?" ExprProxy)
-          [Lis [ Lit (Integer 1) ExprProxy
-               , Lit (Integer 2) ExprProxy
-               , Lit (Integer 3) ExprProxy
+          [Lis [ Lit (Natural 1) ExprProxy
+               , Lit (Natural 2) ExprProxy
+               , Lit (Natural 3) ExprProxy
                ]
           ])
 

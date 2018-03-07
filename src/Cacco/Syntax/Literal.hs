@@ -33,7 +33,7 @@ data Literal
   | Uint16  Natural
   | Uint32  Natural
   | Uint64  Natural
-  | Numeric Natural
+  | Natural Natural
 
   -- Floating point numbers
   | Float16 Scientific
@@ -62,7 +62,7 @@ instance Pretty Literal where
     Uint32 x   -> pretty x <> "_u32"
     Uint64 x   -> pretty x <> "_u64"
     Integer x  -> (if x < 0 then "" else "+") <> pretty x
-    Numeric x  -> pretty x
+    Natural x  -> pretty x
     Float16 x  -> pretty (show x) <> "_f16"
     Float32 x  -> pretty (show x) <> "_f32"
     Float64 x  -> pretty (show x) <> "_f64"

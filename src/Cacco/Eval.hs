@@ -51,7 +51,7 @@ evalLit l = case l of
     Lit.Uint32  x -> return $ Val.uint32  $ fromIntegral x
     Lit.Uint64  x -> return $ Val.uint64  $ fromIntegral x
     Lit.Integer x -> return $ Val.integer x
-    Lit.Numeric x -> return $ Val.natural x
+    Lit.Natural x -> return $ Val.natural x
     Lit.Float16 x -> return $ Val.float16 $ toRealFloat x
     Lit.Float32 x -> return $ Val.float32 $ toRealFloat x
     Lit.Float64 x -> return $ Val.float64 $ toRealFloat x

@@ -135,6 +135,7 @@ instance Eq (Val a) where
     (Uint32  x _, Uint32  y _) -> x == y
     (Uint64  x _, Uint64  y _) -> x == y
     (Integer x _, Integer y _) -> x == y
+    (Natural x _, Natural y _) -> x == y
     (Float16 x _, Float16 y _) -> x == y
     (Float32 x _, Float32 y _) -> x == y
     (Float64 x _, Float64 y _) -> x == y
@@ -159,6 +160,7 @@ instance (Show a) => Show (Val a) where
     Uint32  x i -> unwords ["Uint32",  show x, show i]
     Uint64  x i -> unwords ["Uint64",  show x, show i]
     Integer x i -> unwords ["Integer", show x, show i]
+    Natural x i -> unwords ["Numeric", show x, show i]
     Float16 x i -> unwords ["Float16", show x, show i]
     Float32 x i -> unwords ["Float32", show x, show i]
     Float64 x i -> unwords ["Float64", show x, show i]
@@ -184,6 +186,7 @@ info val = case val of
   Uint32  _ i -> i
   Uint64  _ i -> i
   Integer _ i -> i
+  Natural _ i -> i
   Float16 _ i -> i
   Float32 _ i -> i
   Float64 _ i -> i
@@ -209,6 +212,7 @@ setInfo i v = ($ i) $ case v of
   Uint32  x _ -> Uint32  x
   Uint64  x _ -> Uint64  x
   Integer x _ -> Integer x
+  Natural x _ -> Natural x
   Float16 x _ -> Float16 x
   Float32 x _ -> Float32 x
   Float64 x _ -> Float64 x
@@ -234,6 +238,7 @@ removeInfo val = ($ Nothing) $ case val of
   Uint32  x _ -> Uint32  x
   Uint64  x _ -> Uint64  x
   Integer x _ -> Integer x
+  Natural x _ -> Natural x
   Float16 x _ -> Float16 x
   Float32 x _ -> Float32 x
   Float64 x _ -> Float64 x
@@ -259,6 +264,7 @@ pretty val = case val of
   Uint32  x _ -> show x
   Uint64  x _ -> show x
   Integer x _ -> show x
+  Natural x _ -> show x
   Float16 x _ -> show x
   Float32 x _ -> show x
   Float64 x _ -> show x

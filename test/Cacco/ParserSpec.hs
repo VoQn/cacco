@@ -16,7 +16,7 @@ spec_parseAst =  do
   --
   it "can parse \"0xff\"" $
     testParse "0xff" `shouldBe` Right
-      (Lit $ Integer 0xff)
+      (Lit $ Natural 0xff)
   --
   it "can parse \"+1.0\"" $
     testParse "+1.0" `shouldBe` Right
@@ -47,13 +47,13 @@ spec_parseAst =  do
   --
   it "can parse \"(= x 100)\"" $
     testParse "(= x 100)" `shouldBe` Right
-      (Con (Sym "x") $ Lit $ Integer 100)
+      (Con (Sym "x") $ Lit $ Natural 100)
   --
   it "can parse \"(var x 100)\"" $
     testParse "(var x 100)" `shouldBe` Right
       (App (Sym "var")
         [ Sym "x"
-        , Lit $ Integer 100
+        , Lit $ Natural 100
         ])
   --
   it "can parse \"(var x 10.0)\"" $
@@ -67,7 +67,7 @@ spec_parseAst =  do
     testParse "(set! x 0)" `shouldBe` Right
       (App (Sym "set!")
         [ Sym "x"
-        , Lit $ Integer 0
+        , Lit $ Natural 0
         ])
   --
   it "can parse \"(foo true false\\n undefined 2)\"" $
@@ -77,7 +77,7 @@ spec_parseAst =  do
         , Lit $ Bool False
         , Lit Undef
         , Lit $ Text "hello"
-        , Lit $ Integer 2
+        , Lit $ Natural 2
         ])
   --
   it "can parse \"(+ +1 -2)\"" $
@@ -90,8 +90,8 @@ spec_parseAst =  do
   it "can parse \"(== 1 1)\"" $
     testParse "(== 1 1)" `shouldBe` Right
       (App (Sym "==")
-        [ Lit $ Integer 1
-        , Lit $ Integer 1
+        [ Lit $ Natural 1
+        , Lit $ Natural 1
         ])
   --
   it "can parse expression with ignoreing line comments" $

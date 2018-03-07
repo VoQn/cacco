@@ -17,7 +17,7 @@ spec_numeric :: Spec
 spec_numeric = do
   let testParse = parse numeric "<test>"
   it "can parse \"0\"" $
-    testParse "0" `shouldBe` Right (Integer 0)
+    testParse "0" `shouldBe` Right (Natural 0)
   --
   it "can parse \"-5\"" $
     testParse "-5" `shouldBe` Right (Integer (-5))
@@ -40,19 +40,19 @@ spec_with_digit_separater = do
   let testParse = parse numeric "<test>"
 
   it "1'234'567" $
-    testParse "1'234'567" `shouldBe` Right (Integer 1234567)
+    testParse "1'234'567" `shouldBe` Right (Natural 1234567)
   --
   it "1'2'3'4'5" $
-    testParse "1'2'3'4'5" `shouldBe` Right (Integer 12345)
+    testParse "1'2'3'4'5" `shouldBe` Right (Natural 12345)
   --
   it "0b11'00" $
-    testParse "0b11'00" `shouldBe` Right (Integer 12)
+    testParse "0b11'00" `shouldBe` Right (Natural 12)
   --
   it "0o123'456" $
-    testParse "0o123'456" `shouldBe` Right (Integer 0o123456)
+    testParse "0o123'456" `shouldBe` Right (Natural 0o123456)
   --
   it "0xfe'dc'ab'98'76" $
-    testParse "0xfedcab9876" `shouldBe` Right (Integer 0xfedcab9876)
+    testParse "0xfedcab9876" `shouldBe` Right (Natural 0xfedcab9876)
   --
 --
 spec_parse_strict_type_suffix :: Spec

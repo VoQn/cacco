@@ -17,6 +17,7 @@ import           Data.Scientific           (Scientific)
 import qualified Data.Text                 as Text
 import           Data.Word
 import           Numeric.Half              (Half)
+import           Numeric.Natural
 
 import           Cacco.Error               (Error (..))
 import qualified Cacco.Error.ArityMismatch as AME
@@ -137,6 +138,15 @@ untilInt name cond = go
       | otherwise       = go y rest
     go _ (unexpected:_) = Left $ typeMismatch name "Integer" unexpected
 
+untilNat :: Until Natural i
+untilNat name cond = go
+  where
+    go _ []             = return True
+    go x (Natural y _:rest)
+        | cond x y      = return False
+        | otherwise     = go y rest
+    go _ (unexpected:_) = Left $ typeMismatch name "Numeric" unexpected
+
 untilF16 :: Until Half i
 untilF16 name cond = go
   where
@@ -187,6 +197,7 @@ eq (value:rest) = Val.bool <$> case value of
     Uint32  x _ -> untilU32  `startWith` x
     Uint64  x _ -> untilU64  `startWith` x
     Integer x _ -> untilInt  `startWith` x
+    Natural x _ -> untilNat  `startWith` x
     Float16 x _ -> untilF16  `startWith` x
     Float32 x _ -> untilF32  `startWith` x
     Float64 x _ -> untilF64  `startWith` x
@@ -211,6 +222,7 @@ ne (v:vs) = Val.bool <$> case v of
     Uint32  x _ -> untilU32  `startWith` x
     Uint64  x _ -> untilU64  `startWith` x
     Integer x _ -> untilInt  `startWith` x
+    Natural x _ -> untilNat  `startWith` x
     Float16 x _ -> untilF16  `startWith` x
     Float32 x _ -> untilF32  `startWith` x
     Float64 x _ -> untilF64  `startWith` x
@@ -234,6 +246,7 @@ gt (v:vs) = Val.bool <$> case v of
     Uint32  x _ -> untilU32 `startWith` x
     Uint64  x _ -> untilU64 `startWith` x
     Integer x _ -> untilInt `startWith` x
+    Natural x _ -> untilNat `startWith` x
     Float16 x _ -> untilF16 `startWith` x
     Float32 x _ -> untilF32 `startWith` x
     Float64 x _ -> untilF64 `startWith` x
@@ -257,6 +270,7 @@ ge (v:vs) = Val.bool <$> case v of
     Uint32  x _ -> untilU32 `startWith` x
     Uint64  x _ -> untilU64 `startWith` x
     Integer x _ -> untilInt `startWith` x
+    Natural x _ -> untilNat `startWith` x
     Float16 x _ -> untilF16 `startWith` x
     Float32 x _ -> untilF32 `startWith` x
     Float64 x _ -> untilF64 `startWith` x
@@ -280,6 +294,7 @@ lt (v:vs) = Val.bool <$> case v of
     Uint32  x _ -> untilU32 `startWith` x
     Uint64  x _ -> untilU64 `startWith` x
     Integer x _ -> untilInt `startWith` x
+    Natural x _ -> untilNat `startWith` x
     Float16 x _ -> untilF16 `startWith` x
     Float32 x _ -> untilF32 `startWith` x
     Float64 x _ -> untilF64 `startWith` x
@@ -303,6 +318,7 @@ le (v:vs) = Val.bool <$> case v of
     Uint32  x _ -> untilU32 `startWith` x
     Uint64  x _ -> untilU64 `startWith` x
     Integer x _ -> untilInt `startWith` x
+    Natural x _ -> untilNat `startWith` x
     Float16 x _ -> untilF16 `startWith` x
     Float32 x _ -> untilF32 `startWith` x
     Float64 x _ -> untilF64 `startWith` x
@@ -376,6 +392,13 @@ accInt name bin = go
     go x (Integer y _:rest) = go (x `bin` y) rest
     go _ (unexpected:_)     = Left $ typeMismatch name "Integer" unexpected
 
+accNat :: Acc Natural i
+accNat name bin = go
+  where
+    go x []                 = return $ Val.natural x
+    go x (Natural y _:rest) = go (x `bin` y) rest
+    go _ (unexpected:_)     = Left $ typeMismatch name "Numeric" unexpected
+
 accF16 :: Acc Half i
 accF16 name bin = go
   where
@@ -416,6 +439,7 @@ add (v:vs) = case v of
     Uint32  x _ -> accU32 `startWith` x
     Uint64  x _ -> accU64 `startWith` x
     Integer x _ -> accInt `startWith` x
+    Natural x _ -> accNat `startWith` x
     Float16 x _ -> accF16 `startWith` x
     Float32 x _ -> accF32 `startWith` x
     Float64 x _ -> accF64 `startWith` x
@@ -436,6 +460,7 @@ sub [v] = ($ Nothing) <$> case v of
   Int32   x _ -> Int32   <$> pure (negate x)
   Int64   x _ -> Int64   <$> pure (negate x)
   Integer x _ -> Integer <$> pure (negate x)
+  Natural x _ -> Integer <$> pure (negate $ fromIntegral x)
   Float16 x _ -> Float16 <$> pure (negate x)
   Float32 x _ -> Float32 <$> pure (negate x)
   Float64 x _ -> Float64 <$> pure (negate x)
@@ -452,6 +477,7 @@ sub (v:vs) = case v of
     Uint32  x _ -> accU32 `startWith` x
     Uint64  x _ -> accU64 `startWith` x
     Integer x _ -> accInt `startWith` x
+    Natural x _ -> accNat `startWith` x
     Float16 x _ -> accF16 `startWith` x
     Float32 x _ -> accF32 `startWith` x
     Float64 x _ -> accF64 `startWith` x
@@ -474,6 +500,7 @@ mul (v:vs) = case v of
     Uint32  x _ -> accU32 `startWith` x
     Uint64  x _ -> accU64 `startWith` x
     Integer x _ -> accInt `startWith` x
+    Natural x _ -> accNat `startWith` x
     Float16 x _ -> accF16 `startWith` x
     Float32 x _ -> accF32 `startWith` x
     Float64 x _ -> accF64 `startWith` x
