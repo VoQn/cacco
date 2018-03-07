@@ -31,6 +31,4 @@ data IndexProxy (i :: Index) where
 deriving instance Show (IndexProxy i)
 deriving instance Eq (IndexProxy i)
 deriving instance Ord (IndexProxy i)
-deriving instance Typeable (IndexProxy i)
-deriving instance Data (IndexProxy i)
-instance NFData (IndexProxy i)
+deriving instance Typeable i => Typeable (IndexProxy i)
