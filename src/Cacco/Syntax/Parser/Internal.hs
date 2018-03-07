@@ -1,8 +1,8 @@
 module Cacco.Syntax.Parser.Internal
-  ( Parser
-  , ParseError
-  , locationFromSourcePos
-  ) where
+( Parser
+, ParseError
+, locationFromSourcePos
+) where
 
 import           Control.Lens          ((&), (.~))
 import           Data.Text             (Text)
@@ -22,9 +22,9 @@ type ParseError = MP.ParseError (Token Text) Void
 fromSourcePos :: SourcePos -> Position
 fromSourcePos p =
     initPosition
-      & P.sourceName .~ src
-      & P.line .~ line
-      & P.column .~ column
+        & P.sourceName .~ src
+        & P.line .~ line
+        & P.column .~ column
   where
     src :: FilePath
     src = Pos.sourceName p

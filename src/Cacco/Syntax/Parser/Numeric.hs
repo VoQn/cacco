@@ -103,8 +103,8 @@ decimalPoint c' = do
   where
     acc :: SP -> Char -> SP
     acc (SP a e') c =
-      let a' = a * 10 + fromIntegral (digitToInt c)
-      in SP a' $ e' - 1
+        let a' = a * 10 + fromIntegral (digitToInt c)
+        in SP a' $ e' - 1
     {-# INLINE acc #-}
 {-# INLINEABLE decimalPoint #-}
 
@@ -127,22 +127,22 @@ decimalLiteral = do
     defaultWrapper ____ _ = Natural . fromInteger
     {-# INLINE defaultWrapper #-}
     trail s f n
-      = decimalPoint' f n
-      <|> expo f n
-      <|> (($ f n) <$> suffixI s)
+        = decimalPoint' f n
+        <|> expo f n
+        <|> (($ f n) <$> suffixI s)
     {-# INLINE trail #-}
 
     decimalPoint' f n = do
-      SP c e' <- decimalPoint n
-      e       <- option e' $ exponent e'
-      w       <- option Flonum suffixF
-      return . w $ scientific (f c) e
+        SP c e' <- decimalPoint n
+        e       <- option e' $ exponent e'
+        w       <- option Flonum suffixF
+        return . w $ scientific (f c) e
     {-# INLINEABLE decimalPoint' #-}
 
     expo f n = do
-      e <- exponent 0
-      w <- option Flonum suffixF
-      return . w $ scientific (f n) e
+        e <- exponent 0
+        w <- option Flonum suffixF
+        return . w $ scientific (f n) e
     {-# INLINE expo #-}
 
     suffixF = char '_' >> float

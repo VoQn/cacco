@@ -21,7 +21,6 @@ import           Data.Text                    (Text)
 import           Text.Megaparsec              (between, choice, eof, many,
                                                parse, parseTest, try, (<|>))
 
-
 import           Data.Ann                     (AnnF (..))
 import qualified Data.Ann                     as Ann
 
@@ -42,13 +41,13 @@ fixParser f = fmap Fix $ f $ fixParser f
 
 addLocation :: Parser (f a) -> Parser (AnnF Location f a)
 addLocation p = do
-  (l, v) <- withLocation p
-  return $ AnnF (v, l)
+    (l, v) <- withLocation p
+    return $ AnnF (v, l)
 
 defForm :: forall f. Parser f -> Parser (AstF f)
 defForm p = do
-  reserved "=" <|> reserved "def"
-  ConF <$> p <*> p
+    reserved "=" <|> reserved "def"
+    ConF <$> p <*> p
 
 applyForm :: Parser f -> Parser (AstF f)
 applyForm p = AppF <$> p <*> many p
@@ -67,11 +66,11 @@ lis p = ListF <$> many p
 
 ast :: forall f. Parser f -> Parser (AstF f)
 ast p = lexeme $ choice
-  [ try lit
-  , sym
-  , parens $ fuctor p
-  , brackets $ lis p
-  ]
+    [ try lit
+    , sym
+    , parens $ fuctor p
+    , brackets $ lis p
+    ]
 
 expr :: Parser (Expr Location)
 expr = fixParser $ addLocation . ast
@@ -89,7 +88,7 @@ frontend p []   = frontend p "<stdin>"
 frontend p name = parse (contents p) name
 
 parseAst :: FontendParser Ast
-parseAst = frontend $ (cata embed) . Ann.remove <$> expr
+parseAst = frontend $ cata embed . Ann.remove <$> expr
 
 parseExpr :: FontendParser (Expr Location)
 parseExpr = frontend expr

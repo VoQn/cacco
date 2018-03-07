@@ -97,8 +97,8 @@ identifier = lexeme . try $ identifier' >>= check
 
     check :: String -> Parser String
     check x
-      | x `elem` keywords = conflictWithReserved x
-      | otherwise = return x
+        | x `elem` keywords = conflictWithReserved x
+        | otherwise = return x
     {-# INLINE check #-}
 
     conflictWithReserved x = fail $ "keyword " <> show x <> " cannot be an identifier"

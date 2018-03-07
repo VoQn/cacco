@@ -30,17 +30,17 @@ import qualified Cacco.Syntax.Position     as P
 
 -- | The abstract data type @Location@ hints source positions.
 data Location = Location
-  { -- | the name of the source-file or input.
-    _sourceName  :: FilePath,
-    -- | the start line number in the source-file or input.
-    _startLine   :: !Word,
-    -- | the start column number in the source-file or input.
-    _startColumn :: !Word,
-    -- | the end line number in the source-file or input.
-    _endLine     :: !Word,
-    -- | the end column number in the source-file or input.
-    _endColumn   :: !Word
-  } deriving (Eq, Ord, Show, Data, Typeable, Generic)
+    { _sourceName  :: FilePath
+    -- ^ the name of the source-file or input.
+    , _startLine   :: !Word
+    -- ^ the start line number in the source-file or input.
+    , _startColumn :: !Word
+    -- ^ the start column number in the source-file or input.
+    , _endLine     :: !Word
+    -- ^ the end line number in the source-file or input.
+    , _endColumn   :: !Word
+    -- ^ the end column number in the source-file or input.
+    } deriving (Eq, Ord, Show, Data, Typeable, Generic)
 
 instance NFData Location
 
@@ -49,12 +49,12 @@ makeLenses ''Location
 -- | Constant initial location (startLine 1, startColumn 1, endLine 1, endColumn 1)
 initLocation :: Location
 initLocation = Location
-  { _sourceName  = ""
-  , _startLine   = 1
-  , _startColumn = 1
-  , _endLine     = 1
-  , _endColumn   = 1
-  }
+    { _sourceName  = ""
+    , _startLine   = 1
+    , _startColumn = 1
+    , _endLine     = 1
+    , _endColumn   = 1
+    }
 
 fromPositions :: Position -> Position -> Location
 fromPositions a b
@@ -67,11 +67,11 @@ fromPositions a b
     (start, end) = uncurry min &&& uncurry max $ (a, b)
     location :: Location
     location = initLocation
-              & sourceName  .~ start ^. P.sourceName
-              & startLine   .~ start ^. P.line
-              & startColumn .~ start ^. P.column
-              & endLine     .~ end   ^. P.line
-              & endColumn   .~ end   ^. P.column
+            & sourceName  .~ start ^. P.sourceName
+            & startLine   .~ start ^. P.line
+            & startColumn .~ start ^. P.column
+            & endLine     .~ end   ^. P.line
+            & endColumn   .~ end   ^. P.column
     {-# INLINE location #-}
 
 toPositions :: Location -> (Position, Position)
@@ -82,31 +82,30 @@ toPositions l = (start, end)
     {-# INLINE src #-}
     start :: Position
     start = P.initPosition
-          & P.sourceName .~ src
-          & P.line       .~ l ^. startLine
-          & P.column     .~ l ^. startColumn
+            & P.sourceName .~ src
+            & P.line       .~ l ^. startLine
+            & P.column     .~ l ^. startColumn
     {-# INLINE start #-}
     end :: Position
     end = P.initPosition
-        & P.sourceName .~ src
-        & P.line       .~ l ^. endLine
-        & P.column     .~ l ^. endColumn
+            & P.sourceName .~ src
+            & P.line       .~ l ^. endLine
+            & P.column     .~ l ^. endColumn
     {-# INLINE end #-}
 
 instance Pretty Location where
-  pretty Location{..} = "(" <> name <> ":" <> start <> "-" <> end <> ")"
-    where
-      name :: Doc ann
-      name
-        | null _sourceName = "(unknown)"
-        | otherwise        = pretty _sourceName
-      {-# INLINE name #-}
-      pos :: Pretty p => p -> p -> Doc ann
-      pos l' c' = let [l, c] = pretty <$> [l', c'] in l <> "," <> c
-      {-# INLINE pos #-}
-      start :: Doc ann
-      start = pos _startLine _startColumn
-      {-# INLINE start #-}
-      end :: Doc ann
-      end = pos _endLine _endColumn
-      {-# INLINE end #-}
+    pretty Location{..} = "(" <> name _sourceName <> ":" <> start <> "-" <> end <> ")"
+      where
+        name :: FilePath -> Doc ann
+        name [] = "(unknown)"
+        name s  = pretty s
+        {-# INLINE name #-}
+        pos :: Pretty p => p -> p -> Doc ann
+        pos l' c' = let [l, c] = pretty <$> [l', c'] in l <> "," <> c
+        {-# INLINE pos #-}
+        start :: Doc ann
+        start = pos _startLine _startColumn
+        {-# INLINE start #-}
+        end :: Doc ann
+        end = pos _endLine _endColumn
+        {-# INLINE end #-}
