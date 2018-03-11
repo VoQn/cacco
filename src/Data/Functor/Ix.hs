@@ -167,9 +167,15 @@ some f (Some x) = f x
 -- Indexed Free
 -------------------------------------------------------------------------------
 
-data IxFree h f i where
-    IxPure :: f i -> IxFree h f i
-    IxFree :: h (IxFree h f) i -> IxFree h f i
+data IxFreeF f a b i where
+    IxPureF :: a i -> IxFreeF f a b i
+    IxFreeF :: f b i -> IxFreeF f a b i
+
+data IxFree f a i where
+    IxPure :: a i -> IxFree f a i
+    IxFree :: f (IxFree f a) i -> IxFree f a i
+
+type instance IxBase (IxFree f a) = (IxFreeF f a)
 
 instance IxFunctor f => IxFunctor (IxFree f) where
     imap f (IxPure a) = IxPure $ f a

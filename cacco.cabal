@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 76769ca8441cbf9ae4861dd35bcd619c455cbe3429eaac39b14aa90afba1bf7b
+-- hash: eb473a74b8d53da64866c7421ee00a83eaa3515b7b15fd68a6f1c96f22fb601e
 
 name:           cacco
 version:        0.1.0.0
@@ -53,6 +53,7 @@ library
       Cacco.Eval.Indexed
       Cacco.Inferencer
       Cacco.REPL
+      Cacco.Syntax.AST
       Cacco.Syntax.AST.Indexed
       Cacco.Syntax.Expr
       Cacco.Syntax.Index
@@ -122,6 +123,7 @@ test-suite test
       Cacco.Parser.LexerSpec
       Cacco.Parser.NumericSpec
       Cacco.ParserSpec
+      Cacco.Syntax.ASTSpec
       Cacco.Syntax.LiteralSpec
       Cacco.Syntax.LocationSpec
       Cacco.Syntax.PositionSpec
