@@ -17,8 +17,6 @@ dependencies:
     - megaparsec >=6 && <7
     - lens >=4.15 && <4.16
     - recursion-schemes >=5.0 && <6
-    - smallcheck >=1.1 && <2.0
-    - QuickCheck >=2.10 && <3.0
 library:
     source-dirs: src
     ghc-options: -Wall -Wcompat
@@ -53,4 +51,6 @@ tests:
             - tasty-hspec
             - tasty-quickcheck
             - tasty-smallcheck
+            - smallcheck >=1.1 && <2.0
+            - QuickCheck >=2.10 && <3.0
             - cacco
