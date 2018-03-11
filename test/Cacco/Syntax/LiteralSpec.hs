@@ -4,6 +4,8 @@ module Cacco.Syntax.LiteralSpec where
 
 import           Data.Text.Prettyprint.Doc (pretty)
 import           Test.Tasty.Hspec          (Spec, it, shouldBe)
+import Test.SmallCheck ((==>))
+import qualified Test.SmallCheck as SC
 
 import           Cacco.Syntax.Literal      (Literal (..))
 
@@ -22,6 +24,12 @@ spec_instance_of_Eq = do
 
 prop_Integer_equality :: Integer -> Bool
 prop_Integer_equality x = Integer x == Integer x
+
+scprop_instance_of_Eq :: Literal -> Literal -> Bool
+scprop_instance_of_Eq a b = a == b || a /= b
+
+scprop_instance_of_Show :: Monad m => Literal -> Literal -> SC.Property m
+scprop_instance_of_Show a b = a /= b ==> show [a] /= show [b]
 
 spec_instance_of_Show :: Spec
 spec_instance_of_Show = do
