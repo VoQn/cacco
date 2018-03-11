@@ -7,48 +7,50 @@ copyright: 2017 Kazuhiro Mizushima
 license: BSD3
 github: VoQn/cacco
 extra-source-files:
-- README.asciidoc
+    - README.asciidoc
 dependencies:
-  - base >=4.7 && <5
-  - text >=1.2 && <2
-  - prettyprinter >=1.1 && <2.0
-  - half >=0.2 && <1
-  - scientific >=0.3 && <0.4
-  - megaparsec >=6 && <7
-  - lens >=4.15 && <4.16
-  - recursion-schemes >=5.0 && <6
+    - base >=4.7 && <5
+    - text >=1.2 && <2
+    - prettyprinter >=1.1 && <2.0
+    - half >=0.2 && <1
+    - scientific >=0.3 && <0.4
+    - megaparsec >=6 && <7
+    - lens >=4.15 && <4.16
+    - recursion-schemes >=5.0 && <6
+    - smallcheck >=1.1 && <2.0
+    - QuickCheck >=2.10 && <3.0
 library:
-  source-dirs: src
-  ghc-options: -Wall -Wcompat
-  dependencies:
-  - vector
-  - deepseq >=1.4 && <2
-  - mtl >=2.2 && <3
-  - containers >=0.5 && <0.6
-  - haskeline >=0.7 && <0.8
+    source-dirs: src
+    ghc-options: -Wall -Wcompat
+    dependencies:
+        - vector
+        - deepseq >=1.4 && <2
+        - mtl >=2.2 && <3
+        - containers >=0.5 && <0.6
+        - haskeline >=0.7 && <0.8
 executables:
-  cacco:
-    main: Main.hs
-    source-dirs: app
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - base
-    - cacco
+    cacco:
+        main: Main.hs
+        source-dirs: app
+        ghc-options:
+            - -threaded
+            - -rtsopts
+            - -with-rtsopts=-N
+        dependencies:
+            - base
+            - cacco
 tests:
-  test:
-    main: Tasty.hs
-    source-dirs: test
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - tasty >=1.0 && <2.0
-    - tasty-discover >=4.0 && <5.0
-    - tasty-hspec
-    - tasty-quickcheck
-    - tasty-smallcheck
-    - cacco
+    test:
+        main: Tasty.hs
+        source-dirs: test
+        ghc-options:
+            - -threaded
+            - -rtsopts
+            - -with-rtsopts=-N
+        dependencies:
+            - tasty >=1.0 && <2.0
+            - tasty-discover >=4.0 && <5.0
+            - tasty-hspec
+            - tasty-quickcheck
+            - tasty-smallcheck
+            - cacco

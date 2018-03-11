@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: eb473a74b8d53da64866c7421ee00a83eaa3515b7b15fd68a6f1c96f22fb601e
+-- hash: 57a6af6ddc2d7dc2d3ed093f0ecf5474840a85b6bdaf14f90962b5451e7d0add
 
 name:           cacco
 version:        0.1.0.0
@@ -29,7 +29,8 @@ library
       src
   ghc-options: -Wall -Wcompat
   build-depends:
-      base >=4.7 && <5
+      QuickCheck >=2.10 && <3.0
+    , base >=4.7 && <5
     , containers >=0.5 && <0.6
     , deepseq >=1.4 && <2
     , half >=0.2 && <1
@@ -40,6 +41,7 @@ library
     , prettyprinter >=1.1 && <2.0
     , recursion-schemes >=5.0 && <6
     , scientific >=0.3 && <0.4
+    , smallcheck >=1.1 && <2.0
     , text >=1.2 && <2
     , vector
   exposed-modules:
@@ -83,7 +85,8 @@ executable cacco
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base
+      QuickCheck >=2.10 && <3.0
+    , base
     , cacco
     , half >=0.2 && <1
     , lens >=4.15 && <4.16
@@ -91,6 +94,7 @@ executable cacco
     , prettyprinter >=1.1 && <2.0
     , recursion-schemes >=5.0 && <6
     , scientific >=0.3 && <0.4
+    , smallcheck >=1.1 && <2.0
     , text >=1.2 && <2
   other-modules:
       Paths_cacco
@@ -103,7 +107,8 @@ test-suite test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      QuickCheck >=2.10 && <3.0
+    , base >=4.7 && <5
     , cacco
     , half >=0.2 && <1
     , lens >=4.15 && <4.16
@@ -111,6 +116,7 @@ test-suite test
     , prettyprinter >=1.1 && <2.0
     , recursion-schemes >=5.0 && <6
     , scientific >=0.3 && <0.4
+    , smallcheck >=1.1 && <2.0
     , tasty >=1.0 && <2.0
     , tasty-discover >=4.0 && <5.0
     , tasty-hspec
