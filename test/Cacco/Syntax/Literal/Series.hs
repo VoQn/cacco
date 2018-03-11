@@ -1,18 +1,18 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# OPTIONS_GHC -fno-warn-orphans  #-}
 
 module Cacco.Syntax.Literal.Series where
 
-import Data.Int
-import Data.Word
-import Numeric.Natural
-import Data.Scientific
-import Test.SmallCheck.Series
-import qualified Data.Text as T
+import           Data.Int
+import           Data.Scientific
+import qualified Data.Text               as T
+import           Data.Word
+import           Numeric.Natural
+import           Test.SmallCheck.Series
 
-import Test.SmallCheck.Numeric()
-import Cacco.Syntax.Literal
+import           Cacco.Syntax.Literal
+import           Test.SmallCheck.Numeric ()
 
 instance Monad m => Serial m Literal where
     series =
