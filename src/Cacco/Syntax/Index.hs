@@ -3,7 +3,6 @@
 {-# LANGUAGE DeriveGeneric      #-}
 {-# LANGUAGE GADTs              #-}
 {-# LANGUAGE KindSignatures     #-}
-{-# LANGUAGE PatternSynonyms    #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
 module Cacco.Syntax.Index where
@@ -21,6 +20,11 @@ data Index
     deriving (Eq, Ord, Show, Data, Typeable, Generic)
 
 instance NFData Index
+
+type Expr = 'Expr
+type Decl = 'Decl
+type Patt = 'Patt
+type Type = 'Type
 
 data IndexProxy (i :: Index) where
     ExprProxy :: IndexProxy 'Expr
