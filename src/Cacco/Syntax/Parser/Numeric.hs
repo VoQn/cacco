@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns      #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Cacco.Syntax.Parser.Numeric
@@ -44,24 +43,22 @@ binary = char 'b' >> foldl' acc 0 <$> withDigitSep bit
     bit = char '0' <|> char '1' <?> "0 or 1"
     -- | Accumulate boolean as bit-shift
     acc :: Integer -> Char -> Integer
-    acc 0  '0' = 0
-    acc 0  '1' = 1
-    acc !v '0' = v `shiftL` 1
-    acc !v '1' = v `shiftL` 1 + 1
-    acc _ _    = undefined
+    acc 0 '0' = 0
+    acc 0 '1' = 1
+    acc v '0' = v `shiftL` 1
+    acc v '1' = v `shiftL` 1 + 1
+    acc v c   = v `shiftL` 1 + fromIntegral (digitToInt c)
     {-# INLINE acc #-}
 {-# INLINEABLE binary #-}
 
 decimal :: Parser Integer
-decimal = do
-    ds <- withDigitSep digitChar
-    return $ foldl' acc 0 ds
+decimal = foldl' acc 0 <$> withDigitSep digitChar
   where
     acc :: Integer -> Char -> Integer
-    acc 0 '0'  = 0
-    acc 0 c    = fromIntegral $ digitToInt c
-    acc !v '0' = v * 10
-    acc !v c   = v * 10 + fromIntegral (digitToInt c)
+    acc 0 '0' = 0
+    acc 0 c   = fromIntegral $ digitToInt c
+    acc v '0' = v * 10
+    acc v c   = v * 10 + fromIntegral (digitToInt c)
     {-# INLINE acc #-}
 {-# INLINEABLE decimal #-}
 
@@ -72,10 +69,10 @@ octal = do
     return $ foldl' acc 0 ds
   where
     acc :: Integer -> Char -> Integer
-    acc 0 '0'  = 0
-    acc 0  c   = fromIntegral (digitToInt c)
-    acc !v '0' = v `shiftL` 3
-    acc !v c   = v `shiftL` 3 + fromIntegral (digitToInt c)
+    acc 0 '0' = 0
+    acc 0  c  = fromIntegral (digitToInt c)
+    acc v '0' = v `shiftL` 3
+    acc v c   = v `shiftL` 3 + fromIntegral (digitToInt c)
     {-# INLINE acc #-}
 {-# INLINEABLE octal #-}
 
@@ -86,10 +83,10 @@ hexadecimal = do
     return $ foldl' acc 0 ds
   where
     acc :: Integer -> Char -> Integer
-    acc 0 '0'  = 0
-    acc 0 c    = fromIntegral (digitToInt c)
-    acc !v '0' = v `shiftL` 4
-    acc !v c   = v `shiftL` 4 + fromIntegral (digitToInt c)
+    acc 0 '0' = 0
+    acc 0 c   = fromIntegral (digitToInt c)
+    acc v '0' = v `shiftL` 4
+    acc v c   = v `shiftL` 4 + fromIntegral (digitToInt c)
     {-# INLINE acc #-}
 {-# INLINEABLE hexadecimal #-}
 
@@ -115,7 +112,6 @@ exponent e' = do
     e <- decimal
     return $ fromInteger (f e) + e'
 {-# INLINEABLE exponent #-}
---
 
 decimalLiteral :: Parser Literal
 decimalLiteral = do
