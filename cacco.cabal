@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b4ace9938a69f192ec0cdfe6f7c29ade76ab4ea7e8783eecfbfa1e6a3d875845
+-- hash: 177998f417e80072a3c8c118a5b0db469f804174ad9547b085c28a29d98853e2
 
 name:           cacco
 version:        0.1.0.0
@@ -60,6 +60,7 @@ library
       Cacco.Syntax.Literal
       Cacco.Syntax.Location
       Cacco.Syntax.Parser
+      Cacco.Syntax.Parser.AST
       Cacco.Syntax.Parser.AST.Indexed
       Cacco.Syntax.Parser.Internal
       Cacco.Syntax.Parser.Lexer

@@ -22,7 +22,7 @@ instance IxTraversable t => IxTraversable (IxAnnF a t) where
 type IxAnn a t i = IxFix (IxAnnF a t) i
 
 --
-addAnn:: IxTraversable t => a -> IxFix t i -> IxAnn a t i
+addAnn :: IxTraversable t => a -> IxFix t i -> IxAnn a t i
 addAnn ann = cata $ In . IxAnnF . (,) ann
 
 getAnn :: IxTraversable t => IxAnn a t i -> a

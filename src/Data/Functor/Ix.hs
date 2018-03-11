@@ -10,7 +10,7 @@
 {-# LANGUAGE StandaloneDeriving        #-}
 {-# LANGUAGE TypeFamilies              #-}
 {-# LANGUAGE TypeOperators             #-}
-{-# LANGUAGE UndecidableInstances      #-}
+{-# LANGUAGE UndecidableInstances, PatternSynonyms      #-}
 
 module Data.Functor.Ix where
 
@@ -58,7 +58,13 @@ class IxFunctor (h :: (i -> *) -> (i -> *)) where
 
 -- | The product of indexed functors
 data (f :*: g) a = (:*:) { ifst :: f a, isnd :: g a }
+    deriving (Eq, Ord, Show, Read, Functor, Foldable, Traversable)
+
 infixr 6 :*:
+
+type (x :& g) = Const x :*: g
+pattern (:&) :: a -> f i -> (Const a :*: f) i
+pattern x :& g = Const x :*: g
 
 (&&&&) :: (f ~> g) -> (f ~> g') -> f ~> (g :*: g')
 (&&&&) u v x = u x :*: v x
@@ -180,3 +186,15 @@ type instance IxBase (IxFree f a) = (IxFreeF f a)
 instance IxFunctor f => IxFunctor (IxFree f) where
     imap f (IxPure a) = IxPure $ f a
     imap f (IxFree w) = IxFree $ imap f `imap` w
+
+instance IxFoldable f => IxFoldable (IxFree f) where
+    ifoldMap m (IxPure f) = m f
+    ifoldMap m (IxFree f) = ifoldMap (ifoldMap m) f
+
+instance IxTraversable f => IxTraversable (IxFree f) where
+    itraverse t (IxPure f) = IxPure <$> t f
+    itraverse t (IxFree f) = IxFree <$> itraverse (itraverse t) f
+
+ifree :: IxFreeF f a (IxFree f a) i -> IxFree f a i
+ifree (IxPureF a) = IxPure a
+ifree (IxFreeF f) = IxFree f
