@@ -5,12 +5,13 @@
 {-# LANGUAGE FlexibleContexts          #-}
 {-# LANGUAGE GADTs                     #-}
 {-# LANGUAGE KindSignatures            #-}
+{-# LANGUAGE PatternSynonyms           #-}
 {-# LANGUAGE PolyKinds                 #-}
 {-# LANGUAGE RankNTypes                #-}
 {-# LANGUAGE StandaloneDeriving        #-}
 {-# LANGUAGE TypeFamilies              #-}
 {-# LANGUAGE TypeOperators             #-}
-{-# LANGUAGE UndecidableInstances, PatternSynonyms      #-}
+{-# LANGUAGE UndecidableInstances      #-}
 
 module Data.Functor.Ix where
 
@@ -98,14 +99,14 @@ class IxFunctor (IxBase h) => IxCorecursive (h :: i -> *) where
     iana :: IxCoalgebra (IxBase h) f -> f ~> h
     iana g = iembed . imap (iana g) . g
 
-class IxFoldable (h :: (i -> *) -> l -> *) where
-    ifoldMap :: forall (f :: i -> *) (m :: *).
-                Monoid m => f ~>. m -> h f ~>. m
+class IxFoldable t where
+    ifoldMap :: Monoid m => f ~>. m -> t f ~>. m
 
-class IxFunctor h => IxTraversable h where
+class IxFunctor t => IxTraversable t where
     itraverse :: Applicative f
               => (forall i. a i -> f (b i))
-              -> (forall j. h a j -> f (h b j))
+              -> (forall j. t a j -> f (t b j))
+
 -------------------------------------------------------------------------------
 -- Indexed Fix
 -------------------------------------------------------------------------------
@@ -114,7 +115,7 @@ class IxFunctor h => IxTraversable h where
 newtype IxFix f i = IxFix (f (IxFix f) i)
 
 -- | unfix for 'IxFix' version
-iunfix :: IxFix f i -> f (IxFix f) i
+iunfix :: IxFix f ~> f (IxFix f)
 iunfix (IxFix f) = f
 
 deriving instance Eq (f (IxFix f) i) => Eq (IxFix f i)
@@ -158,7 +159,7 @@ class IxEq f => IxEqHet f where
     -- | heterogeneous equality
     ieqHet :: f a -> f b -> Maybe (a :=: b)
     ieqHet x y = case ieqIdx x y of
-        Just Refl | x `ieq` y -> Just Refl
+        Just Refl | ieq x y -> Just Refl
         _________ -> Nothing
 
 instance IxEq (f (IxFix f)) => IxEq (IxFix f) where
@@ -166,35 +167,80 @@ instance IxEq (f (IxFix f)) => IxEq (IxFix f) where
 
 data Some f = forall a. Some (f a)
 
-some :: (forall a. f a -> b) -> Some f -> b
+some :: f ~>. b -> Some f -> b
 some f (Some x) = f x
 
 -------------------------------------------------------------------------------
 -- Indexed Free
 -------------------------------------------------------------------------------
+-- | Indexed Free
+data IxFree h f i where
+    IxPure   :: f i -> IxFree h f i
+    IxImpure :: h (IxFree h f) i -> IxFree h f i
 
-data IxFreeF f a b i where
-    IxPureF :: a i -> IxFreeF f a b i
-    IxFreeF :: f b i -> IxFreeF f a b i
+instance (IxEq f, IxEq (h (IxFree h f))) => IxEq (IxFree h f) where
+    ieq (IxPure a) (IxPure b)     = ieq a b
+    ieq (IxImpure f) (IxImpure g) = ieq f g
+    ieq _ _                       = False
 
-data IxFree f a i where
-    IxPure :: a i -> IxFree f a i
-    IxFree :: f (IxFree f a) i -> IxFree f a i
+deriving instance (Eq (f i), Eq (h (IxFree h f) i)) => Eq (IxFree h f i)
+deriving instance (Show (f i), Show (h (IxFree h f) i)) => Show (IxFree h f i)
+deriving instance (Functor f, Functor (h (IxFree h f))) => Functor (IxFree h f)
+
+-- | Base Functor for Indexed Free
+data IxFreeF h f g i where
+    IxPureF   :: f i -> IxFreeF h f g i
+    IxImpureF :: h g i -> IxFreeF h f g i
 
 type instance IxBase (IxFree f a) = (IxFreeF f a)
 
+instance IxFunctor f => IxFunctor (IxFreeF f a) where
+    imap _ (IxPureF   a) = IxPureF a
+    imap f (IxImpureF h) = IxImpureF $ imap f h
+
+instance IxFunctor f => IxRecursive (IxFree f a) where
+    iproject (IxPure   f) = IxPureF f
+    iproject (IxImpure f) = IxImpureF f
+
+instance IxFunctor f => IxCorecursive (IxFree f a) where
+    iembed (IxPureF   f) = IxPure f
+    iembed (IxImpureF f) = IxImpure f
+
 instance IxFunctor f => IxFunctor (IxFree f) where
-    imap f (IxPure a) = IxPure $ f a
-    imap f (IxFree w) = IxFree $ imap f `imap` w
+    imap f (IxPure   a) = IxPure $ f a
+    imap f (IxImpure w) = IxImpure $ imap (imap f) w
 
 instance IxFoldable f => IxFoldable (IxFree f) where
-    ifoldMap m (IxPure f) = m f
-    ifoldMap m (IxFree f) = ifoldMap (ifoldMap m) f
+    ifoldMap f (IxPure   a) = f a
+    ifoldMap f (IxImpure w) = ifoldMap (ifoldMap f) w
 
 instance IxTraversable f => IxTraversable (IxFree f) where
-    itraverse t (IxPure f) = IxPure <$> t f
-    itraverse t (IxFree f) = IxFree <$> itraverse (itraverse t) f
+    itraverse f (IxPure   a) = IxPure <$> f a
+    itraverse f (IxImpure w) = IxImpure <$> itraverse (itraverse f) w
 
-ifree :: IxFreeF f a (IxFree f a) i -> IxFree f a i
-ifree (IxPureF a) = IxPure a
-ifree (IxFreeF f) = IxFree f
+ifree :: IxFreeF f a (IxFree f a) ~> IxFree f a
+ifree (IxPureF   a) = IxPure a
+ifree (IxImpureF f) = IxImpure f
+
+-------------------------------------------------------------------------------
+-- Indexed Cofree
+-------------------------------------------------------------------------------
+-- | Indexed Cofree
+data IxCofree h f i = (f i) :< (h (IxCofree h f) i)
+
+-- | Base Functor for Indexed Cofree
+data IxCofreeF h f g i = (f i) :<< (h g i)
+
+type instance IxBase (IxCofree h f) = IxCofreeF h f
+
+instance IxFunctor f => IxFunctor (IxCofreeF f a) where
+    imap f (x :<< xs) = x :<< imap f xs
+
+instance IxFunctor f => IxRecursive (IxCofree f a) where
+    iproject (x :< xs) = x :<< xs
+
+instance IxFunctor f => IxCorecursive (IxCofree f a) where
+    iembed (x :<< xs) = x :< xs
+
+icofree :: IxCofreeF h f (IxCofree h f) ~> IxCofree h f
+icofree (x :<< xs) = x :< xs

@@ -9,7 +9,7 @@
 
 module Cacco.Syntax.Parser.AST where
 
-import           Data.Functor.Const           (Const)
+import           Data.Functor.Const           (Const (..))
 import           Data.List.NonEmpty
 import           Text.Megaparsec
 import qualified Text.Megaparsec              as MP
@@ -122,27 +122,23 @@ astFix proxy e d p t = case proxy of
     p' = astFix' p
     t' = astFix' t
 
-newtype AnnF ann t f i = AnnF { unAnnF :: (ann :& t f) i }
-    deriving (Eq, Show)
-
-type Ann ann t i = IxFix (AnnF ann t) i
+type AnnF ann t = IxCofreeF t (Const ann)
+type Ann  ann t = IxFix (IxCofreeF t (Const ann))
 
 withLocation' :: IParser (t f) ~> IParser (AnnF Location t f)
 withLocation' p = do
     (l, v) <- withLocation p
-    return $ AnnF (l :& v)
+    return (Const l :<< v)
 
-located :: forall (f :: Index -> *).()
-    => AstParser AstF f ~> AstParser (AnnF Location AstF) f
+located :: AstParser AstF f ~> AstParser (AnnF Location AstF) f
 located f e d p t = withLocation' (f e d p t)
 
-astParser :: forall (i :: Index).()
-    => IndexProxy i -> Parser (Ann Location AstF i)
+astParser :: IndexProxy ~> IParser (Ann Location AstF)
 astParser proxy = astFix proxy
     (located exprAstF)
     (located declAstF)
     (located pattAstF)
     (located typeAstF)
 
-exprAst :: Parser (Ann Location AstF Expr)
+exprAst :: IParser (Ann Location AstF) Expr
 exprAst = astParser ExprProxy
