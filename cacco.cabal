@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 177998f417e80072a3c8c118a5b0db469f804174ad9547b085c28a29d98853e2
+-- hash: 1b94251b58ae64463f813f0cddddeee1fbe48d8824a64b6f40e897adb5241575
 
 name:           cacco
 version:        0.1.0.0
@@ -70,6 +70,10 @@ library
       Cacco.Type
       Cacco.Val
       Data.Ann
+      Data.Functor.Hi
+      Data.Functor.Hi.HiFoldable
+      Data.Functor.Hi.HiFunctor
+      Data.Functor.Hi.Types
       Data.Functor.Ix
       Data.IxAnn
       Data.IxFix
