@@ -17,7 +17,6 @@ module Cacco.Syntax.AST
 
 import           Control.Applicative
 import           Control.Arrow             ((&&&))
-import           Data.Functor.Identity
 import           Data.List.NonEmpty        (NonEmpty (..), toList)
 import           Data.Text.Prettyprint.Doc
 import           Data.Typeable             (Typeable)
@@ -69,6 +68,8 @@ data Ast (i :: Index) where
 deriving instance Eq (Ast i)
 deriving instance Show (Ast i)
 deriving instance Typeable (Ast i)
+
+-- type instance IxBase Ast = IxCoyoneda
 
 -------------------------------------------------------------------------------
 -- Indexed AST Base-Functor

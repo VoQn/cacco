@@ -24,6 +24,15 @@ import           Data.Functor.Ix
 
 type IParser f a = Parser (f a)
 
+rmAnn :: Ann Location (IxBase Ast) ~> Ast
+rmAnn = icata alg where
+    alg (_ :<< x) = iembed x
+
+withLocation' :: IParser (f a) ~> IParser (AnnF Location f a)
+withLocation' p = do
+    (l, v) <- withLocation p
+    return $ Const l :<< v
+
 hole :: IndexProxy ~> IParser (AstF f)
 hole proxy = HoleF proxy <$ reserved "_"
 
@@ -123,17 +132,6 @@ astFix proxy e d p t = case proxy of
     t' = astFix' t
 --
 
-type AnnF ann t = IxCofreeF t (Const ann)
-type Ann  ann t = IxFix (IxCofreeF t (Const ann))
-
-rmAnn :: Ann Location AstF ~> Ast
-rmAnn = icata alg where
-    alg (_ :<< x) = iembed x
-
-withLocation' :: IParser (f a) ~> IParser (AnnF Location f a)
-withLocation' p = do
-    (l, v) <- withLocation p
-    return $ Const l :<< v
 
 located :: AstParser AstF f ~> AstParser (AnnF Location AstF) f
 located f e d p t = withLocation' (f e d p t)

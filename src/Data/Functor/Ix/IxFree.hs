@@ -1,26 +1,29 @@
-{-# LANGUAGE DeriveDataTypeable     #-}
-{-# LANGUAGE DeriveFoldable         #-}
-{-# LANGUAGE DeriveFunctor          #-}
-{-# LANGUAGE DeriveTraversable      #-}
-{-# LANGUAGE FlexibleContexts       #-}
-{-# LANGUAGE FlexibleInstances      #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE GADTs                  #-}
-{-# LANGUAGE MultiParamTypeClasses  #-}
-{-# LANGUAGE PolyKinds              #-}
-{-# LANGUAGE RankNTypes             #-}
-{-# LANGUAGE StandaloneDeriving     #-}
-{-# LANGUAGE TypeFamilies           #-}
-{-# LANGUAGE TypeOperators          #-}
-{-# LANGUAGE UndecidableInstances   #-}
+{-# LANGUAGE DeriveDataTypeable        #-}
+{-# LANGUAGE DeriveFoldable            #-}
+{-# LANGUAGE DeriveFunctor             #-}
+{-# LANGUAGE DeriveTraversable         #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleContexts          #-}
+{-# LANGUAGE FlexibleInstances         #-}
+{-# LANGUAGE FunctionalDependencies    #-}
+{-# LANGUAGE GADTs                     #-}
+{-# LANGUAGE MultiParamTypeClasses     #-}
+{-# LANGUAGE PolyKinds                 #-}
+{-# LANGUAGE RankNTypes                #-}
+{-# LANGUAGE StandaloneDeriving        #-}
+{-# LANGUAGE TypeFamilies              #-}
+{-# LANGUAGE TypeOperators             #-}
+{-# LANGUAGE UndecidableInstances      #-}
 
 module Data.Functor.Ix.IxFree where
---
+
+import           Control.Arrow
 import           Data.Functor.Classes
 import           Data.Functor.Const
 import           Data.Typeable
 
 import           Data.Functor.Ix.IxEq
+import           Data.Functor.Ix.IxFix
 import           Data.Functor.Ix.IxFoldable
 import           Data.Functor.Ix.IxFunctor
 import           Data.Functor.Ix.IxRecursive
@@ -171,3 +174,48 @@ icoiter f a = a :< (icoiter f `imap` f a)
 -------------------------------------------------------------------------------
 -- Cofree Annotation
 -------------------------------------------------------------------------------
+
+type AnnF ann t = IxCofreeF t (Const ann)
+type Ann  ann t = IxFix (IxCofreeF t (Const ann))
+
+-------------------------------------------------------------------------------
+-- Yoneda & CoYoneda
+-------------------------------------------------------------------------------
+
+newtype IxYoneda (f :: (k -> *) -> k -> *) (a :: k -> *) (i :: k)
+    = IxYo { runIxYo :: forall (b :: k -> *). (a ~> b) -> f b i }
+
+iyoneda :: IxFunctor f => f a i -> IxYoneda f a i
+iyoneda a = IxYo $ \f -> imap f a
+
+ilowerYo :: IxYoneda f a ~> f a
+ilowerYo (IxYo f) = f id
+
+instance IxFunctor (IxYoneda h) where
+    imap f m = IxYo $ \k -> runIxYo m (k . f)
+
+data IxCoyoneda (a :: k -> *) (i :: k)
+    = forall (b :: k -> *). IxCoyo (b i -> a i) (b i)
+
+icoyo :: a ~> IxCoyoneda a
+icoyo = IxCoyo id
+
+fromCxt :: (a ~>. b) -> IxCoyoneda a ~>. b
+fromCxt f (IxCoyo g x) = g >>> f $ x
+
+mapCxt :: (a ~> b) -> IxCoyoneda a ~> IxCoyoneda b
+mapCxt f (IxCoyo g x) = IxCoyo f (g x)
+
+instance IxFunctor IxCoyoneda where
+    imap f (IxCoyo g x) = IxCoyo (g >>> f) x
+
+instance IxApplicative IxCoyoneda where
+    ireturn = icoyo
+
+instance IxMonad IxCoyoneda where
+    ibind f (IxCoyo g x) = g >>> f $ x
+
+data IxOperational
+
+programable :: a ~> IxFree IxCoyoneda a
+programable = icoyo >>> imap IxPure >>> IxFree
