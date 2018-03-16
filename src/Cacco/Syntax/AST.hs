@@ -17,6 +17,7 @@ module Cacco.Syntax.AST
 
 import           Control.Applicative
 import           Control.Arrow             ((&&&))
+import           Data.Functor.Identity
 import           Data.List.NonEmpty        (NonEmpty (..), toList)
 import           Data.Text.Prettyprint.Doc
 import           Data.Typeable             (Typeable)

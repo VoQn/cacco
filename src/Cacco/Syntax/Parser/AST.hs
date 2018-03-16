@@ -1,6 +1,5 @@
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE GADTs               #-}
-{-# LANGUAGE KindSignatures      #-}
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE PolyKinds           #-}
 {-# LANGUAGE RankNTypes          #-}
@@ -22,7 +21,7 @@ import           Cacco.Syntax.Parser.Lexer
 import           Cacco.Syntax.Parser.Literal
 import           Data.Functor.Ix
 
-type IParser (f :: k -> *) (i :: k) = Parser (f i)
+type IParser f a = Parser (f a)
 
 hole :: IndexProxy ~> IParser (AstF f)
 hole proxy = HoleF proxy <$ reserved "_"
@@ -58,14 +57,14 @@ def e p = do
     reserved "="
     DefF <$> p <*> (fromList <$> MP.some e)
 
-type AstParser t f (i :: Index)
+type AstParser t f i
     =  IParser f Expr
     -> IParser f Decl
     -> IParser f Patt
     -> IParser f Type
     -> IParser (t f) i
 
-type IxFixAstParser t (i :: Index)
+type IxFixAstParser t i
     =  (forall f. AstParser t f Expr)
     -> (forall f. AstParser t f Decl)
     -> (forall f. AstParser t f Patt)
