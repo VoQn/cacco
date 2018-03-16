@@ -8,6 +8,7 @@
 {-# LANGUAGE GADTs                  #-}
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE PolyKinds              #-}
+{-# LANGUAGE RankNTypes             #-}
 {-# LANGUAGE StandaloneDeriving     #-}
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeOperators          #-}
@@ -16,6 +17,7 @@
 module Data.Functor.Ix.IxFree where
 --
 import           Data.Functor.Classes
+import           Data.Functor.Const
 import           Data.Typeable
 
 import           Data.Functor.Ix.IxEq
@@ -144,12 +146,12 @@ instance IxFunctor f => IxCorecursive (IxFree f a) where
 -------------------------------------------------------------------------------
 
 -- | Indexed Cofree
-data IxCofree h f i = (f i) :< (h (IxCofree h f) i)
+data IxCofree f a i = a i :< f (IxCofree f a) i
 
 -- | Base Functor for Indexed Cofree
-data IxCofreeF h f g i = (f i) :<< (h g i)
+data IxCofreeF f a b i = a i :<< f b i
 
-type instance IxBase (IxCofree h f) = IxCofreeF h f
+type instance IxBase (IxCofree f a) = IxCofreeF f a
 
 instance IxFunctor f => IxFunctor (IxCofreeF f a) where
     imap f (x :<< xs) = x :<< imap f xs
@@ -162,3 +164,10 @@ instance IxFunctor f => IxCorecursive (IxCofree f a) where
 
 icofree :: IxCofreeF h f (IxCofree h f) ~> IxCofree h f
 icofree (x :<< xs) = x :< xs
+
+icoiter :: IxFunctor f => IxCoalgebra f a -> a ~> IxCofree f a
+icoiter f a = a :< (icoiter f `imap` f a)
+
+-------------------------------------------------------------------------------
+-- Cofree Annotation
+-------------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds           #-}
+{-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE PolyKinds           #-}
@@ -120,14 +121,19 @@ astFix proxy e d p t = case proxy of
     d' = astFix' d
     p' = astFix' p
     t' = astFix' t
+--
 
 type AnnF ann t = IxCofreeF t (Const ann)
 type Ann  ann t = IxFix (IxCofreeF t (Const ann))
 
-withLocation' :: IParser (t f) ~> IParser (AnnF Location t f)
+rmAnn :: Ann Location AstF ~> Ast
+rmAnn = icata alg where
+    alg (_ :<< x) = iembed x
+
+withLocation' :: IParser (f a) ~> IParser (AnnF Location f a)
 withLocation' p = do
     (l, v) <- withLocation p
-    return (Const l :<< v)
+    return $ Const l :<< v
 
 located :: AstParser AstF f ~> AstParser (AnnF Location AstF) f
 located f e d p t = withLocation' (f e d p t)
