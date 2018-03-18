@@ -69,8 +69,6 @@ deriving instance Eq (Ast i)
 deriving instance Show (Ast i)
 deriving instance Typeable (Ast i)
 
--- type instance IxBase Ast = IxCoyoneda
-
 -------------------------------------------------------------------------------
 -- Indexed AST Base-Functor
 -------------------------------------------------------------------------------
@@ -194,48 +192,43 @@ instance IxCorecursive Ast where
 -------------------------------------------------------------------------------
 
 instance Pretty (Ast i) where
-    pretty = icata' _prettify
+    pretty = icata' alg
+      where
+        alg :: forall ann. AstF (Const (Doc ann)) ~>. Doc ann
+        alg astF = case astF of
+            HoleF _  -> "_"
+            DotsF _  -> "..."
+            LitF _ l -> pretty l
+            VarF _ v -> pretty v
+            VecF v   -> brackets . sep $ getConst <$> v
+            MapF v   -> braces . sep $ _prettyKeyValue <$> v
+            IfF (Const c) (Const t) (Const e) ->
+                "(if" <+> c <+> t <+> e <> ")"
+            IfsF p (Const o) ->
+                "(if" <+> _prettyCases p o <> ")"
+            CaseF p (Const o) ->
+                "(case" <+> _prettyCases p o <> ")"
+            AppF (Const f) args ->
+                "(" <> f <+> sep (getConst <$> args) <> ")"
+            LamF args es ->
+                "(" <> pipeArgs args <+> asList es <> ")"
+            DecF (Const v) t ->
+                "(:" <+> v <+> asList t <> ")"
+            DefF (Const v) e ->
+                "(=" <+> v <+> asList e <> ")"
+        {-# INLINE alg #-}
 
--- | pretty print accumulate algorithm
-_prettify :: forall ann. AstF (Const (Doc ann)) ~>. Doc ann
-_prettify (HoleF _) = "_"
-_prettify (DotsF _) = "..."
-_prettify (LitF _ l) = pretty l
-_prettify (VarF _ v) = pretty v
+        pipeArgs :: forall ann (j :: Index).()
+            => [Const (Doc ann) j]
+            -> Doc ann
+        pipeArgs args = "|" <> sep (getConst <$> args) <> "|"
+        {-# INLINE pipeArgs #-}
 
-_prettify (VecF v) = brackets . sep $ getConst <$> v
-_prettify (MapF v) = braces . sep $ _prettyKeyValue <$> v
-
-_prettify (IfF (Const c) (Const t) (Const e))
-    = parens $ "if" <+> c <+> t <+> e
-
-_prettify (IfsF p (Const o)) = parens $ "if" <+> _prettyCases p o
-
-_prettify (CaseF p (Const o)) = parens $ "case" <+> _prettyCases p o
-
-_prettify (AppF (Const f) args) = parens $ f <+> sep (getConst <$> args)
-
-_prettify (LamF args es) = parens $ arguments <+> expressions
-  where
-    arguments :: Doc ann
-    arguments = ("|" <>) . (<> "|") . sep $ getConst <$> args
-    {-# INLINE arguments #-}
-
-    expressions :: Doc ann
-    expressions = sep . toList $ getConst <$> es
-    {-# INLINE expressions #-}
-
-_prettify (DecF (Const v) t) = parens $ ":" <+> v <+> typings
-  where
-    typings :: Doc ann
-    typings = sep $ toList $ getConst <$> t
-    {-# INLINE typings #-}
-
-_prettify (DefF (Const v) e) = parens $ "=" <+> v <+> expressions
-  where
-    expressions :: Doc ann
-    expressions = sep . toList $ getConst <$> e
-    {-# INLINE expressions #-}
+        asList :: forall ann (j :: Index).()
+            => NonEmpty (Const (Doc ann) j)
+            -> Doc ann
+        asList = sep . toList . fmap getConst
+        {-# INLINE asList #-}
 
 -- | pretty print Key-Value pair
 _prettyKeyValue :: forall (j :: Index) (k :: Index) a.()

@@ -93,6 +93,9 @@ data IxCoyoneda (a :: k -> *) (i :: k)
 icoyo :: a ~> IxCoyoneda a
 icoyo = IxCoyo id
 
+lowerCoyo :: IxCoyoneda a ~> a
+lowerCoyo (IxCoyo g x) = g x
+
 fromCxt :: (a ~>. b) -> IxCoyoneda a ~>. b
 fromCxt f (IxCoyo g x) = g >>> f $ x
 
@@ -107,8 +110,6 @@ instance IxApplicative IxCoyoneda where
 
 instance IxMonad IxCoyoneda where
     ibind f (IxCoyo g x) = g >>> f $ x
-
-data IxOperational
 
 programable :: a ~> IxFree IxCoyoneda a
 programable = icoyo >>> imap IxPure >>> IxFree

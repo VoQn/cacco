@@ -11,26 +11,26 @@ import           Data.Functor.Ix.IxFunctor
 import           Data.Functor.Ix.Types
 
 -------------------------------------------------------------------------------
--- Indexed Recursive
+-- Indexed Recursive & Corecursive
 -------------------------------------------------------------------------------
 
-class IxFunctor (IxBase h) => IxRecursive (h :: i -> *) where
-    iproject :: h ~> (IxBase h) h
+class IxFunctor (IxBase f) => IxRecursive (f :: i -> *) where
+    iproject :: f ~> (IxBase f) f
 
     -- | catamorphism folding
-    icata :: IxAlgebra (IxBase h) f -> h ~> f
+    icata :: IxAlgebra (IxBase f) a -> f ~> a
     icata g = g . imap (icata g) . iproject
 
     -- | catamorphism folding returning constant type
-    icata' :: KAlgebra (IxBase h) a -> h ~>. a
+    icata' :: KAlgebra (IxBase f) a -> f ~>. a
     icata' g = getConst . icata (Const . g)
 
     -- | paramorphism folding
-    ipara :: ((IxBase h) (a :*: h) ~> a) -> h ~> a
+    ipara :: ((IxBase f) (a :*: f) ~> a) -> f ~> a
     ipara f = f . imap (ipara f &&&& id) . iproject
 
-class IxFunctor (IxBase h) => IxCorecursive (h :: i -> *) where
-    iembed :: (IxBase h) h ~> h
+class IxFunctor (IxBase f) => IxCorecursive (f :: i -> *) where
+    iembed :: (IxBase f) f ~> f
 
-    iana :: IxCoalgebra (IxBase h) f -> f ~> h
+    iana :: IxCoalgebra (IxBase f) a -> a ~> f
     iana g = iembed . imap (iana g) . g
