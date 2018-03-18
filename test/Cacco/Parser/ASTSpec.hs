@@ -9,6 +9,7 @@ import           Cacco.Syntax.AST
 import           Cacco.Syntax.Index
 import           Cacco.Syntax.Literal
 import           Cacco.Syntax.Parser.AST
+import           Data.Functor.Ix.IxFree
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 

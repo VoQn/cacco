@@ -20,13 +20,10 @@ import           Cacco.Syntax.Location
 import           Cacco.Syntax.Parser.Internal
 import           Cacco.Syntax.Parser.Lexer
 import           Cacco.Syntax.Parser.Literal
+import           Control.Comonad.Ix.IxCofree  (IxCofreeF (..))
 import           Data.Functor.Ix
 
 type IParser f a = Parser (f a)
-
-rmAnn :: Ann Location (IxBase Ast) ~> Ast
-rmAnn = icata alg where
-    alg (_ :<< x) = iembed x
 
 withLocation' :: IParser (f a) ~> IParser (AnnF Location f a)
 withLocation' p = do
