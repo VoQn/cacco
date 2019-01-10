@@ -1,8 +1,10 @@
--- This file has been generated from package.yaml by hpack version 0.20.0.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 458eda34343b75e4efdb972f2bd146601982f6f40f37787b965f283d327bf496
+-- hash: fca0439293631c50457140f44911a63fe0e98c79adb32f4d88bd3c3ed24c2125
 
 name:           cacco
 version:        0.1.0.0
@@ -15,8 +17,6 @@ copyright:      2017 Kazuhiro Mizushima
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
-cabal-version:  >= 1.10
-
 extra-source-files:
     README.asciidoc
 
