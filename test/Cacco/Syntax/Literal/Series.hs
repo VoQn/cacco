@@ -12,7 +12,6 @@ import           Numeric.Natural
 import           Test.SmallCheck.Series
 
 import           Cacco.Syntax.Literal
-import           Test.SmallCheck.Numeric ()
 
 instance Monad m => Serial m Literal where
     series =

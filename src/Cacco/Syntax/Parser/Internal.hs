@@ -7,7 +7,7 @@ module Cacco.Syntax.Parser.Internal
 import           Control.Lens          ((&), (.~))
 import           Data.Text             (Text)
 import           Data.Void             (Void)
-import           Text.Megaparsec       (Parsec, SourcePos, Token)
+import           Text.Megaparsec       (Parsec, SourcePos)
 import qualified Text.Megaparsec       as MP
 import qualified Text.Megaparsec.Pos   as Pos
 
