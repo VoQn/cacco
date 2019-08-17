@@ -129,7 +129,6 @@ astFix proxy e d p t = case proxy of
     t' = astFix' t
 --
 
-
 located :: AstParser AstF f ~> AstParser (AnnF Location AstF) f
 located f e d p t = withLocation' (f e d p t)
 
