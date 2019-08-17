@@ -291,7 +291,7 @@ pretty val = case val of
   Flonum  x _ -> show x
   Text    x _ -> show x
   Symbol  x _ -> x
-  List    x _ -> '(' : unwords (pretty <$> x) ++ ")"
+  List    x _ -> '[' : unwords (pretty <$> x) ++ "]"
   Vector  x _ -> '[' : unwords (pretty <$> Vec.toList x) ++ "]"
   Struct  x _ -> '{' : unwords (prettyPair <$> Map.toList x) ++ "}"
   Builtin _ _ -> "<#Builtin#>"

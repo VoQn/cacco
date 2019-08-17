@@ -31,6 +31,11 @@ spec_parseAst = do
   it "can parse \"undefined\"" $ testParse "undefined" `shouldBe` Right
     (Lit Undef)
   --
+  it "can parse \"[]\"" $ testParse "[]" `shouldBe` Right (List [])
+  --
+  it "can parse \"[1 2 3]\"" $ testParse "[1 2 3]" `shouldBe` Right
+    (List [Lit $ Natural 1, Lit $ Natural 2, Lit $ Natural 3])
+  --
   it "can parse \"(dec x Integer)\""
     $          testParse "(dec x Integer)"
     `shouldBe` Right (App (Sym "dec") [Sym "x", Sym "Integer"])

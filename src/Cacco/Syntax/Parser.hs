@@ -77,7 +77,7 @@ lis :: Parser f -> Parser (AstF f)
 lis p = ListF <$> many p
 
 ast :: forall f . Parser f -> Parser (AstF f)
-ast p = lexeme $ choice [try lit, sym, parens $ fuctor p, brackets $ lis p]
+ast p = lexeme $ choice [try lit, sym,brackets $ lis p, parens $ fuctor p]
 
 expr :: Parser (Expr Location)
 expr = fixParser $ addLocation . ast

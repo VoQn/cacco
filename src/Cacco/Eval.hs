@@ -73,6 +73,10 @@ evalLit l = case l of
 evalAcc :: forall i . (AstF (EvalF i), i) -> EvalF i
 evalAcc (LitF l   , info) = supplyInfo info $ evalLit l
 
+evalAcc (ListF exprsE, info) = do
+  exprs <- sequence exprsE
+  supplyInfo info $ return $ Val.list exprs
+
 evalAcc (SymF name, info) = do
   env <- State.get
   supplyInfo info $ case Env.lookup name env of
