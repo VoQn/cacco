@@ -1,8 +1,10 @@
--- This file has been generated from package.yaml by hpack version 0.20.0.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 782d4c2e123d1bbe8e7812e62d6da5957ab6b66703c1ded4199f490d819f1237
+-- hash: fca0439293631c50457140f44911a63fe0e98c79adb32f4d88bd3c3ed24c2125
 
 name:           cacco
 version:        0.1.0.0
@@ -15,8 +17,6 @@ copyright:      2017 Kazuhiro Mizushima
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
-cabal-version:  >= 1.10
-
 extra-source-files:
     README.asciidoc
 
@@ -50,15 +50,15 @@ library
       Cacco.Error.IsError
       Cacco.Error.TypeMismatch
       Cacco.Eval
-      Cacco.Eval.Indexed
       Cacco.Inferencer
       Cacco.REPL
-      Cacco.Syntax.AST.Indexed
+      Cacco.Syntax.AST
       Cacco.Syntax.Expr
+      Cacco.Syntax.Index
       Cacco.Syntax.Literal
       Cacco.Syntax.Location
       Cacco.Syntax.Parser
-      Cacco.Syntax.Parser.AST.Indexed
+      Cacco.Syntax.Parser.AST
       Cacco.Syntax.Parser.Internal
       Cacco.Syntax.Parser.Lexer
       Cacco.Syntax.Parser.Literal
@@ -66,9 +66,26 @@ library
       Cacco.Syntax.Position
       Cacco.Type
       Cacco.Val
+      Control.Comonad.Ix.IxCofree
+      Control.Monad.Ix.IxFree
       Data.Ann
-      Data.IxAnn
-      Data.IxFix
+      Data.Functor.Hi
+      Data.Functor.Hi.HiFix
+      Data.Functor.Hi.HiFoldable
+      Data.Functor.Hi.HiFree
+      Data.Functor.Hi.HiFunctor
+      Data.Functor.Hi.HiRecursive
+      Data.Functor.Hi.HiTraversable
+      Data.Functor.Hi.Types
+      Data.Functor.Ix
+      Data.Functor.Ix.IxEq
+      Data.Functor.Ix.IxFix
+      Data.Functor.Ix.IxFoldable
+      Data.Functor.Ix.IxFree
+      Data.Functor.Ix.IxFunctor
+      Data.Functor.Ix.IxRecursive
+      Data.Functor.Ix.IxTraversable
+      Data.Functor.Ix.Types
       Lib
   other-modules:
       Paths_cacco
@@ -100,7 +117,8 @@ test-suite test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      QuickCheck >=2.10 && <3.0
+    , base >=4.7 && <5
     , cacco
     , half >=0.2 && <1
     , lens >=4.15 && <4.16
@@ -108,6 +126,7 @@ test-suite test
     , prettyprinter >=1.1 && <2.0
     , recursion-schemes >=5.0 && <6
     , scientific >=0.3 && <0.4
+    , smallcheck >=1.1 && <2.0
     , tasty >=1.0 && <2.0
     , tasty-discover >=4.0 && <5.0
     , tasty-hspec
@@ -116,12 +135,17 @@ test-suite test
     , text >=1.2 && <2
   other-modules:
       Cacco.EvalSpec
-      Cacco.Parser.AST.IndexedASTParserSpec
+      Cacco.Parser.ASTSpec
       Cacco.Parser.LexerSpec
       Cacco.Parser.NumericSpec
       Cacco.ParserSpec
+      Cacco.Syntax.ASTSpec
+      Cacco.Syntax.Index.Series
+      Cacco.Syntax.IndexSpec
+      Cacco.Syntax.Literal.Series
       Cacco.Syntax.LiteralSpec
       Cacco.Syntax.LocationSpec
       Cacco.Syntax.PositionSpec
+      Test.SmallCheck.Numeric
       Paths_cacco
   default-language: Haskell2010

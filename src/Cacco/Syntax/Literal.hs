@@ -46,24 +46,24 @@ data Literal
 
 instance NFData Literal
 
-instance Pretty Literal
-  where
-    pretty Undef       = "undefined"
-    pretty Unit        = "()"
-    pretty (Bool True) = "true"
-    pretty (Bool ____) = "false"
-    pretty (Int8    x) = pretty x <> "_i8"
-    pretty (Int16   x) = pretty x <> "_i16"
-    pretty (Int32   x) = pretty x <> "_i32"
-    pretty (Int64   x) = pretty x <> "_i64"
-    pretty (Uint8   x) = pretty x <> "_u8"
-    pretty (Uint16  x) = pretty x <> "_u16"
-    pretty (Uint32  x) = pretty x <> "_u32"
-    pretty (Uint64  x) = pretty x <> "_u64"
-    pretty (Integer x) = (if x < 0 then "" else "+") <> pretty x
-    pretty (Natural x) = pretty x
-    pretty (Float16 x) = pretty (show x) <> "_f16"
-    pretty (Float32 x) = pretty (show x) <> "_f32"
-    pretty (Float64 x) = pretty (show x) <> "_f64"
-    pretty (Flonum  x) = pretty (show x)
-    pretty (Text    x) = dquotes $ pretty x
+instance Pretty Literal where
+    pretty literal = case literal of
+        Undef     -> "undefined"
+        Unit      -> "()"
+        Bool True -> "true"
+        Bool ____ -> "false"
+        Int8    x -> pretty x <> "_i8"
+        Int16   x -> pretty x <> "_i16"
+        Int32   x -> pretty x <> "_i32"
+        Int64   x -> pretty x <> "_i64"
+        Uint8   x -> pretty x <> "_u8"
+        Uint16  x -> pretty x <> "_u16"
+        Uint32  x -> pretty x <> "_u32"
+        Uint64  x -> pretty x <> "_u64"
+        Integer x -> (if x < 0 then "" else "+") <> pretty x
+        Natural x -> pretty x
+        Float16 x -> pretty (show x) <> "_f16"
+        Float32 x -> pretty (show x) <> "_f32"
+        Float64 x -> pretty (show x) <> "_f64"
+        Flonum  x -> pretty (show x)
+        Text    x -> dquotes $ pretty x

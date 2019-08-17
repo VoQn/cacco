@@ -9,7 +9,7 @@ import           Data.Word
 import           Test.Tasty.Hspec     (Spec, it, shouldBe)
 
 import           Cacco.Syntax.Literal
-import           Cacco.Syntax.Parser  hiding (parseTest)
+import           Cacco.Syntax.Parser
 
 {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}
 

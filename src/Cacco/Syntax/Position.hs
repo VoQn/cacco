@@ -44,16 +44,10 @@ initPosition = Position
 
 instance Pretty Position where
     pretty Position{..} =
-        "(" <> src <> ":" <> lin <> "," <> col <> ")"
+        "(" <> name _sourceName <> ":" <>
+        pretty _line <> "," <> pretty _column <> ")"
       where
-        src :: Doc ann
-        src = name _sourceName
-        {-# INLINE src #-}
         name :: FilePath -> Doc ann
         name [] = "(unknown)"
         name s  = pretty s
         {-# INLINE name #-}
-        lin, col :: Doc ann
-        [lin, col] = pretty <$> [_line, _column]
-        {-# INLINE lin #-}
-        {-# INLINE col #-}
