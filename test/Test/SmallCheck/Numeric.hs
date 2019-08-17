@@ -17,13 +17,3 @@ ints = generate zero <|> nats \/ (negate <$> nats)
 
 uints :: (Monad m, Integral n, Bounded n) => Series m n
 uints = generate $ \d -> take (d + 1) [0..maxBound]
-
-instance Monad m => Serial m Int8  where series = ints
-instance Monad m => Serial m Int16 where series = ints
-instance Monad m => Serial m Int32 where series = ints
-instance Monad m => Serial m Int64 where series = ints
-
-instance Monad m => Serial m Word8  where series = uints
-instance Monad m => Serial m Word16 where series = uints
-instance Monad m => Serial m Word32 where series = uints
-instance Monad m => Serial m Word64 where series = uints

@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.0.
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fca0439293631c50457140f44911a63fe0e98c79adb32f4d88bd3c3ed24c2125
+-- hash: a0dcfb541b02e8eb8d50fad7e255b13b51733198bbc9c8454745b2704c946cb2
 
 name:           cacco
 version:        0.1.0.0
@@ -30,12 +30,12 @@ library
   ghc-options: -Wall -Wcompat
   build-depends:
       base >=4.7 && <5
-    , containers >=0.5 && <0.6
+    , containers >=0.5 && <1
     , deepseq >=1.4 && <2
     , half >=0.2 && <1
     , haskeline >=0.7 && <0.8
-    , lens >=4.15 && <4.16
-    , megaparsec >=6 && <7
+    , lens >=4.15 && <5
+    , megaparsec >=7 && <8
     , mtl >=2.2 && <3
     , prettyprinter >=1.1 && <2.0
     , recursion-schemes >=5.0 && <6
@@ -100,8 +100,8 @@ executable cacco
       base
     , cacco
     , half >=0.2 && <1
-    , lens >=4.15 && <4.16
-    , megaparsec >=6 && <7
+    , lens >=4.15 && <5
+    , megaparsec >=7 && <8
     , prettyprinter >=1.1 && <2.0
     , recursion-schemes >=5.0 && <6
     , scientific >=0.3 && <0.4
@@ -121,8 +121,8 @@ test-suite test
     , base >=4.7 && <5
     , cacco
     , half >=0.2 && <1
-    , lens >=4.15 && <4.16
-    , megaparsec >=6 && <7
+    , lens >=4.15 && <5
+    , megaparsec >=7 && <8
     , prettyprinter >=1.1 && <2.0
     , recursion-schemes >=5.0 && <6
     , scientific >=0.3 && <0.4

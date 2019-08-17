@@ -16,7 +16,7 @@ import           Cacco.Syntax.Position (Position, initPosition)
 import qualified Cacco.Syntax.Position as P
 
 type Parser = Parsec Void Text
-type ParseError = MP.ParseError (Token Text) Void
+type ParseError = MP.ParseErrorBundle Text Void
 
 -- | Convert from two @SourcePos@ to @Position@.
 fromSourcePos :: SourcePos -> Position

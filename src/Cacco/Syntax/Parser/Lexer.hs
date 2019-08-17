@@ -67,9 +67,9 @@ withLocation :: Parser a -> Parser (Location, a)
 -- (test:1,1-1,3,Integer 10)
 --
 withLocation parser = do
-    begin <- getPosition
+    begin <- getSourcePos
     value <- parser
-    end   <- getPosition
+    end   <- getSourcePos
     let location = locationFromSourcePos begin end
     return (location, value)
 {-# INLINEABLE withLocation #-}
