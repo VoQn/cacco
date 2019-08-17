@@ -5,6 +5,7 @@ Thumbs.db
 # build
 dist/*
 .stack-work/*
+stack.yaml.lock
 .hpc/*
 *.tix
 *.prof
