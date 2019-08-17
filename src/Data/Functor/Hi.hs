@@ -1,12 +1,13 @@
 module Data.Functor.Hi
-( module Data.Functor.Hi.Types
-, module Data.Functor.Hi.HiFunctor
-, module Data.Functor.Hi.HiFoldable
-, module Data.Functor.Hi.HiTraversable
-, module Data.Functor.Hi.HiRecursive
-, module Data.Functor.Hi.HiFix
-, module Data.Functor.Hi.HiFree
-) where
+  ( module Data.Functor.Hi.Types
+  , module Data.Functor.Hi.HiFunctor
+  , module Data.Functor.Hi.HiFoldable
+  , module Data.Functor.Hi.HiTraversable
+  , module Data.Functor.Hi.HiRecursive
+  , module Data.Functor.Hi.HiFix
+  , module Data.Functor.Hi.HiFree
+  )
+where
 
 import           Data.Functor.Hi.HiFix
 import           Data.Functor.Hi.HiFoldable

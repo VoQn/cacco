@@ -11,12 +11,13 @@ module Cacco.Env
   , hasKeySomeWhere
   , lookup
   , register
-  ) where
+  )
+where
 
-import           Data.Map.Lazy (Map)
-import qualified Data.Map.Lazy as Map
-import           Data.Maybe    (isJust)
-import           Prelude       hiding (lookup)
+import           Data.Map.Lazy                  ( Map )
+import qualified Data.Map.Lazy                 as Map
+import           Data.Maybe                     ( isJust )
+import           Prelude                 hiding ( lookup )
 
 data Ambient k a = Ambient
   { outerAmbient :: Maybe (Ambient k a)
@@ -24,10 +25,9 @@ data Ambient k a = Ambient
   } deriving (Eq, Show)
 
 instance Functor (Ambient k) where
-  fmap f amb = Ambient
-      { outerAmbient = fmap f <$> outerAmbient amb
-      , localScope = f <$> localScope amb
-      }
+  fmap f amb = Ambient { outerAmbient = fmap f <$> outerAmbient amb
+                       , localScope   = f <$> localScope amb
+                       }
 
 type Env = Ambient String
 
@@ -55,7 +55,5 @@ lookup key = fmap fst . find key
 
 register :: Ord k => k -> a -> Ambient k a -> Ambient k a
 register key value ambient =
-  let
-    registered = Map.insert key value $ localScope ambient
-  in
-    ambient { localScope = registered }
+  let registered = Map.insert key value $ localScope ambient
+  in  ambient { localScope = registered }

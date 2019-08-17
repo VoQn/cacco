@@ -16,7 +16,7 @@
 module Data.Functor.Hi.HiFree where
 --
 import           Data.Functor.Classes
-import           Data.Typeable               (Typeable)
+import           Data.Typeable                  ( Typeable )
 --
 import           Data.Functor.Hi.HiFunctor
 import           Data.Functor.Hi.HiRecursive
@@ -31,17 +31,17 @@ class HiMonad m => HiMonadFree h m | m -> h where
 
 -- | Higher-order version of the 'Free'
 data HiFree (h :: (* -> *) -> * -> *) (f :: * -> *) (a :: *) where
-    HiPure :: f a -> HiFree h f a
-    HiFree :: h (HiFree h f) a -> HiFree h f a
+    HiPure ::f a -> HiFree h f a
+    HiFree ::h (HiFree h f) a -> HiFree h f a
 
 instance (Eq1 f, Eq1 (h (HiFree h f)), Eq a) => Eq (HiFree h f a) where
-    HiPure a  == HiPure b  = a `eq1` b
-    HiFree as == HiFree bs = as `eq1` bs
-    _ == _ = False
+  HiPure a  == HiPure b  = a `eq1` b
+  HiFree as == HiFree bs = as `eq1` bs
+  _         == _         = False
 
 instance (Show1 f, Show1 (h (HiFree h f)), Show a) => Show (HiFree h f a) where
-    showsPrec n (HiPure f) = showsPrec1 n f
-    showsPrec n (HiFree f) = showsPrec1 n f
+  showsPrec n (HiPure f) = showsPrec1 n f
+  showsPrec n (HiFree f) = showsPrec1 n f
 
 deriving instance Typeable (HiFree h f)
 
@@ -61,52 +61,52 @@ deriving instance
     ) => Traversable (HiFree h f)
 
 instance HiFunctor h => HiFunctor (HiFree h) where
-    hmap f (HiPure  a) = HiPure $ f a
-    hmap f (HiFree as) = HiFree $ hmap (hmap f) as
+  hmap f (HiPure a ) = HiPure $ f a
+  hmap f (HiFree as) = HiFree $ hmap (hmap f) as
 
 instance HiFunctor h => HiApplicative (HiFree h) where
-    hreturn = HiPure
+  hreturn = HiPure
 
 instance HiFunctor h => HiMonad (HiFree h) where
-    hbind f (HiPure  a) = f a
-    hbind f (HiFree as) = HiFree $ hbind f `hmap` as
+  hbind f (HiPure a ) = f a
+  hbind f (HiFree as) = HiFree $ hbind f `hmap` as
 
 instance HiFunctor h => HiMonadFree h (HiFree h) where
-    hfree = HiFree
+  hfree = HiFree
 
 -- | Higher-order Base Functor of 'HiFree'
 data HiFreeF (h :: (* -> *) -> * -> *) (f :: * -> *) (g :: * -> *) (a :: *)
   where
-    HiPureF :: f a   -> HiFreeF h f g a
-    HiFreeF :: h g a -> HiFreeF h f g a
+    HiPureF ::f a   -> HiFreeF h f g a
+    HiFreeF ::h g a -> HiFreeF h f g a
 
 instance (Eq1 f, Eq1 (h g), Eq a) => Eq (HiFreeF h f g a) where
-    HiPureF a  == HiPureF b  = a  `eq1` b
-    HiFreeF as == HiFreeF bs = as `eq1` bs
-    _ == _ = False
+  HiPureF a  == HiPureF b  = a `eq1` b
+  HiFreeF as == HiFreeF bs = as `eq1` bs
+  _          == _          = False
 
 instance (Show1 f, Show1 (h g), Show a) => Show (HiFreeF h f g a) where
-    showsPrec n (HiPureF  a) = showsPrec1 n a
-    showsPrec n (HiFreeF as) = showsPrec1 n as
+  showsPrec n (HiPureF a ) = showsPrec1 n a
+  showsPrec n (HiFreeF as) = showsPrec1 n as
 
 deriving instance Typeable (HiFreeF h f g)
 
 type instance HiBase (HiFree h f) = HiFreeF h f
 
 instance HiFunctor h => HiFunctor (HiFreeF h f) where
-    hmap f fr = case fr of
-        HiPureF a  -> HiPureF a
-        HiFreeF as -> HiFreeF $ hmap f as
+  hmap f fr = case fr of
+    HiPureF a  -> HiPureF a
+    HiFreeF as -> HiFreeF $ hmap f as
 
 instance HiFunctor h => HiRecursive (HiFree h f) where
-    hproject fr = case fr of
-        HiPure a  -> HiPureF a
-        HiFree as -> HiFreeF as
+  hproject fr = case fr of
+    HiPure a  -> HiPureF a
+    HiFree as -> HiFreeF as
 
 instance HiFunctor h => HiCorecursive (HiFree h f) where
-    hembed fr = case fr of
-        HiPureF a  -> HiPure a
-        HiFreeF as -> HiFree as
+  hembed fr = case fr of
+    HiPureF a  -> HiPure a
+    HiFreeF as -> HiFree as
 
 -------------------------------------------------------------------------------
 -- Higher-order Free
@@ -122,12 +122,12 @@ data HiCofree (h :: (* -> *) -> * -> *) (f :: * -> *) (a :: *)
 type instance HiBase (HiCofree h f) = HiCofreeF h f
 
 instance HiFunctor h => HiFunctor (HiCofreeF h p) where
-    hmap f (x :<< xs) = x :<< hmap f xs
+  hmap f (x :<< xs) = x :<< hmap f xs
 
 instance HiFunctor h => HiRecursive (HiCofree h f) where
-    hproject (x :< xs) = x :<< xs
+  hproject (x :< xs) = x :<< xs
 
 instance HiFunctor h => HiCorecursive (HiCofree h f) where
-    hembed (x :<< xs) = x :< xs
+  hembed (x :<< xs) = x :< xs
 
 type HiCVAlgebra h f a = f (HiCofree h f a) -> a

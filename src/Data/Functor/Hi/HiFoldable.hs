@@ -6,11 +6,13 @@
 
 module Data.Functor.Hi.HiFoldable where
 
-import           Control.Arrow         ((>>>))
-import           Data.Functor.Const    (Const (..))
-import           Data.Monoid           (Dual (..), Endo (..))
+import           Control.Arrow                  ( (>>>) )
+import           Data.Functor.Const             ( Const(..) )
+import           Data.Monoid                    ( Dual(..)
+                                                , Endo(..)
+                                                )
 
-import           Data.Functor.Hi.Types (type (~>.))
+import           Data.Functor.Hi.Types          ( type (~>.) )
 
 -------------------------------------------------------------------------------
 -- Higher-order Foldable
@@ -53,14 +55,12 @@ class HiFoldable (h :: (* -> *) -> * -> *) where
         {-# INLINE acc #-}
 
 -- | 'foldr' folding Constant values
-kfoldr :: HiFoldable h
-    => (a -> b -> b) -> b -> h (Const a) ~>. b
+kfoldr :: HiFoldable h => (a -> b -> b) -> b -> h (Const a) ~>. b
 kfoldr f = hfoldr (getConst >>> f)
 
 -- | 'foldl' left hand folding Constant values
-kfoldl :: forall a b h. HiFoldable h
-    => (b -> a -> b) -> b -> h (Const a) ~>. b
+kfoldl :: forall a b h . HiFoldable h => (b -> a -> b) -> b -> h (Const a) ~>. b
 kfoldl f = hfoldl acc
-  where
-    acc :: b -> Const a ~>. b
-    acc x = f x . getConst
+ where
+  acc :: b -> Const a ~>. b
+  acc x = f x . getConst

@@ -4,9 +4,13 @@
 
 module Data.Functor.Hi.HiTraversable where
 
-import           Control.Arrow         ((>>>))
-import           Data.Functor.Const    (Const (..), getConst)
-import           Data.Functor.Identity (Identity (..), runIdentity)
+import           Control.Arrow                  ( (>>>) )
+import           Data.Functor.Const             ( Const(..)
+                                                , getConst
+                                                )
+import           Data.Functor.Identity          ( Identity(..)
+                                                , runIdentity
+                                                )
 
 import           Data.Functor.Hi.Types
 -------------------------------------------------------------------------------

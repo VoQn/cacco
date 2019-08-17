@@ -1,5 +1,5 @@
 {-# LANGUAGE Rank2Types #-}
-module  Data.Functor.Ix.IxTraversable where
+module Data.Functor.Ix.IxTraversable where
 
 import           Data.Functor.Ix.IxFunctor
 import           Data.Functor.Ix.Types

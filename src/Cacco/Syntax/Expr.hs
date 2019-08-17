@@ -16,12 +16,12 @@
 module Cacco.Syntax.Expr where
 
 import           Data.Functor.Foldable.TH
-import           Data.Typeable            (Typeable)
-import           GHC.Generics             (Generic)
+import           Data.Typeable                  ( Typeable )
+import           GHC.Generics                   ( Generic )
 
 import           Data.Ann
 
-import           Cacco.Syntax.Literal     (Literal)
+import           Cacco.Syntax.Literal           ( Literal )
 
 -- | Abstruct syntax tree of Cacco language
 data Ast

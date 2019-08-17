@@ -7,10 +7,10 @@
 
 module Cacco.Syntax.Index where
 
-import           Control.DeepSeq (NFData)
-import           Data.Data       (Data)
-import           Data.Typeable   (Typeable)
-import           GHC.Generics    (Generic)
+import           Control.DeepSeq                ( NFData )
+import           Data.Data                      ( Data )
+import           Data.Typeable                  ( Typeable )
+import           GHC.Generics                   ( Generic )
 
 data Index
     = Expr
@@ -27,10 +27,10 @@ type Patt = 'Patt
 type Type = 'Type
 
 data IndexProxy (i :: Index) where
-    ExprProxy :: IndexProxy 'Expr
-    DeclProxy :: IndexProxy 'Decl
-    PattProxy :: IndexProxy 'Patt
-    TypeProxy :: IndexProxy 'Type
+    ExprProxy ::IndexProxy 'Expr
+    DeclProxy ::IndexProxy 'Decl
+    PattProxy ::IndexProxy 'Patt
+    TypeProxy ::IndexProxy 'Type
 
 deriving instance Show (IndexProxy i)
 deriving instance Eq (IndexProxy i)

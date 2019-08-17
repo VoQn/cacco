@@ -11,7 +11,7 @@
 
 module Data.Functor.Ix.IxFix where
 --
-import           Data.Function               (on)
+import           Data.Function                  ( on )
 import           Data.Typeable
 
 import           Data.Functor.Ix.IxEq
@@ -41,10 +41,10 @@ deriving instance Foldable (f (IxFix f)) => Foldable (IxFix f)
 deriving instance Traversable (f (IxFix f)) => Traversable (IxFix f)
 
 instance IxFunctor f => IxRecursive (IxFix f) where
-    iproject (IxFix a) = a
+  iproject (IxFix a) = a
 
 instance IxFunctor f => IxCorecursive (IxFix f) where
-    iembed = IxFix
+  iembed = IxFix
 
 irefix :: (IxRecursive s, IxCorecursive t, IxBase s ~ IxBase t) => s ~> t
 irefix = icata iembed
@@ -56,4 +56,4 @@ fromIxFix :: IxCorecursive t => IxFix (IxBase t) ~> t
 fromIxFix = irefix
 
 instance IxEq (f (IxFix f)) => IxEq (IxFix f) where
-    ieq = ieq `on` iunfix
+  ieq = ieq `on` iunfix

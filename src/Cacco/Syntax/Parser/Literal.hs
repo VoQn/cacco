@@ -5,12 +5,13 @@ module Cacco.Syntax.Parser.Literal
   , text
   , numeric
   , literal
-  ) where
+  )
+where
 
 import           Text.Megaparsec
 
 import           Cacco.Syntax.Literal
-import           Cacco.Syntax.Parser.Internal (Parser)
+import           Cacco.Syntax.Parser.Internal   ( Parser )
 import           Cacco.Syntax.Parser.Lexer
 import           Cacco.Syntax.Parser.Numeric
 

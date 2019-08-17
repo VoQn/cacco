@@ -22,13 +22,13 @@ data IxCofreeF f a b i = a i :<< f b i
 type instance IxBase (IxCofree f a) = IxCofreeF f a
 
 instance IxFunctor f => IxFunctor (IxCofreeF f a) where
-    imap f (x :<< xs) = x :<< imap f xs
+  imap f (x :<< xs) = x :<< imap f xs
 
 instance IxFunctor f => IxRecursive (IxCofree f a) where
-    iproject (x :< xs) = x :<< xs
+  iproject (x :< xs) = x :<< xs
 
 instance IxFunctor f => IxCorecursive (IxCofree f a) where
-    iembed (x :<< xs) = x :< xs
+  iembed (x :<< xs) = x :< xs
 
 icofree :: IxCofreeF h f (IxCofree h f) ~> IxCofree h f
 icofree (x :<< xs) = x :< xs

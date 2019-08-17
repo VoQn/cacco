@@ -3,17 +3,21 @@
 {-# LANGUAGE OverloadedStrings  #-}
 
 module Cacco.Syntax.Literal
-( Literal(..)
-) where
+  ( Literal(..)
+  )
+where
 
-import           Control.DeepSeq           (NFData)
-import           Data.Data                 (Data)
-import           Data.Scientific           (Scientific)
-import           Data.Text                 (Text)
-import           Data.Text.Prettyprint.Doc (Pretty (..), dquotes, (<>))
-import           Data.Typeable             (Typeable)
-import           GHC.Generics              (Generic)
-import           Numeric.Natural           (Natural)
+import           Control.DeepSeq                ( NFData )
+import           Data.Data                      ( Data )
+import           Data.Scientific                ( Scientific )
+import           Data.Text                      ( Text )
+import           Data.Text.Prettyprint.Doc      ( Pretty(..)
+                                                , dquotes
+                                                , (<>)
+                                                )
+import           Data.Typeable                  ( Typeable )
+import           GHC.Generics                   ( Generic )
+import           Numeric.Natural                ( Natural )
 
 data Literal
     = Undef
@@ -47,23 +51,23 @@ data Literal
 instance NFData Literal
 
 instance Pretty Literal where
-    pretty literal = case literal of
-        Undef     -> "undefined"
-        Unit      -> "()"
-        Bool True -> "true"
-        Bool ____ -> "false"
-        Int8    x -> pretty x <> "_i8"
-        Int16   x -> pretty x <> "_i16"
-        Int32   x -> pretty x <> "_i32"
-        Int64   x -> pretty x <> "_i64"
-        Uint8   x -> pretty x <> "_u8"
-        Uint16  x -> pretty x <> "_u16"
-        Uint32  x -> pretty x <> "_u32"
-        Uint64  x -> pretty x <> "_u64"
-        Integer x -> (if x < 0 then "" else "+") <> pretty x
-        Natural x -> pretty x
-        Float16 x -> pretty (show x) <> "_f16"
-        Float32 x -> pretty (show x) <> "_f32"
-        Float64 x -> pretty (show x) <> "_f64"
-        Flonum  x -> pretty (show x)
-        Text    x -> dquotes $ pretty x
+  pretty literal = case literal of
+    Undef        -> "undefined"
+    Unit         -> "()"
+    Bool    True -> "true"
+    Bool    ____ -> "false"
+    Int8    x    -> pretty x <> "_i8"
+    Int16   x    -> pretty x <> "_i16"
+    Int32   x    -> pretty x <> "_i32"
+    Int64   x    -> pretty x <> "_i64"
+    Uint8   x    -> pretty x <> "_u8"
+    Uint16  x    -> pretty x <> "_u16"
+    Uint32  x    -> pretty x <> "_u32"
+    Uint64  x    -> pretty x <> "_u64"
+    Integer x    -> (if x < 0 then "" else "+") <> pretty x
+    Natural x    -> pretty x
+    Float16 x    -> pretty (show x) <> "_f16"
+    Float32 x    -> pretty (show x) <> "_f32"
+    Float64 x    -> pretty (show x) <> "_f64"
+    Flonum  x    -> pretty (show x)
+    Text    x    -> dquotes $ pretty x

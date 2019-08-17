@@ -6,8 +6,10 @@
 
 module Data.Functor.Hi.HiRecursive where
 --
-import           Control.Arrow             ((>>>))
-import           Data.Functor.Const        (Const (..), getConst)
+import           Control.Arrow                  ( (>>>) )
+import           Data.Functor.Const             ( Const(..)
+                                                , getConst
+                                                )
 --
 import           Data.Functor.Hi.HiFunctor
 import           Data.Functor.Hi.Types

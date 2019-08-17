@@ -8,11 +8,12 @@ module Cacco.Error.TypeMismatch
   , expectedType
   , applied
   , defaultError
-  ) where
+  )
+where
 
 import           Control.Lens
-import           Data.Typeable       (Typeable)
-import           GHC.Generics        (Generic)
+import           Data.Typeable                  ( Typeable )
+import           GHC.Generics                   ( Generic )
 
 import           Cacco.Error.IsError
 
@@ -29,19 +30,19 @@ data TypeMismatch = TypeMismatch
 makeLenses ''TypeMismatch
 
 defaultError :: TypeMismatch
-defaultError = TypeMismatch
-  { _funcName = ""
-  , _expectedType = ""
-  , _applied = ""
-  }
+defaultError =
+  TypeMismatch { _funcName = "", _expectedType = "", _applied = "" }
 
 instance IsError TypeMismatch where
-  printError TypeMismatch{..} =
-    unwords [
-        "type mismatch:", name,
-        "expected:", _expectedType, "type.",
-        "but got:", acutal ++ "."
-      ]
-    where
-      name = '`' : _funcName ++ "`"
-      acutal = '`' : _applied ++ "`"
+  printError TypeMismatch {..} = unwords
+    [ "type mismatch:"
+    , name
+    , "expected:"
+    , _expectedType
+    , "type."
+    , "but got:"
+    , acutal ++ "."
+    ]
+   where
+    name   = '`' : _funcName ++ "`"
+    acutal = '`' : _applied ++ "`"

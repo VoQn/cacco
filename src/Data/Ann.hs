@@ -5,8 +5,8 @@
 module Data.Ann where
 
 import           Control.Arrow
-import           Data.Typeable         (Typeable)
-import           GHC.Generics          (Generic)
+import           Data.Typeable                  ( Typeable )
+import           GHC.Generics                   ( Generic )
 
 import           Data.Functor.Foldable
 
@@ -22,10 +22,11 @@ instance Traversable t => Traversable (AnnF i t) where
 type Ann i f = Fix (AnnF i f)
 
 -- | Add some annotation to 'Fix' functor.
-add :: Functor f
-    => i       -- ^ Additional information
-    -> Fix f   -- ^ Fixed contents functor
-    -> Ann i f
+add
+  :: Functor f
+  => i       -- ^ Additional information
+  -> Fix f   -- ^ Fixed contents functor
+  -> Ann i f
 add i = cata $ Fix . AnnF . (id &&& const i)
 
 -- | Get annotation from 'Ann'

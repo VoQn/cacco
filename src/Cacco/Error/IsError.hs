@@ -1,6 +1,7 @@
 module Cacco.Error.IsError
   ( IsError(..)
-  ) where
+  )
+where
 
 class IsError a where
   printError :: a -> String

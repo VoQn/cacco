@@ -32,41 +32,41 @@ import           Data.Functor.Ix.Types
 data IxIdeal f a i = IxP (a i) | IxI (f a i)
 
 instance (IxEq a, IxEq (f a)) => IxEq (IxIdeal f a) where
-    ieq (IxP a) (IxP b) = ieq a b
-    ieq (IxI f) (IxI g) = ieq f g
-    ieq _ _             = False
+  ieq (IxP a) (IxP b) = ieq a b
+  ieq (IxI f) (IxI g) = ieq f g
+  ieq _       _       = False
 
 instance (Eq1 a, Eq1 (f a), Eq i) => Eq (IxIdeal f a i) where
-    IxP a == IxP b = a `eq1` b
-    IxI a == IxI b = a `eq1` b
-    _ == _ = False
+  IxP a == IxP b = a `eq1` b
+  IxI a == IxI b = a `eq1` b
+  _     == _     = False
 
 instance (Show1 a, Show1 (f a), Show i) => Show (IxIdeal f a i) where
-    showsPrec n (IxP a) = showsPrec1 n a
-    showsPrec n (IxI a) = showsPrec1 n a
+  showsPrec n (IxP a) = showsPrec1 n a
+  showsPrec n (IxI a) = showsPrec1 n a
 
 deriving instance (Functor a, Functor (f a)) => Functor (IxIdeal f a)
 
 instance IxFunctor f => IxFunctor (IxIdeal f) where
-    imap f (IxP a)  = IxP (f a)
-    imap f (IxI fa) = IxI $ f `imap` fa
+  imap f (IxP a ) = IxP (f a)
+  imap f (IxI fa) = IxI $ f `imap` fa
 
 class IxFunctor f => Mu' f where
     mu' :: f (IxIdeal f a) ~> f a
 
 instance IxFunctor f => IxApplicative (IxIdeal f) where
-    ireturn = IxP
+  ireturn = IxP
 
 instance Mu' f => IxMonad (IxIdeal f) where
-    ibind f (IxP a)  = f a
-    ibind f (IxI fa) = IxI $ mu' $ f `imap` fa
+  ibind f (IxP a ) = f a
+  ibind f (IxI fa) = IxI $ mu' $ f `imap` fa
 
 -------------------------------------------------------------------------------
 -- Cofree Annotation
 -------------------------------------------------------------------------------
 
 type AnnF ann t = IxCofreeF t (Const ann)
-type Ann  ann t = IxFix (IxCofreeF t (Const ann))
+type Ann ann t = IxFix (IxCofreeF t (Const ann))
 
 rmAnn :: IxCorecursive f => Ann ann (IxBase f) ~> f
 rmAnn = icata alg where alg (_ :<< x) = iembed x
@@ -85,7 +85,7 @@ ilowerYo :: IxYoneda f a ~> f a
 ilowerYo (IxYo f) = f id
 
 instance IxFunctor (IxYoneda h) where
-    imap f m = IxYo $ \k -> runIxYo m (k . f)
+  imap f m = IxYo $ \k -> runIxYo m (k . f)
 
 data IxCoyoneda (a :: k -> *) (i :: k)
     = forall (b :: k -> *). IxCoyo (b i -> a i) (b i)
@@ -103,13 +103,13 @@ mapCxt :: (a ~> b) -> IxCoyoneda a ~> IxCoyoneda b
 mapCxt f (IxCoyo g x) = IxCoyo f (g x)
 
 instance IxFunctor IxCoyoneda where
-    imap f (IxCoyo g x) = IxCoyo (g >>> f) x
+  imap f (IxCoyo g x) = IxCoyo (g >>> f) x
 
 instance IxApplicative IxCoyoneda where
-    ireturn = icoyo
+  ireturn = icoyo
 
 instance IxMonad IxCoyoneda where
-    ibind f (IxCoyo g x) = g >>> f $ x
+  ibind f (IxCoyo g x) = g >>> f $ x
 
 programable :: a ~> IxFree IxCoyoneda a
 programable = icoyo >>> imap IxPure >>> IxFree

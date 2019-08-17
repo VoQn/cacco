@@ -5,10 +5,14 @@
 
 module Data.Functor.Hi.HiFunctor where
 
-import           Control.Arrow         ((>>>))
-import           GHC.Generics          ((:*:))
+import           Control.Arrow                  ( (>>>) )
+import           GHC.Generics                   ( (:*:) )
 
-import           Data.Functor.Hi.Types (type (~>), fst1, snd1, (&&&&))
+import           Data.Functor.Hi.Types          ( type (~>)
+                                                , fst1
+                                                , snd1
+                                                , (&&&&)
+                                                )
 
 -------------------------------------------------------------------------------
 -- Higher-order Functor
@@ -20,9 +24,10 @@ class HiFunctor (h :: (* -> *) -> (* -> *)) where
     hmap :: (f ~> g) -> (h f ~> h g)
 
 -- | hylomorphism refolding
-hhylo :: forall (h :: (* -> *) -> * -> *) (f :: * -> *) (g :: * -> *).()
-    => HiFunctor h
-    => (h g ~> g) -> (f ~> h f) -> f ~> g
+hhylo
+  :: forall (h :: (* -> *) -> * -> *) (f :: * -> *) (g :: * -> *)
+   . ()
+  => HiFunctor h => (h g ~> g) -> (f ~> h f) -> f ~> g
 hhylo f g = g >>> hmap (hhylo f g) >>> f
 
 hunzip :: HiFunctor h => h (f :*: g) ~> (h f :*: h g)

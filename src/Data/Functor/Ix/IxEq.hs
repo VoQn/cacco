@@ -14,7 +14,7 @@ class IxEq (f :: k -> *) where
     ieq :: f i -> f i -> Bool
 
 data x :=: y where
-    Refl :: x :=: x
+    Refl ::x :=: x
 
 class IxEq f => IxEqHet f where
     -- | type index equality
