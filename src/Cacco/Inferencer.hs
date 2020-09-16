@@ -10,7 +10,7 @@ import           Control.Monad.ST               ( ST
                                                 , runST
                                                 )
 
-import           Data.Functor.Const
+import Data.Functor.Const ( Const(..) )
 import           Data.Map                       ( Map )
 import qualified Data.Map                      as Map
 import           Data.STRef                     ( STRef
@@ -19,13 +19,19 @@ import           Data.STRef                     ( STRef
                                                 , writeSTRef
                                                 )
 
-import           Cacco.Syntax.AST
+import Cacco.Syntax.AST ( AstF(IfF, AppF, VarF, LitF) )
 import           Cacco.Syntax.Index             ( IndexProxy(..) )
-import           Cacco.Syntax.Literal
-import           Cacco.Syntax.Location
-import           Cacco.Type
-import           Control.Comonad.Ix.IxCofree
-import           Data.Functor.Ix
+import Cacco.Syntax.Literal
+    ( Literal(Flonum, Float64, Float32, Float16, Natural, Uint64,
+              Uint32, Uint16, Uint8, Integer, Int64, Int32, Int16, Int8, Bool) )
+import Cacco.Syntax.Location ( Location )
+import Cacco.Type
+    ( Type(TyDecimal, TyFloat64, TyFloat32, TyFloat16, TyNat, TyUint64,
+           TyUint32, TyUint16, TyUint8, TyInteger, TyInt64, TyInt32, TyInt16,
+           TyInt8, TyBool, TyFun, TyVar) )
+import Control.Comonad.Ix.IxCofree ( IxCofreeF((:<<)) )
+import Data.Functor.Ix
+    ( type (~>.), IxRecursive(icata'), Ann, AnnF )
 
 type Env = Map String Type
 

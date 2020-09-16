@@ -1,5 +1,4 @@
 {-# LANGUAGE GADTs          #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE PolyKinds      #-}
 {-# LANGUAGE RankNTypes     #-}
 {-# LANGUAGE TypeOperators  #-}

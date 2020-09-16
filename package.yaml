@@ -19,7 +19,10 @@ dependencies:
     - recursion-schemes >=5.0 && <6
 library:
     source-dirs: src
-    ghc-options: -Wall -Wcompat
+    ghc-options:
+        - -Wall
+        - -Wcompat
+        - -optP-Wno-nonportable-include-path
     dependencies:
         - vector
         - deepseq >=1.4 && <2
@@ -34,6 +37,7 @@ executables:
             - -threaded
             - -rtsopts
             - -with-rtsopts=-N
+            - -optP-Wno-nonportable-include-path
         dependencies:
             - base
             - cacco
@@ -45,10 +49,11 @@ tests:
             - -threaded
             - -rtsopts
             - -with-rtsopts=-N
+            - -optP-Wno-nonportable-include-path
         dependencies:
             - tasty >=1.0 && <2.0
             - tasty-discover >=4.0 && <5.0
-            - tasty-hspec
+            - tasty-hspec >=1.1 && <2
             - tasty-quickcheck
             - tasty-smallcheck
             - smallcheck >=1.1 && <2.0

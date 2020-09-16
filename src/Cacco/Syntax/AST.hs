@@ -1,13 +1,13 @@
-{-# LANGUAGE DataKinds           #-}
-{-# LANGUAGE DeriveDataTypeable  #-}
-{-# LANGUAGE FlexibleContexts    #-}
-{-# LANGUAGE GADTs               #-}
-{-# LANGUAGE OverloadedStrings   #-}
-{-# LANGUAGE RankNTypes          #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving  #-}
-{-# LANGUAGE TypeFamilies        #-}
-{-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Cacco.Syntax.AST
   ( Ast(..)
@@ -15,57 +15,68 @@ module Cacco.Syntax.AST
   )
 where
 
-import           Control.Applicative
+import           Cacco.Syntax.Index             ( Index(..)
+                                                , IndexProxy
+                                                )
+import           Cacco.Syntax.Literal           ( Literal )
+import           Control.Applicative            ( Const(..) )
 import           Control.Arrow                  ( (&&&) )
+import           Data.Functor.Ix                ( IxBase
+                                                , IxCorecursive(iembed)
+                                                , IxFunctor(imap)
+                                                , IxRecursive(icata', iproject)
+                                                , type (~>.)
+                                                )
 import           Data.List.NonEmpty             ( NonEmpty(..)
                                                 , toList
                                                 )
-import           Data.Text.Prettyprint.Doc
+import           Data.Text.Prettyprint.Doc      ( Doc
+                                                , Pretty(pretty)
+                                                , braces
+                                                , brackets
+                                                , sep
+                                                , (<+>)
+                                                )
 import           Data.Typeable                  ( Typeable )
-
-import           Cacco.Syntax.Index
-import           Cacco.Syntax.Literal
-import           Data.Functor.Ix
 
 -------------------------------------------------------------------------------
 -- Indexed AST
 -------------------------------------------------------------------------------
-
 data Ast (i :: Index) where
-    -- Atomic (Leaf Node of AST)
-    -- | Hole @_@
-    Hole ::IndexProxy i -> Ast i
-    -- | 3 Dots @...@
-    Dots ::IndexProxy i -> Ast i
-    -- | 'Literal'
-    Lit  ::IndexProxy i -> Literal -> Ast i
-    -- | Variable
-    Var  ::IndexProxy i -> String -> Ast i
+  -- Atomic (Leaf Node of AST)
 
-    -- Collections
-    -- | List, Array, Vector Expression
-    Vec ::[Ast i] -> Ast i
-    -- | Key-Value Map
-    Map ::[(Ast i, Ast i)] -> Ast i
+  -- | Hole @_@
+  Hole ::IndexProxy i -> Ast i
+  -- | 3 Dots @...@
+  Dots ::IndexProxy i -> Ast i
+  -- | 'Literal'
+  Lit ::IndexProxy i -> Literal -> Ast i
+  -- | Variable
+  Var ::IndexProxy i -> String -> Ast i
+  -- Collections
 
-    -- Conditional branch
-    -- | if
-    If  ::Ast 'Expr -> Ast 'Expr -> Ast 'Expr -> Ast 'Expr
-    -- | multyway if
-    Ifs ::[(Ast 'Expr, Ast 'Expr)] -> Ast 'Expr -> Ast 'Expr
-    -- | Pattern-match
-    Case ::[(Ast 'Patt, Ast 'Expr)] -> Ast 'Expr -> Ast 'Expr
+  -- | List, Array, Vector Expression
+  Vec ::[Ast i] -> Ast i
+  -- | Key-Value Map
+  Map ::[(Ast i, Ast i)] -> Ast i
+  -- Conditional branch
 
-    -- | Apply function
-    App ::Ast i -> [Ast i] -> Ast i
-    -- | Lambda (anonymous) function
-    Lam ::[Ast 'Patt] -> NonEmpty (Ast 'Expr) -> Ast 'Expr
+  -- | if
+  If ::Ast 'Expr -> Ast 'Expr -> Ast 'Expr -> Ast 'Expr
+  -- | multyway if
+  Ifs ::[(Ast 'Expr, Ast 'Expr)] -> Ast 'Expr -> Ast 'Expr
+  -- | Pattern-match
+  Case ::[(Ast 'Patt, Ast 'Expr)] -> Ast 'Expr -> Ast 'Expr
+  -- | Apply function
+  App ::Ast i -> [Ast i] -> Ast i
+  -- | Lambda (anonymous) function
+  Lam ::[Ast 'Patt] -> NonEmpty (Ast 'Expr) -> Ast 'Expr
+  -- Declarations
 
-    -- Declarations
-    -- | Declare type bind
-    Dec ::Ast 'Patt -> NonEmpty (Ast 'Type) -> Ast 'Expr
-    -- | Define function or constants
-    Def ::Ast 'Patt -> NonEmpty (Ast 'Expr) -> Ast 'Expr
+  -- | Declare type bind
+  Dec ::Ast 'Patt -> NonEmpty (Ast 'Type) -> Ast 'Expr
+  -- | Define function or constants
+  Def ::Ast 'Patt -> NonEmpty (Ast 'Expr) -> Ast 'Expr
 
 deriving instance Eq (Ast i)
 deriving instance Show (Ast i)
@@ -77,64 +88,69 @@ deriving instance Typeable (Ast i)
 
 -- | Indexed Base Functor for Abstruct Syntax Tree of Cacco language
 data AstF (r :: Index -> *) (i :: Index) where
-    -- Atomic (Leaf Node of AST)
-    -- | Hole @_@
-    HoleF ::IndexProxy i -> AstF r i
-    -- | 3 Dots @...@
-    DotsF ::IndexProxy i -> AstF r i
-    -- | 'Literal'
-    LitF ::IndexProxy i -> Literal -> AstF r i
-    -- | Variable
-    VarF ::IndexProxy i -> String -> AstF r i
+  {- Atomic (Leaf Node of AST) -}
+  -- | Hole @_@
+  HoleF ::IndexProxy i -> AstF r i
+  -- | 3 Dots @...@
+  DotsF ::IndexProxy i -> AstF r i
+  -- | 'Literal'
+  LitF ::IndexProxy i -> Literal -> AstF r i
+  -- | Variable
+  VarF ::IndexProxy i -> String -> AstF r i
+  
+  {- Collections -}
+  -- | List, Array, Vector Expression
+  VecF ::[r i] -> AstF r i
+  -- | Key-Value Map
+  MapF ::[(r i, r i)] -> AstF r i
 
-    -- Collections
-    -- | List, Array, Vector Expression
-    VecF ::[r i] -> AstF r i
-    -- | Key-Value Map
-    MapF ::[(r i, r i)] -> AstF r i
+  {- Conditional branch -}
+  -- | if
+  IfF ::r 'Expr -> r 'Expr -> r 'Expr -> AstF r 'Expr
+  -- | multyway if
+  IfsF ::[(r 'Expr, r 'Expr)] -> r 'Expr -> AstF r 'Expr
+  -- | Pattern-match
+  CaseF ::[(r 'Patt, r 'Expr)] -> r 'Expr -> AstF r 'Expr
+  -- | Apply function
+  AppF ::r i -> [r i] -> AstF r i
+  -- | Lambda (anonymous) function
+  LamF ::[r 'Patt] -> NonEmpty (r 'Expr) -> AstF r 'Expr
+  
+  {- Declarations -}
+  -- | Declare type bind
+  DecF ::r 'Patt -> NonEmpty (r 'Type) -> AstF r 'Expr
+  -- | Define function or constants
+  DefF ::r 'Patt -> NonEmpty (r 'Expr) -> AstF r 'Expr
 
-    -- Conditional branch
-    -- | if
-    IfF  ::r 'Expr -> r 'Expr -> r 'Expr -> AstF r 'Expr
-    -- | multyway if
-    IfsF ::[(r 'Expr, r 'Expr)] -> r 'Expr -> AstF r 'Expr
-    -- | Pattern-match
-    CaseF ::[(r 'Patt, r 'Expr)] -> r 'Expr -> AstF r 'Expr
+deriving instance
+  forall (r :: Index -> *) (i :: Index).
+  ( Show (r 'Expr),
+    Show (r 'Patt),
+    Show (r 'Decl),
+    Show (r 'Type),
+    Show (r i)
+  ) =>
+  Show (AstF r i)
 
-    -- | Apply function
-    AppF ::r i -> [r i] -> AstF r i
-    -- | Lambda (anonymous) function
-    LamF ::[r 'Patt] -> NonEmpty (r 'Expr) -> AstF r 'Expr
+deriving instance
+  forall (r :: Index -> *) (i :: Index).
+  ( Eq (r 'Expr),
+    Eq (r 'Patt),
+    Eq (r 'Decl),
+    Eq (r 'Type),
+    Eq (r i)
+  ) =>
+  Eq (AstF r i)
 
-    -- Declarations
-    -- | Declare type bind
-    DecF ::r 'Patt -> NonEmpty (r 'Type) -> AstF r 'Expr
-    -- | Define function or constants
-    DefF ::r 'Patt -> NonEmpty (r 'Expr) -> AstF r 'Expr
-
-deriving instance forall (r :: Index -> *) (i :: Index).
-    ( Show (r 'Expr)
-    , Show (r 'Patt)
-    , Show (r 'Decl)
-    , Show (r 'Type)
-    , Show (r i)
-    ) => Show (AstF r i)
-
-deriving instance forall (r :: Index -> *) (i :: Index).
-    ( Eq (r 'Expr)
-    , Eq (r 'Patt)
-    , Eq (r 'Decl)
-    , Eq (r 'Type)
-    , Eq (r i)
-    ) => Eq (AstF r i)
-
-deriving instance forall (r :: Index -> *) (i :: Index).
-    ( Typeable (r 'Expr)
-    , Typeable (r 'Patt)
-    , Typeable (r 'Decl)
-    , Typeable (r 'Type)
-    , Typeable (r i)
-    ) => Typeable (AstF r i)
+deriving instance
+  forall (r :: Index -> *) (i :: Index).
+  ( Typeable (r 'Expr),
+    Typeable (r 'Patt),
+    Typeable (r 'Decl),
+    Typeable (r 'Type),
+    Typeable (r i)
+  ) =>
+  Typeable (AstF r i)
 
 type instance IxBase Ast = AstF
 
@@ -248,7 +264,6 @@ _prettyCases patterns otherwiseCase = sep $ cap <$> allCases
   pair (Const x, Const y) = (x, y)
   {-# INLINE pair #-}
 
-  -- | capping by brackets
   cap :: (Doc ann, Doc ann) -> Doc ann
   cap (p, e) = brackets $ p <+> e
   {-# INLINE cap #-}

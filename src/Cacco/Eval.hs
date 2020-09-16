@@ -43,8 +43,7 @@ runEval evaluator = runIdentity . runStateT (runExceptT evaluator)
 type EvalF i = Eval i (Val i)
 type EvalResult i = (Either (Error i) (Val i), Env (Val i))
 
-supplyInfo
-  :: MonadError (Error i) m => i -> Either (Error i) (Val i) -> m (Val i)
+supplyInfo :: MonadError (Error i) m => i -> Either (Error i) (Val i) -> m (Val i)
 supplyInfo info result = case result of
   Left  err -> throwError $ Err.supplyInfo info err
   Right val -> return $ Val.setInfo (Just info) val

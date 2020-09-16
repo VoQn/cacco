@@ -1,14 +1,21 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE KindSignatures   #-}
 {-# LANGUAGE PolyKinds        #-}
 {-# LANGUAGE RankNTypes       #-}
 {-# LANGUAGE TypeOperators    #-}
 module Data.Functor.Ix.IxRecursive where
 
-import           Data.Functor.Const
+import           Data.Functor.Const             ( Const(Const, getConst) )
 
-import           Data.Functor.Ix.IxFunctor
-import           Data.Functor.Ix.Types
+import           Data.Functor.Ix.IxFunctor      ( IxFunctor(imap) )
+import           Data.Functor.Ix.Types          ( (&&&&)
+                                                , type (:*:)
+                                                , IxAlgebra
+                                                , IxBase
+                                                , IxCoalgebra
+                                                , KAlgebra
+                                                , type (~>)
+                                                , type (~>.)
+                                                )
 
 -------------------------------------------------------------------------------
 -- Indexed Recursive & Corecursive

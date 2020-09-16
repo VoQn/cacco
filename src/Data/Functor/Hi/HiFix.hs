@@ -3,7 +3,6 @@
 {-# LANGUAGE DeriveFunctor        #-}
 {-# LANGUAGE DeriveTraversable    #-}
 {-# LANGUAGE FlexibleContexts     #-}
-{-# LANGUAGE KindSignatures       #-}
 {-# LANGUAGE StandaloneDeriving   #-}
 {-# LANGUAGE TypeFamilies         #-}
 {-# LANGUAGE TypeOperators        #-}
@@ -12,12 +11,22 @@
 module Data.Functor.Hi.HiFix where
 
 --
-import           Data.Functor.Classes
+import           Data.Functor.Classes           ( Eq1
+                                                , Ord1
+                                                , Show1
+                                                , compare1
+                                                , eq1
+                                                , showsPrec1
+                                                )
 import           Data.Typeable                  ( Typeable )
 --
-import           Data.Functor.Hi.HiFunctor
-import           Data.Functor.Hi.HiRecursive
-import           Data.Functor.Hi.Types
+import           Data.Functor.Hi.HiFunctor      ( HiFunctor )
+import           Data.Functor.Hi.HiRecursive    ( HiCorecursive(hembed)
+                                                , HiRecursive(hproject)
+                                                )
+import           Data.Functor.Hi.Types          ( HiBase
+                                                , type (~>)
+                                                )
 
 -------------------------------------------------------------------------------
 -- Higher-order Fix

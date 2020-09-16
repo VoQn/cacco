@@ -6,8 +6,6 @@
 {-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GADTs                  #-}
-{-# LANGUAGE KindSignatures         #-}
-{-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE StandaloneDeriving     #-}
 {-# LANGUAGE TypeFamilies           #-}
 {-# LANGUAGE TypeOperators          #-}
@@ -15,12 +13,23 @@
 
 module Data.Functor.Hi.HiFree where
 --
-import           Data.Functor.Classes
+import           Data.Functor.Classes           ( Eq1
+                                                , Show1
+                                                , eq1
+                                                , showsPrec1
+                                                )
 import           Data.Typeable                  ( Typeable )
 --
-import           Data.Functor.Hi.HiFunctor
-import           Data.Functor.Hi.HiRecursive
-import           Data.Functor.Hi.Types
+import           Data.Functor.Hi.HiFunctor      ( HiApplicative(..)
+                                                , HiFunctor(..)
+                                                , HiMonad(hbind)
+                                                )
+import           Data.Functor.Hi.HiRecursive    ( HiCorecursive(hembed)
+                                                , HiRecursive(hproject)
+                                                )
+import           Data.Functor.Hi.Types          ( HiBase
+                                                , type (~>)
+                                                )
 
 -------------------------------------------------------------------------------
 -- Higher-order Free

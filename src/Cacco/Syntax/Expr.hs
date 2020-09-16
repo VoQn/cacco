@@ -1,31 +1,29 @@
-{-# LANGUAGE DataKinds          #-}
-{-# LANGUAGE DeriveFoldable     #-}
-{-# LANGUAGE DeriveFunctor      #-}
-{-# LANGUAGE DeriveGeneric      #-}
-{-# LANGUAGE DeriveTraversable  #-}
-{-# LANGUAGE FlexibleContexts   #-}
-{-# LANGUAGE GADTs              #-}
-{-# LANGUAGE PatternSynonyms    #-}
-{-# LANGUAGE PolyKinds          #-}
-{-# LANGUAGE RankNTypes         #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TemplateHaskell    #-}
-{-# LANGUAGE TypeFamilies       #-}
-{-# LANGUAGE TypeOperators      #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Cacco.Syntax.Expr where
 
-import           Data.Functor.Foldable.TH
+import           Cacco.Syntax.Literal           ( Literal )
+import           Data.Ann                       ( Ann )
+import           Data.Functor.Foldable.TH       ( makeBaseFunctor )
 import           Data.Typeable                  ( Typeable )
 import           GHC.Generics                   ( Generic )
 
-import           Data.Ann
-
-import           Cacco.Syntax.Literal           ( Literal )
-
 -- | Abstruct syntax tree of Cacco language
 data Ast
-  -- Atomic
+  {- Atomics -}
   -- | Hole @_@
   = Hole
   -- | 'Literal'
@@ -33,13 +31,13 @@ data Ast
   -- | Symbol
   | Sym String
 
-  -- Collections
+  {- Collections -}
   -- | List
   | List [Ast]
   -- | Struct
   | StrF [(String, Ast)]
 
-  -- Fuctors
+  {- Fuctors -}
   -- | Apply function
   | App Ast [Ast]
   -- | Lambda (anonymous) function

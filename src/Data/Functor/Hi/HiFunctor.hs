@@ -1,4 +1,3 @@
-{-# LANGUAGE ExplicitNamespaces #-}
 {-# LANGUAGE KindSignatures     #-}
 {-# LANGUAGE RankNTypes         #-}
 {-# LANGUAGE TypeOperators      #-}

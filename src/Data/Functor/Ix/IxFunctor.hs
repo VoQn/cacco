@@ -1,5 +1,4 @@
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE ExplicitNamespaces        #-}
 {-# LANGUAGE PolyKinds                 #-}
 {-# LANGUAGE Rank2Types                #-}
 {-# LANGUAGE RankNTypes                #-}
@@ -8,8 +7,15 @@
 
 module Data.Functor.Ix.IxFunctor where
 --
-import           Control.Arrow
-import           Data.Functor.Ix.Types
+import Control.Arrow ( (>>>) )
+import Data.Functor.Ix.Types
+    ( (&&&&),
+      fst1,
+      snd1,
+      type (:*:),
+      IxAlgebra,
+      IxCoalgebra,
+      type (~>) )
 
 -------------------------------------------------------------------------------
 -- Indexed Functor

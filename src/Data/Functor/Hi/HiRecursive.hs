@@ -1,4 +1,3 @@
-{-# LANGUAGE ExplicitNamespaces #-}
 {-# LANGUAGE FlexibleContexts   #-}
 {-# LANGUAGE KindSignatures     #-}
 {-# LANGUAGE Rank2Types         #-}
@@ -11,8 +10,18 @@ import           Data.Functor.Const             ( Const(..)
                                                 , getConst
                                                 )
 --
-import           Data.Functor.Hi.HiFunctor
-import           Data.Functor.Hi.Types
+import           Data.Functor.Hi.HiFunctor      ( HiFunctor(..) )
+import           Data.Functor.Hi.Types          ( (&&&&)
+                                                , (||||)
+                                                , HiAlgebra
+                                                , HiBase
+                                                , HiCoalgebra
+                                                , HiRAlgebra
+                                                , HiRCoalgebra
+                                                , KAlgebra
+                                                , type (~>)
+                                                , type (~>.)
+                                                )
 
 -------------------------------------------------------------------------------
 -- Higher-order Recursive
