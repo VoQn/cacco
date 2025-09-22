@@ -14,6 +14,7 @@ import Data.Functor (
 import Data.List (foldl')
 import Data.Scientific (
     Scientific,
+    fromFloatDigits,
     scientific,
  )
 import Text.Megaparsec (
@@ -162,11 +163,67 @@ decimalLiteral = do
     {-# INLINE suffixI #-}
 {-# INLINEABLE decimalLiteral #-}
 
+-- Parse hexadecimal decimal point
+hexFloatPoint :: Integer -> Parser (Integer, Double)
+hexFloatPoint c' = do
+    void $ char '.'
+    ds <- withDigitSep hexDigitChar
+    let (c, f) = foldl' acc (c', 0.0) (zip ds [1..])
+    return (c, f)
+  where
+    acc :: (Integer, Double) -> (Char, Int) -> (Integer, Double)
+    acc (a, f) (c, i) =
+        let f' = f + fromIntegral (digitToInt c) / (16 ^ i)
+        in (a, f')
+    {-# INLINE acc #-}
+{-# INLINEABLE hexFloatPoint #-}
+
+-- Parse hexadecimal exponent part
+hexExponent :: Int -> Parser Int
+hexExponent e' = do
+    void $ char 'p'
+    (_, f) <- signed
+    e <- decimal
+    return $ fromInteger (f e) + e'
+{-# INLINEABLE hexExponent #-}
+
+-- Convert hexadecimal float to Scientific
+hexFloatToScientific :: Integer -> Double -> Int -> Scientific
+hexFloatToScientific mantissa fraction hexExp =
+    let value = (fromInteger mantissa + fraction) * (2 ^^ hexExp)
+    in fromFloatDigits value
+{-# INLINEABLE hexFloatToScientific #-}
+
+-- Hexadecimal literal (integer + floating point)
 hexLiteral :: Parser Literal
 hexLiteral = do
     n <- hexadecimal
-    w <- option (Natural . fromInteger) $ char '_' >> unsignedInt <|> signedInt
-    return $ w n
+    -- Process as float if decimal point or exponent is present
+    option (defaultWrapper n) $ trail n
+  where
+    defaultWrapper = Natural . fromInteger
+
+    trail n = hexFloatPoint' n <|> hexExpo n <|> (($ n) <$> suffixI')
+    {-# INLINE trail #-}
+
+    hexFloatPoint' n = do
+        (c, f) <- hexFloatPoint n
+        e <- option 0 $ hexExponent 0
+        w <- option Flonum suffixF
+        return . w $ hexFloatToScientific c f e
+    {-# INLINEABLE hexFloatPoint' #-}
+
+    hexExpo n = do
+        e <- hexExponent 0
+        w <- option Flonum suffixF
+        return . w $ hexFloatToScientific n 0 e
+    {-# INLINE hexExpo #-}
+
+    suffixF = char '_' >> float
+    {-# INLINE suffixF #-}
+
+    suffixI' = char '_' >> unsignedInt <|> signedInt <|> float'
+    {-# INLINE suffixI' #-}
 {-# INLINEABLE hexLiteral #-}
 
 numeric :: Parser Literal

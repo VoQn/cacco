@@ -73,6 +73,28 @@ spec_parse_strict_type_suffix = do
 
 --
 --
+spec_hex_float :: Spec
+spec_hex_float = do
+    let testParse = parse numeric "<test>"
+
+    it "0x1.0p1" $ testParse "0x1.0p1" `shouldBe` Right (Flonum 2.0)
+    --
+    it "0x1p1" $ testParse "0x1p1" `shouldBe` Right (Flonum 2.0)
+    --
+    it "0x1.0" $ testParse "0x1.0" `shouldBe` Right (Flonum 1.0)
+    --
+    it "0x0.1p4" $ testParse "0x0.1p4" `shouldBe` Right (Flonum 1.0)
+    --
+    it "0x1.0p-1" $ testParse "0x1.0p-1" `shouldBe` Right (Flonum 0.5)
+    --
+    it "0x10p-4" $ testParse "0x10p-4" `shouldBe` Right (Flonum 1.0)
+    --
+    it "0x1.0_f32" $ testParse "0x1.0_f32" `shouldBe` Right (Float32 1.0)
+    --
+    it "0x1p1_f64" $ testParse "0x1p1_f64" `shouldBe` Right (Float64 2.0)
+
+--
+--
 prop_parse_any_uint8 :: Word8 -> Bool
 prop_parse_any_uint8 x =
     let expr = Text.pack $ show x <> "_u8"
