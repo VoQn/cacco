@@ -14,6 +14,7 @@ import Data.Functor (
 import Data.List (foldl')
 import Data.Scientific (
     Scientific,
+    fromFloatDigits,
     scientific,
  )
 import Text.Megaparsec (
@@ -188,9 +189,9 @@ hexExponent e' = do
 
 -- Convert hexadecimal float to Scientific
 hexFloatToScientific :: Integer -> Double -> Int -> Scientific
-hexFloatToScientific mantissa fraction hexExponent =
-    let value = (fromInteger mantissa + fraction) * (2 ^^ hexExponent)
-    in scientific (round (value * 10^15)) (-15)  -- Approximate precision
+hexFloatToScientific mantissa fraction hexExp =
+    let value = (fromInteger mantissa + fraction) * (2 ^^ hexExp)
+    in fromFloatDigits value
 {-# INLINEABLE hexFloatToScientific #-}
 
 -- Hexadecimal literal (integer + floating point)
