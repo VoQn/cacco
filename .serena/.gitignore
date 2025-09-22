@@ -5,3 +5,6 @@
 *.token
 secrets/*
 private/*
+
+# Memories
+memories/private/

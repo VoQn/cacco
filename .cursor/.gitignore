@@ -3,3 +3,9 @@
 *.token
 secrets/*
 private/*
+
+# Additional ignores
+logs/
+sessions/
+tmp/
+.log
