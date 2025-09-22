@@ -8,3 +8,21 @@ private/*
 
 # Memories
 memories/private/
+memories/local-*.md
+memories/personal-*.md
+
+# Configuration and logs
+config.local.yml
+logs/
+*.log
+temp/
+tmp/
+
+# Local paths and settings
+local-settings.yml
+user-config.yml
+local-repo-path
+local-serena-repo
+
+# Serena configuration (environment variables)
+.serenarc

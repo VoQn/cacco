@@ -20,6 +20,15 @@ stack.yaml.lock
 # Note: .cursor/, .serena/, .github/ directories are tracked for collaboration,
 # but their secure files are ignored via nested .gitignore files
 
+# Serena MCP Server logs and temp files
+.serena/logs/
+.serena/temp/
+.serena/tmp/
+.serena/*.log
+
+# Local Serena repository paths (secure)
+.serena/.serenarc
+
 # Secrets and API keys
 .env*
 !.env.example
