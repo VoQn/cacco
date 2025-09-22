@@ -63,6 +63,16 @@ spec_parseAst = do
             `shouldBe` Right
                 (App (Sym "var") [Sym "x", Lit $ Flonum 10.0])
     --
+    it "can parse \"0x1.0p1\"" $
+        testParse "0x1.0p1"
+            `shouldBe` Right
+                (Lit $ Flonum 2.0)
+    --
+    it "can parse \"0x1p1\"" $
+        testParse "0x1p1"
+            `shouldBe` Right
+                (Lit $ Flonum 2.0)
+    --
     it "can parse \"(set! x 0)\"" $
         testParse "(set! x 0)"
             `shouldBe` Right
