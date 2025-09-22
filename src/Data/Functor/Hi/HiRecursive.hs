@@ -1,25 +1,28 @@
-{-# LANGUAGE ExplicitNamespaces #-}
-{-# LANGUAGE FlexibleContexts   #-}
-{-# LANGUAGE KindSignatures     #-}
-{-# LANGUAGE Rank2Types         #-}
-{-# LANGUAGE TypeOperators      #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Data.Functor.Hi.HiRecursive where
+
 --
-import           Control.Arrow                  ( (>>>) )
-import           Data.Functor.Const             ( Const(..)
-                                                , getConst
-                                                )
+import Control.Arrow ((>>>))
+import Data.Functor.Const (
+    Const (..),
+    getConst,
+ )
+
 --
-import           Data.Functor.Hi.HiFunctor
-import           Data.Functor.Hi.Types
+import Data.Functor.Hi.HiFunctor
+import Data.Functor.Hi.Types
+import Data.Kind (Type)
 
 -------------------------------------------------------------------------------
 -- Higher-order Recursive
 -------------------------------------------------------------------------------
 
 -- | Higher-order version of the 'Recursive' type-class
-class HiFunctor (HiBase f) => HiRecursive (f :: * -> *) where
+class (HiFunctor (HiBase f)) => HiRecursive (f :: Type -> Type) where
     hproject :: f ~> (HiBase f) f
 
     -- | catamorphism folding for 'HiRecursive'
@@ -34,7 +37,7 @@ class HiFunctor (HiBase f) => HiRecursive (f :: * -> *) where
     hpara phi = hproject >>> hmap (hpara phi &&&& id) >>> phi
 
 -- | Higher-order version of the 'CoRecursive' type-class
-class HiFunctor (HiBase f) => HiCorecursive (f :: * -> *) where
+class (HiFunctor (HiBase f)) => HiCorecursive (f :: Type -> Type) where
     hembed :: (HiBase f) f ~> f
 
     -- | anamorphism unfolding

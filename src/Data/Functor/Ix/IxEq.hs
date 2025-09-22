@@ -1,26 +1,28 @@
-{-# LANGUAGE GADTs          #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE PolyKinds      #-}
-{-# LANGUAGE RankNTypes     #-}
-{-# LANGUAGE TypeOperators  #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Data.Functor.Ix.IxEq where
+
+import Data.Kind (Type)
 
 -------------------------------------------------------------------------------
 -- Indexed Equality
 -------------------------------------------------------------------------------
 
-class IxEq (f :: k -> *) where
+class IxEq (f :: k -> Type) where
     ieq :: f i -> f i -> Bool
 
 data x :=: y where
-    Refl ::x :=: x
+    Refl :: x :=: x
 
-class IxEq f => IxEqHet f where
+class (IxEq f) => IxEqHet f where
     -- | type index equality
     ieqIdx :: f a -> f b -> Maybe (a :=: b)
+
     -- | heterogeneous equality
     ieqHet :: f a -> f b -> Maybe (a :=: b)
     ieqHet x y = case ieqIdx x y of
         Just Refl | ieq x y -> Just Refl
-        _________ -> Nothing
+        _ -> Nothing

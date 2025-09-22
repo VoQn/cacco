@@ -1,20 +1,25 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE KindSignatures   #-}
-{-# LANGUAGE PolyKinds        #-}
-{-# LANGUAGE RankNTypes       #-}
-{-# LANGUAGE TypeOperators    #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+
 module Data.Functor.Ix.IxRecursive where
 
-import           Data.Functor.Const
+import Data.Kind (Type)
 
-import           Data.Functor.Ix.IxFunctor
-import           Data.Functor.Ix.Types
+import Data.Functor.Const (
+    Const (Const),
+    getConst,
+ )
+
+import Data.Functor.Ix.IxFunctor
+import Data.Functor.Ix.Types
 
 -------------------------------------------------------------------------------
 -- Indexed Recursive & Corecursive
 -------------------------------------------------------------------------------
 
-class IxFunctor (IxBase f) => IxRecursive (f :: i -> *) where
+class (IxFunctor (IxBase f)) => IxRecursive (f :: i -> Type) where
     iproject :: f ~> (IxBase f) f
 
     -- | catamorphism folding
@@ -29,7 +34,7 @@ class IxFunctor (IxBase f) => IxRecursive (f :: i -> *) where
     ipara :: ((IxBase f) (a :*: f) ~> a) -> f ~> a
     ipara f = f . imap (ipara f &&&& id) . iproject
 
-class IxFunctor (IxBase f) => IxCorecursive (f :: i -> *) where
+class (IxFunctor (IxBase f)) => IxCorecursive (f :: i -> Type) where
     iembed :: (IxBase f) f ~> f
 
     iana :: IxCoalgebra (IxBase f) a -> a ~> f

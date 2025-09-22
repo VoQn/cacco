@@ -1,6 +1,6 @@
-module Lib
-  ( printVersion
-  )
+module Lib (
+    printVersion,
+)
 where
 
 printVersion :: IO ()

@@ -1,19 +1,21 @@
-{-# LANGUAGE DeriveDataTypeable        #-}
-{-# LANGUAGE DeriveFoldable            #-}
-{-# LANGUAGE DeriveFunctor             #-}
-{-# LANGUAGE DeriveTraversable         #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE PatternSynonyms           #-}
-{-# LANGUAGE PolyKinds                 #-}
-{-# LANGUAGE RankNTypes                #-}
-{-# LANGUAGE TypeFamilies              #-}
-{-# LANGUAGE TypeOperators             #-}
+{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Data.Functor.Ix.Types where
+
 --
-import           Data.Typeable
+
+import Data.Kind (Type)
+import Data.Typeable
+
 --
-import           Data.Functor.Const (Const (..))
+import Data.Functor.Const (Const (..))
 
 -------------------------------------------------------------------------------
 -- Type synonyms, Type operators, and Type families
@@ -21,21 +23,24 @@ import           Data.Functor.Const (Const (..))
 
 -- | Natural transformation
 type f ~> g = forall a. f a -> g a
+
 infixr 0 ~>
 
 -- | Constant transformer on the left
 type a .~> f = forall b. a -> f b
+
 infixr 0 .~>
 
 -- | Constant tranformer on the left
 type f ~>. b = forall a. f a -> b
+
 infixr 0 ~>.
 
-type Lim (f :: k -> *) = forall (a :: k). f a
+type Lim (f :: k -> Type) = forall (a :: k). f a
 
-type family Indexed (ix :: k) :: k -> *
+type family Indexed (ix :: k) :: k -> Type
 
-type family IxBase (h :: k -> *) :: (k -> *) -> k -> *
+type family IxBase (h :: k -> Type) :: (k -> Type) -> k -> Type
 
 -- | Indexed algebric function
 type IxAlgebra h f = h f ~> f
@@ -54,6 +59,7 @@ data Some f = forall a. Some (f a)
 
 some :: f ~>. b -> Some f -> b
 some f (Some x) = f x
+
 -------------------------------------------------------------------------------
 -- Operators
 -------------------------------------------------------------------------------
@@ -63,7 +69,7 @@ infixr 6 :*:
 data (f :*: g) a = f a :*: g a
     deriving (Eq, Ord, Show, Read, Typeable, Functor, Foldable, Traversable)
 
-type (x :& g) = Const x :*: g
+type x :& g = Const x :*: g
 pattern (:&) :: a -> f i -> (Const a :*: f) i
 pattern x :& g = Const x :*: g
 
@@ -82,11 +88,11 @@ data (f :+: g) a = L1 (f a) | R1 (g a)
 
 fromL1 :: (f :+: g) a -> Maybe (f a)
 fromL1 (L1 f) = Just f
-fromL1 ______ = Nothing
+fromL1 _ = Nothing
 
 fromR1 :: (f :+: g) a -> Maybe (g a)
 fromR1 (R1 g) = Just g
-fromR1 ______ = Nothing
+fromR1 _ = Nothing
 
 infixr 3 ||||
 (||||) :: (f a -> b) -> (g a -> b) -> (f :+: g) a -> b
