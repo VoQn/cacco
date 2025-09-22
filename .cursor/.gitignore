@@ -1,0 +1,11 @@
+# Secure files
+*.key
+*.token
+secrets/*
+private/*
+
+# Additional ignores
+logs/
+sessions/
+tmp/
+.log

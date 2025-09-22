@@ -1,0 +1,41 @@
+---
+description: Haskell Development Rules
+---
+
+# Haskell Development Rules
+
+## Project Structure
+- Maintain a clear module hierarchy in `src/` directory
+- Use descriptive module names that reflect functionality
+- Follow standard Haskell project layout (app/, src/, test/)
+
+## Code Quality
+- Always use explicit type annotations for top-level functions
+- Prefer pure functions over impure ones when possible
+- Use pattern matching instead of case statements for simple cases
+- Keep functions small and focused on single responsibilities
+
+## Type Safety
+- Avoid `undefined` and `error` in production code
+- Use `Maybe`, `Either`, or custom types instead of `null` equivalents
+- Leverage Haskell's type system for compile-time guarantees
+
+## Testing
+- Write tests for all non-trivial functions
+- Use property-based testing with QuickCheck for complex logic
+- Ensure test coverage for edge cases
+
+## Documentation
+- Add Haddock comments for all public functions
+- Document module purposes clearly
+- Use examples in documentation when helpful
+
+## Performance
+- Avoid unnecessary recursion that could cause stack overflow
+- Use strict evaluation judiciously to control memory usage
+- Profile code when performance issues arise
+
+## Serena Integration
+- Use Serena's symbolic tools for efficient code navigation
+- Leverage LSP capabilities for precise refactoring
+- Run tests via Serena's shell execution for immediate feedback

@@ -1,0 +1,5 @@
+# Secure files
+*.key
+*.token
+secrets/*
+private/*
