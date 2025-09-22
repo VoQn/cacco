@@ -1,7 +1,7 @@
-module Cacco.Error.IsError
-  ( IsError(..)
-  )
+module Cacco.Error.IsError (
+    IsError (..),
+)
 where
 
 class IsError a where
-  printError :: a -> String
+    printError :: a -> String

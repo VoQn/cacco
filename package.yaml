@@ -10,13 +10,14 @@ extra-source-files:
     - README.asciidoc
 dependencies:
     - base >=4.7 && <5
-    - text >=1.2 && <2
+    - text >=1.2 && <2.1
     - prettyprinter >=1.1 && <2.0
     - half >=0.2 && <1
     - scientific >=0.3 && <0.4
-    - megaparsec >=7 && <8
-    - lens >=4.15 && <5
+    - megaparsec >=9 && <10
+    - lens >=4.15 && <6
     - recursion-schemes >=5.0 && <6
+    - data-fix >=0.3 && <0.4
 library:
     source-dirs: src
     ghc-options: -Wall -Wcompat
@@ -24,8 +25,55 @@ library:
         - vector
         - deepseq >=1.4 && <2
         - mtl >=2.2 && <3
+        - exceptions >=0.10 && <0.11
         - containers >=0.5 && <1
-        - haskeline >=0.7 && <0.8
+        - haskeline >=0.8 && <0.9
+    other-modules: []
+    exposed-modules:
+        - Cacco.Core
+        - Cacco.Env
+        - Cacco.Error
+        - Cacco.Error.ArityMismatch
+        - Cacco.Error.IsError
+        - Cacco.Error.TypeMismatch
+        - Cacco.Eval
+        - Cacco.Inferencer
+        - Cacco.REPL
+        - Cacco.Syntax.AST
+        - Cacco.Syntax.Expr
+        - Cacco.Syntax.Index
+        - Cacco.Syntax.Literal
+        - Cacco.Syntax.Location
+        - Cacco.Syntax.Parser
+        - Cacco.Syntax.Parser.AST
+        - Cacco.Syntax.Parser.Internal
+        - Cacco.Syntax.Parser.Lexer
+        - Cacco.Syntax.Parser.Literal
+        - Cacco.Syntax.Parser.Numeric
+        - Cacco.Syntax.Position
+        - Cacco.Type
+        - Cacco.Val
+        - Control.Comonad.Ix.IxCofree
+        - Control.Monad.Ix.IxFree
+        - Data.Ann
+        - Data.Functor.Hi
+        - Data.Functor.Hi.HiFix
+        - Data.Functor.Hi.HiFoldable
+        - Data.Functor.Hi.HiFree
+        - Data.Functor.Hi.HiFunctor
+        - Data.Functor.Hi.HiRecursive
+        - Data.Functor.Hi.HiTraversable
+        - Data.Functor.Hi.Types
+        - Data.Functor.Ix
+        - Data.Functor.Ix.IxEq
+        - Data.Functor.Ix.IxFix
+        - Data.Functor.Ix.IxFoldable
+        - Data.Functor.Ix.IxFree
+        - Data.Functor.Ix.IxFunctor
+        - Data.Functor.Ix.IxRecursive
+        - Data.Functor.Ix.IxTraversable
+        - Data.Functor.Ix.Types
+        - Lib
 executables:
     cacco:
         main: Main.hs
@@ -47,7 +95,8 @@ tests:
             - -with-rtsopts=-N
         dependencies:
             - tasty >=1.0 && <2.0
-            - tasty-discover >=4.0 && <5.0
+            - tasty-discover >=4.0 && <6.0
+            - hspec
             - tasty-hspec
             - tasty-quickcheck
             - tasty-smallcheck

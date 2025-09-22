@@ -15,7 +15,7 @@
 # resolver:
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
-resolver: lts-14.1
+resolver: lts-22.44
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -43,12 +43,13 @@ packages:
 
 # Override default flag values for local packages and extra-deps
 flags: {}
+allow-newer: true
 
 # Extra package databases containing global packages
 extra-package-dbs: []
 
 # Control whether we use the GHC we find on the path
-# system-ghc: true
+system-ghc: false
 #
 # Require a specific version of stack, using version ranges
 # require-stack-version: -any # Default

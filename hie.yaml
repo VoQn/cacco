@@ -1,0 +1,9 @@
+cradle:
+  stack:
+    - path: "src"
+      component: "cacco:lib"
+    - path: "app"
+      component: "cacco:exe:cacco"
+    - path: "test"
+      component: "cacco:test:test"
+
