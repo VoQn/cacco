@@ -27,9 +27,21 @@ SERENA_ROOT=/path/to/local/serena-repo
 1. Ensure the local patched Serena repository is available at the path specified in `.serena/.serenarc`
 2. Start Serena MCP server using the local repository:
    ```bash
-   # Load Serena configuration
-   eval $(cat .serena/.serenarc 2>/dev/null | grep -v '^#' | grep -v '^$')
-   cd ${SERENA_ROOT:-/path/to/local/serena-repo} && uv run serena start-mcp-server --context ide-assistant --project $(pwd)
+   # Load Serena configuration safely
+   set -a
+   source .serena/.serenarc 2>/dev/null || echo "Warning: .serenarc not found. Please set SERENA_ROOT."
+   set +a
+
+   # Get current project directory before changing directory
+   PROJECT_DIR=$(pwd)
+
+   # Navigate to Serena repository and start MCP server
+   if [ -n "${SERENA_ROOT}" ] && [ -d "${SERENA_ROOT}" ]; then
+       cd "${SERENA_ROOT}" && uv run serena start-mcp-server --context ide-assistant --project "$PROJECT_DIR"
+   else
+       echo "Error: SERENA_ROOT not set or directory does not exist. Please configure .serenarc."
+       exit 1
+   fi
    ```
 3. Use Serena's tools for efficient code navigation and editing
 4. Run `stack build` or `stack test` to verify changes

@@ -157,3 +157,63 @@ stack haddock
 
 open $(stack path --local-doc-root)/index.html
 ----
+
+[[serena-integration]]
+=== Serena Integration
+
+This project includes scripts for using Serena AI assistant with Haskell LSP support. These scripts are located in `.serena/scripts/` and provide convenient commands for various Serena operations.
+
+[[serena-scripts]]
+==== Serena Scripts
+
+The following scripts are available:
+
+[source,bash]
+----
+# Start Serena MCP server with Haskell LSP support
+.serena/scripts/serena-start-mcp.sh
+
+# Start Serena in planning mode for Haskell development
+.serena/scripts/serena-with-haskell.sh
+
+# Activate current project with Serena
+.serena/scripts/serena-activate-project.sh
+
+# Index current project for improved Serena performance
+.serena/scripts/serena-index-project.sh
+----
+
+Each script includes help information:
+
+[source,bash]
+----
+# Show help for any script
+.serena/scripts/serena-start-mcp.sh --help
+----
+
+==== Configuration
+
+Before using the scripts, configure the Serena repository path in `.serena/.serenarc`:
+
+[source,bash]
+----
+# Example .serena/.serenarc content:
+SERENA_ROOT=/path/to/local/serena-repo
+----
+
+==== Usage Examples
+
+[source,bash]
+----
+# Start Serena MCP server
+.serena/scripts/serena-start-mcp.sh
+
+# Start Serena in planning mode (recommended for complex tasks)
+.serena/scripts/serena-with-haskell.sh
+
+# Index the project for better performance
+.serena/scripts/serena-index-project.sh
+
+# Activate project with Serena
+.serena/scripts/serena-activate-project.sh
+----
