@@ -95,6 +95,24 @@ IMPORTANT: Cacco is still in the design stage. It's not working yet.
 
 [[development]]
 == Development
+
+[[git-policy]]
+=== Git Policy for AI Tools
+
+This project uses AI tools (e.g., Cursor, Serena, GitHub Copilot) for collaboration. To balance openness and security:
+
+* **Tracked Directories**: `.cursor/`, `.serena/`, and `.github/` directories are tracked in Git to enable collaboration among contributors.
+* **Ignored Secure Files**: Within these directories, sensitive files (e.g., API keys, tokens, secrets, private configurations) are ignored via nested `.gitignore` files.
+* **How to Contribute**:
+  - Clone the repository and check out the appropriate branch.
+  - Ensure your AI tools are configured to respect the nested `.gitignore` files.
+  - If you need to add secure files, place them in subdirectories like `secrets/` or `private/` within these directories, as they are automatically ignored.
+* **Example**:
+  - Place API keys in `.cursor/secrets/api.key` – it will be ignored.
+  - Shared configurations can be placed directly in the directory (e.g., `.cursor/settings.json`) and will be tracked.
+
+This policy ensures that collaborative tools remain useful while protecting private information.
+
 [[prequisites]]
 === Prerequisites
 

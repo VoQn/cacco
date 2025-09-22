@@ -1,5 +1,3 @@
-/cache
-
 # Secure files
 *.key
 *.token

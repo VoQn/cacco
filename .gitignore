@@ -16,3 +16,7 @@ stack.yaml.lock
 # Misc
 .direnv
 .vscode/*
+
+# AI tools
+# Note: .cursor/, .serena/, .github/ directories are tracked for collaboration,
+# but their secure files are ignored via nested .gitignore files
