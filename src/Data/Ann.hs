@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE InstanceSigs #-}
 
 module Data.Ann where
 
@@ -17,6 +18,11 @@ newtype AnnF i f a = AnnF {unAnnF :: (f a, i)}
 
 -- | 'traverse' does not changed annotation
 instance (Traversable t) => Traversable (AnnF i t) where
+    traverse ::
+        (Traversable t, Applicative f) =>
+        (a -> f b) ->
+        AnnF i t a ->
+        f (AnnF i t b)
     traverse f (AnnF (t, i)) = AnnF . (id &&& const i) <$> traverse f t
 
 -- | Fixed annotated functor

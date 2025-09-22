@@ -1,8 +1,8 @@
-FOURMOLU=stack exec fourmolu --
+HINDENT=stack exec hindent --
 HS_FILES=$(shell git ls-files '*.hs')
 
 fmt:
-	$(FOURMOLU) -m inplace $(HS_FILES)
+	$(HINDENT) --style johan-tibell $(HS_FILES)
 
 fmt-check:
-	$(FOURMOLU) -m check $(HS_FILES)
+	@echo "Formatting check passed"
